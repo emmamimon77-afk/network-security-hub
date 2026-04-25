@@ -3,314 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSI Model - Network Security Hub</title>
+    <title>OSI Model | Network Security Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             color: #1a2a3a;
             line-height: 1.6;
-            padding: 1rem;
+        }
+
+        /* Same navbar as homepage */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 28, 42, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2d3a46;
+            padding: 0.85rem 1.5rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .navbar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            padding: 0.25rem 0;
+        }
+        .navbar a:hover {
+            color: white;
+            border-bottom: 2px solid #58a6ff;
         }
 
         .container {
             max-width: 1000px;
-            margin: 0 auto;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
         }
 
-        /* Header */
-        .header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-
-        h1 {
-            font-size: 2rem;
-            color: #0f3b5c;
-            margin-bottom: 0.5rem;
-        }
-
-        .breadcrumb {
-            color: #5a6e7c;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
-
-        .breadcrumb a {
-            color: #2c7da0;
-            text-decoration: none;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-
-        /* Card style */
+        /* card styling */
         .card {
             background: white;
             border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
 
-        h2 {
-            color: #0f3b5c;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #cbd5e1;
-        }
+        h1 { color: #0f3b5c; margin-bottom: 0.5rem; }
+        h2 { color: #0f3b5c; margin: 1.2rem 0 0.8rem 0; border-left: 4px solid #2c7da0; padding-left: 0.8rem; }
 
-        h3 {
-            color: #1e4a6b;
-            margin: 1.25rem 0 0.75rem 0;
-        }
+        .osi-grid { max-width: 550px; margin: 1.5rem auto; border: 1px solid #cbd5e1; border-radius: 0.75rem; overflow: hidden; }
+        .osi-layer { display: flex; padding: 0.7rem 1rem; border-bottom: 1px solid #e2edf2; }
+        .layer-number { width: 70px; font-weight: bold; color: #155f7c; }
+        .layer-name { width: 130px; font-weight: 600; }
+        .layer-desc { flex: 1; }
 
-        /* OSI Table / Diagram */
-        .osi-grid {
-            display: flex;
-            flex-direction: column;
-            max-width: 500px;
-            margin: 1.5rem auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.75rem;
-            overflow: hidden;
-        }
-
-        .osi-layer {
-            display: flex;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            background: white;
-        }
-
-        .osi-layer:last-child {
-            border-bottom: none;
-        }
-
-        .layer-number {
-            width: 60px;
-            font-weight: bold;
-            color: #0f3b5c;
-        }
-
-        .layer-name {
-            width: 160px;
-            font-weight: 600;
-            color: #1e4a6b;
-        }
-
-        .layer-desc {
-            flex: 1;
-            color: #2d4a6e;
-        }
-
-        .osi-layer.highlight {
-            background: #eef2ff;
-        }
-
-        /* ASCII Diagram */
         .ascii-box {
-            background: #f1f5f9;
-            border-left: 4px solid #2c7da0;
+            background: #1e2a36; color: #cbd5e6;
             padding: 1rem;
             font-family: monospace;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             overflow-x: auto;
             white-space: pre;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             margin: 1rem 0;
         }
 
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { border: 1px solid #cbd5e1; padding: 0.7rem; text-align: left; }
+        th { background: #eef2ff; }
 
-        th, td {
-            border: 1px solid #cbd5e1;
-            padding: 0.75rem;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        th {
-            background: #eef2ff;
-            color: #0f3b5c;
-        }
-
-        /* Responsive */
-        @media (max-width: 700px) {
-            .osi-layer {
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-            .layer-number, .layer-name, .layer-desc {
-                width: auto;
-            }
-            table, th, td {
-                font-size: 0.85rem;
-            }
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #5a6e7c;
-            margin-top: 2rem;
-            padding: 1rem;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .nav-buttons {
+        /* Page Navigation Buttons */
+        .page-nav {
             display: flex;
             justify-content: space-between;
-            margin-top: 1.5rem;
+            margin: 2rem 0 1rem;
+            gap: 1rem;
         }
-
         .nav-btn {
-            background: #eef2ff;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
+            background: #e2e8f0;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
             text-decoration: none;
-            color: #0f3b5c;
-            font-size: 0.9rem;
+            color: #1f5068;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .nav-btn:hover {
+            background: #cbd5e1;
         }
 
-        .nav-btn:hover {
-            background: #d9e4f5;
+        .footer { text-align: center; font-size: 0.8rem; color: #5a6e7c; margin-top: 2rem; padding: 1rem; border-top: 1px solid #e2e8f0; }
+
+        @media (max-width: 680px) {
+            .osi-layer { flex-direction: column; gap: 0.3rem; }
         }
     </style>
 </head>
 <body>
+
+<div class="navbar">
+    <a href="../index.html">🏠 Home</a>
+    <a href="../index.html#basics">📡 Basics</a>
+    <a href="../index.html#routing">🔀 Routing</a>
+    <a href="../index.html#firewalls">🔥 Firewalls</a>
+    <a href="../index.html#virtualization">🖥️ Virtualization</a>
+    <a href="../index.html#server">🐧 Server</a>
+</div>
+
 <div class="container">
-    <div class="header">
-        <div class="breadcrumb">
-            <a href="../index.html">🏠 Home</a> / 📡 Networking Basics / OSI Model
-        </div>
+    <div class="card">
         <h1>📚 The OSI Model</h1>
-        <p><strong>Open Systems Interconnection Model</strong> — A conceptual framework used to understand network communication in 7 layers.</p>
+        <p>Open Systems Interconnection Model — A conceptual framework used to understand network communication in 7 layers.</p>
     </div>
 
     <div class="card">
         <h2>🧠 Why Learn the OSI Model?</h2>
-        <p>The OSI model helps you:</p>
-        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-            <li>✅ Troubleshoot networks layer by layer</li>
-            <li>✅ Understand how data travels from an app to another device</li>
-            <li>✅ Speak the language of network engineers and security analysts</li>
-        </ul>
+        <ul><li>✅ Troubleshoot networks layer by layer</li><li>✅ Understand how data travels</li><li>✅ Speak the language of network security</li></ul>
     </div>
 
     <div class="card">
-        <h2>📊 The 7 Layers of OSI (Layer 7 to Layer 1)</h2>
+        <h2>📊 The 7 Layers of OSI</h2>
         <div class="osi-grid">
-            <div class="osi-layer highlight">
-                <div class="layer-number">Layer 7</div>
-                <div class="layer-name">Application</div>
-                <div class="layer-desc">HTTP, FTP, SMTP, DNS — where users interact</div>
-            </div>
-            <div class="osi-layer">
-                <div class="layer-number">Layer 6</div>
-                <div class="layer-name">Presentation</div>
-                <div class="layer-desc">Encryption, compression, translation (TLS, JPEG)</div>
-            </div>
-            <div class="osi-layer">
-                <div class="layer-number">Layer 5</div>
-                <div class="layer-name">Session</div>
-                <div class="layer-desc">Establishes, manages, ends sessions (NetBIOS, RPC)</div>
-            </div>
-            <div class="osi-layer highlight">
-                <div class="layer-number">Layer 4</div>
-                <div class="layer-name">Transport</div>
-                <div class="layer-desc">TCP / UDP — segmentation, reliability, flow control</div>
-            </div>
-            <div class="osi-layer">
-                <div class="layer-number">Layer 3</div>
-                <div class="layer-name">Network</div>
-                <div class="layer-desc">IP, routing, logical addressing (Routers)</div>
-            </div>
-            <div class="osi-layer">
-                <div class="layer-number">Layer 2</div>
-                <div class="layer-name">Data Link</div>
-                <div class="layer-desc">MAC addresses, switches, framing (Ethernet)</div>
-            </div>
-            <div class="osi-layer highlight">
-                <div class="layer-number">Layer 1</div>
-                <div class="layer-name">Physical</div>
-                <div class="layer-desc">Cables, fiber, radio signals, voltage</div>
-            </div>
+            <div class="osi-layer"><span class="layer-number">Layer 7</span><span class="layer-name">Application</span><span class="layer-desc">HTTP, FTP, SMTP, DNS</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 6</span><span class="layer-name">Presentation</span><span class="layer-desc">Encryption, compression (TLS, JPEG)</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 5</span><span class="layer-name">Session</span><span class="layer-desc">Session mgmt (NetBIOS, RPC)</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 4</span><span class="layer-name">Transport</span><span class="layer-desc">TCP/UDP, segmentation, ports</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 3</span><span class="layer-name">Network</span><span class="layer-desc">IP addressing, routing (Routers)</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 2</span><span class="layer-name">Data Link</span><span class="layer-desc">MAC addresses, switches, Ethernet</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 1</span><span class="layer-name">Physical</span><span class="layer-desc">Cables, fiber, voltage</span></div>
         </div>
     </div>
 
     <div class="card">
-        <h2>📝 Data Flow: How a Message Travels</h2>
+        <h2>📝 Data Flow (Encapsulation)</h2>
         <div class="ascii-box">
 +-------------+
-|  Layer 7    |  "Hello" (Application data)
-+-------------+
-       ⬇️ (encapsulation)
-+-------------+
-|  Layer 4    |  TCP segment (adds port numbers)
+|  Layer 7    |  "Hello" (data)
 +-------------+
        ⬇️
 +-------------+
-|  Layer 3    |  IP packet (adds source/dest IP)
+|  Layer 4    |  TCP segment (ports)
 +-------------+
        ⬇️
 +-------------+
-|  Layer 2    |  Ethernet frame (adds MAC addresses)
+|  Layer 3    |  IP packet (IP addresses)
 +-------------+
        ⬇️
 +-------------+
-|  Layer 1    |  Bits on the wire (1s and 0s)
+|  Layer 2    |  Ethernet frame (MAC)
++-------------+
+       ⬇️
++-------------+
+|  Layer 1    |  Bits on the wire
 +-------------+</div>
-        <p><strong>At the receiving device:</strong> The process reverses (de-encapsulation) — each layer strips off its header and passes the data up.</p>
     </div>
 
     <div class="card">
-        <h2>🔐 Security Relevance (OSI & Network Security)</h2>
+        <h2>🔐 Security Relevance</h2>
         <table>
-            <thead>
-                <tr><th>Layer</th><th>Common Threats</th><th>Security Controls</th></tr>
-            </thead>
+            <thead><tr><th>Layer</th><th>Threats</th><th>Controls</th></tr></thead>
             <tbody>
-                <tr><td>Application (L7)</td><td>Web attacks, SQLi, XSS</td><td>WAF, input validation, HTTPS</td></tr>
-                <tr><td>Transport (L4)</td><td>TCP hijacking, SYN flood</td><td>Firewall rules, TCP Wrappers</td></tr>
-                <tr><td>Network (L3)</td><td>IP spoofing, DDoS</td><td>ACLs, routing security</td></tr>
-                <tr><td>Data Link (L2)</td><td>ARP spoofing, MAC flooding</td><td>Dynamic ARP Inspection (DAI)</td></tr>
-                <tr><td>Physical (L1)</td><td>Wire tapping, device theft</td><td>Physical access control, cameras</td></tr>
+                <tr><td>Application</td><td>Web attacks, SQLi</td><td>WAF, HTTPS</td></tr>
+                <tr><td>Transport</td><td>SYN flood</td><td>Firewall rules</td></tr>
+                <tr><td>Network</td><td>IP spoofing</td><td>ACLs</td></tr>
+                <tr><td>Data Link</td><td>ARP spoofing</td><td>DAI</td></tr>
             </tbody>
         </table>
     </div>
 
-    <div class="card">
-        <h2>🧪 Quick Mnemonic</h2>
-        <p><strong>Please Do Not Throw Sausage Pizza Away</strong><br>
-        (Layer 7 → Layer 1: Physical, Data Link, Network, Transport, Session, Presentation, Application? Actually reverse — but the classic mnemonic is from top down: <strong>All People Seem To Need Data Processing</strong> → Application → Physical.)</p>
-        <p><em>Better: "Please Do Not Teach Stupid People Acronyms"</em> 😄</p>
-    </div>
-
-    <div class="nav-buttons">
-        <a href="../index.html" class="nav-btn">🏠 Back to Hub</a>
-        <a href="#" class="nav-btn">➡️ Next: TCP/IP Model</a>
+    <!-- Page Navigation: Previous (none) / Next (TCP/IP placeholder) -->
+    <div class="page-nav">
+        <span class="nav-btn" style="opacity:0.5; cursor:default;">◀ Previous</span>
+        <a href="#" class="nav-btn">Next: TCP/IP Model ▶</a>
     </div>
 
     <div class="footer">
-        Network Security Hub — Lesson 1: OSI Model | Light, readable, and mobile-friendly
+        Network Security Hub — OSI Model Lesson | Interactive & Mobile Ready
     </div>
 </div>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Network Security Hub</title>
+    <title>Network Security Hub | Home</title>
     <style>
         * {
             margin: 0;
@@ -13,172 +13,211 @@
 
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: #0a0c10;
-            color: #e6edf3;
+            background: #f8fafc;
+            color: #0a1c2a;
             line-height: 1.5;
-            padding: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Fixed Top Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 28, 42, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2d3a46;
+            padding: 0.85rem 1.5rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .navbar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            padding: 0.25rem 0;
+        }
+        .navbar a:hover {
+            color: white;
+            border-bottom: 2px solid #58a6ff;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
         }
 
-        header {
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(120deg, #0a1c2a 0%, #1b3a4b 100%);
+            color: white;
+            border-radius: 2rem;
+            padding: 3rem 2rem;
+            margin-bottom: 2.5rem;
             text-align: center;
-            padding: 2rem 0 1rem;
-            border-bottom: 1px solid #2d3a4a;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
-
-        h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #58a6ff, #d2a8ff);
+        .hero h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #90d0ff);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
+            margin-bottom: 0.75rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
 
-        .subhead {
-            color: #8b949e;
-            margin-top: 0.5rem;
+        /* Section Headers */
+        .section-title {
+            font-size: 1.8rem;
+            margin: 2rem 0 1.2rem 0;
+            padding-left: 0.5rem;
+            border-left: 5px solid #2c7da0;
+            color: #0f3b5c;
         }
 
-        .grid {
+        /* Card Grid */
+        .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
         }
-
         .card {
-            background: #161b22;
-            border-radius: 1rem;
+            background: white;
+            border-radius: 1.25rem;
             padding: 1.5rem;
-            border: 1px solid #2d3a4a;
-            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            transition: all 0.25s ease;
+            border: 1px solid #e2edf2;
         }
-
         .card:hover {
-            transform: translateY(-4px);
-            border-color: #58a6ff;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1);
+            border-color: #90c8df;
         }
-
-        .card h2 {
-            font-size: 1.5rem;
+        .card h3 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             margin-bottom: 1rem;
-            color: #58a6ff;
+            color: #155f7c;
         }
-
         .card ul {
             list-style: none;
-            margin-top: 0.75rem;
         }
-
         .card li {
-            margin: 0.5rem 0;
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-
         .card a {
-            color: #e6edf3;
             text-decoration: none;
-            display: inline-block;
-            padding: 0.25rem 0;
-            transition: color 0.2s;
+            color: #1f5068;
+            font-weight: 500;
         }
-
         .card a:hover {
-            color: #58a6ff;
+            color: #0f2c3b;
             text-decoration: underline;
         }
-
-        .coming-soon {
-            color: #6e7681;
-            font-style: italic;
+        .badge {
+            font-size: 0.7rem;
+            background: #e2e8f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            color: #2d4a6e;
         }
-
-        footer {
+        .footer {
             text-align: center;
-            padding: 2rem 0;
-            border-top: 1px solid #2d3a4a;
-            margin-top: 2rem;
-            color: #8b949e;
-            font-size: 0.85rem;
+            margin-top: 3rem;
+            padding: 2rem;
+            border-top: 1px solid #cbd5e1;
+            color: #5a6e7c;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 0.75rem;
-            }
-            h1 {
-                font-size: 1.6rem;
-            }
-            .card {
-                padding: 1rem;
-            }
+        @media (max-width: 700px) {
+            .navbar { gap: 1rem; }
+            .hero h1 { font-size: 1.8rem; }
+            .container { padding: 0 1rem; }
         }
     </style>
 </head>
 <body>
+
+<!-- Fixed Navigation -->
+<div class="navbar">
+    <a href="index.html">🏠 Home</a>
+    <a href="#basics">📡 Basics</a>
+    <a href="#routing">🔀 Routing</a>
+    <a href="#firewalls">🔥 Firewalls</a>
+    <a href="#virtualization">🖥️ Virtualization</a>
+    <a href="#server">🐧 Server</a>
+</div>
+
 <div class="container">
-    <header>
+    <div class="hero">
         <h1>🛡️ Network Security Hub</h1>
-        <p class="subhead">Routing · Switching · Firewalls · Virtualization · Server Admin</p>
-    </header>
-
-    <div class="grid">
-        <!-- Networking Basics -->
-        <div class="card">
-            <h2>📡 Networking Basics</h2>
-            <ul>
-                <li><a href="networking-basics/osi-model.html">📘 OSI Model</a></li>
-                <li><a href="#">🌐 TCP/IP</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">✂️ Subnetting</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">⚙️ Cisco Commands</a> <span class="coming-soon">(coming soon)</span></li>
-            </ul>
-        </div>
-
-        <!-- Routing & Switching -->
-        <div class="card">
-            <h2>🔀 Routing & Switching</h2>
-            <ul>
-                <li><a href="#">🗺️ Static Routing</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">🔄 OSPF</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">⚡ EIGRP</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">🏷️ VLAN Config</a> <span class="coming-soon">(coming soon)</span></li>
-            </ul>
-        </div>
-
-        <!-- Firewalls -->
-        <div class="card">
-            <h2>🔥 Firewalls</h2>
-            <ul>
-                <li><a href="#">🛠️ iptables</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">🧱 Zone-Based Firewall</a> <span class="coming-soon">(coming soon)</span></li>
-            </ul>
-        </div>
-
-        <!-- Virtualization -->
-        <div class="card">
-            <h2>🖥️ Virtualization</h2>
-            <ul>
-                <li><a href="#">📦 VirtualBox Setup</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">⚡ VMware Setup</a> <span class="coming-soon">(coming soon)</span></li>
-            </ul>
-        </div>
-
-        <!-- Server Admin -->
-        <div class="card">
-            <h2>🐧 Server Admin</h2>
-            <ul>
-                <li><a href="#">💻 Linux Commands</a> <span class="coming-soon">(coming soon)</span></li>
-                <li><a href="#">🪟 Windows Server</a> <span class="coming-soon">(coming soon)</span></li>
-            </ul>
-        </div>
+        <p>Routing · Switching · Firewalls · Virtualization · Server Admin</p>
+        <p style="font-size: 0.95rem; margin-top: 1rem;">Interactive lessons · CLI examples · Quizzes (coming)</p>
     </div>
 
-    <footer>
-        🧪 Expandable · Mobile & Desktop Ready · More lessons added weekly
-    </footer>
+    <!-- Networking Basics -->
+    <h2 id="basics" class="section-title">📡 Networking Basics</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>📘 OSI Model</h3>
+            <p>Understand the 7 layers, data flow, and security threats.</p>
+            <ul><li><a href="networking-basics/osi-model.html">Start Lesson →</a></li></ul>
+        </div>
+        <div class="card"><h3>🌐 TCP/IP</h3><p>Core protocols of the internet.</p><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>✂️ Subnetting</h3><p>IP addressing and subnet calculation.</p><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>⚙️ Cisco Commands</h3><p>Real CLI for routers/switches.</p><div class="badge">Coming soon</div></div>
+    </div>
+
+    <!-- Routing & Switching -->
+    <h2 id="routing" class="section-title">🔀 Routing & Switching</h2>
+    <div class="card-grid">
+        <div class="card"><h3>🗺️ Static Routing</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>🔄 OSPF</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>⚡ EIGRP</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>🏷️ VLAN Config</h3><div class="badge">Coming soon</div></div>
+    </div>
+
+    <!-- Firewalls -->
+    <h2 id="firewalls" class="section-title">🔥 Firewalls</h2>
+    <div class="card-grid">
+        <div class="card"><h3>🛠️ iptables</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>🧱 Zone-Based Firewall</h3><div class="badge">Coming soon</div></div>
+    </div>
+
+    <!-- Virtualization -->
+    <h2 id="virtualization" class="section-title">🖥️ Virtualization</h2>
+    <div class="card-grid">
+        <div class="card"><h3>📦 VirtualBox Setup</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>⚡ VMware Setup</h3><div class="badge">Coming soon</div></div>
+    </div>
+
+    <!-- Server Admin -->
+    <h2 id="server" class="section-title">🐧 Server Admin</h2>
+    <div class="card-grid">
+        <div class="card"><h3>💻 Linux Commands</h3><div class="badge">Coming soon</div></div>
+        <div class="card"><h3>🪟 Windows Server</h3><div class="badge">Coming soon</div></div>
+    </div>
+
+    <div class="footer">
+        🧪 Network Security Hub – Expandable, interactive, and mobile-ready. More lessons added weekly.
+    </div>
 </div>
 </body>
 </html>
