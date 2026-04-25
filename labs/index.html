@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Library | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .lab-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-left: 4px solid #2c7da0;
+            transition: transform 0.2s;
+        }
+        .lab-card:hover {
+            transform: translateX(5px);
+        }
+        .difficulty-easy { color: #2c8c5e; font-weight: bold; }
+        .difficulty-medium { color: #e68a2e; font-weight: bold; }
+        .difficulty-hard { color: #dc2626; font-weight: bold; }
+        .lab-meta {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+        .prereq {
+            background: #eef2ff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <div class="card" style="text-align: center;">
+        <h1>🧪 Network Security Lab Library</h1>
+        <p>Hands-on exercises to reinforce networking and security concepts</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">🖥️ All labs work on Linux, macOS, or Windows (WSL recommended for Windows)</p>
+    </div>
+
+    <!-- Available Labs -->
+    <h2>📚 Available Labs</h2>
+    
+    <!-- OSI Model Lab -->
+    <div class="card lab-card">
+        <h3>🔬 Lab 1: Observing OSI Layers with Command Line Tools</h3>
+        <div class="lab-meta">
+            <span class="difficulty-easy">⭐ Difficulty: Easy</span>
+            <span>⏱️ Time: 15-20 minutes</span>
+            <span class="prereq">📖 Prereq: OSI Model lesson</span>
+        </div>
+        <p><strong>What you'll learn:</strong> Identify Physical, Data Link, Network, and Transport layers using ping, traceroute, arp, and netstat.</p>
+        <p><strong>Commands used:</strong> <code>ip link show</code>, <code>arp -a</code>, <code>traceroute</code>, <code>netstat -tupan</code></p>
+        <a href="../networking-basics/osi-model.html#lab" class="nav-btn" style="display: inline-block; margin-top: 0.5rem;">Launch Lab →</a>
+    </div>
+
+    <!-- TCP/IP Lab -->
+    <div class="card lab-card">
+        <h3>🌐 Lab 2: Exploring TCP/IP Stack on Your Machine</h3>
+        <div class="lab-meta">
+            <span class="difficulty-easy">⭐ Difficulty: Easy</span>
+            <span>⏱️ Time: 15-20 minutes</span>
+            <span class="prereq">📖 Prereq: TCP/IP Model lesson</span>
+        </div>
+        <p><strong>What you'll learn:</strong> View IP configuration, active TCP connections, DNS resolution, and packet routes.</p>
+        <p><strong>Commands used:</strong> <code>ip addr show</code>, <code>netstat -an</code>, <code>tracert/traceroute</code>, <code>nslookup</code></p>
+        <a href="../networking-basics/tcp-ip-model.html#lab" class="nav-btn" style="display: inline-block; margin-top: 0.5rem;">Launch Lab →</a>
+    </div>
+
+    <!-- Wireshark Lab (NEW) -->
+    <div class="card lab-card">
+        <h3>📡 Lab 3: Packet Analysis with Wireshark (Cross-Platform)</h3>
+        <div class="lab-meta">
+            <span class="difficulty-medium">⭐⭐ Difficulty: Medium</span>
+            <span>⏱️ Time: 25-30 minutes</span>
+            <span class="prereq">📖 Prereq: OSI + TCP/IP lessons</span>
+        </div>
+        <p><strong>What you'll learn:</strong> Capture live packets, filter HTTP/DNS traffic, and see OSI/TCP/IP layers in real time.</p>
+        <p><strong>Tools needed:</strong> Wireshark (free) + your browser</p>
+        <details>
+            <summary>📋 Click for detailed instructions</summary>
+            <h4>Step 1: Install Wireshark</h4>
+            <ul>
+                <li><strong>Linux (Ubuntu/Debian):</strong> <code>sudo apt install wireshark</code></li>
+                <li><strong>macOS:</strong> <code>brew install --cask wireshark</code></li>
+                <li><strong>Windows:</strong> Download from <a href="https://wireshark.org/download.html" target="_blank">wireshark.org</a></li>
+            </ul>
+            
+            <h4>Step 2: Start a Capture</h4>
+            <ul>
+                <li>Open Wireshark → Select your active network interface (Wi-Fi or Ethernet)</li>
+                <li>Click the shark fin icon to start capture</li>
+            </ul>
+            
+            <h4>Step 3: Generate Traffic</h4>
+            <ul>
+                <li>Open browser → visit <code>http://example.com</code> (HTTP, not HTTPS)</li>
+                <li>Run: <code>ping 8.8.8.8</code> in terminal</li>
+                <li>Run: <code>nslookup google.com</code></li>
+            </ul>
+            
+            <h4>Step 4: Apply Filters</h4>
+            <ul>
+                <li>Filter <code>http</code> → see HTTP request/response (Layer 7)</li>
+                <li>Filter <code>dns</code> → see DNS queries (Layer 7)</li>
+                <li>Filter <code>icmp</code> → see ping packets (Layer 3)</li>
+                <li>Click any packet → expand Ethernet (L2), IP (L3), TCP/UDP (L4)</li>
+            </ul>
+            
+            <div class="tip-box">
+                💡 <strong>Questions to answer:</strong>
+                <ul>
+                    <li>What's the MAC address of your default gateway?</li>
+                    <li>Which port does HTTP use? Which source port did your browser use?</li>
+                    <li>How many hops did your ping take?</li>
+                </ul>
+            </div>
+        </details>
+        <a href="#" class="nav-btn" style="display: inline-block; margin-top: 0.5rem;" onclick="alert('Install Wireshark first, then follow the instructions above!'); return false;">Launch Lab →</a>
+    </div>
+
+    <!-- Upcoming Labs -->
+    <h2>📅 Upcoming Labs (In Development)</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+        <div class="card">
+            <h3>🏗️ Subnetting Practice</h3>
+            <p>Interactive subnet calculator + binary conversion drills</p>
+            <span class="tip-box">Coming soon</span>
+        </div>
+        <div class="card">
+            <h3>🖥️ Cisco CLI Simulator</h3>
+            <p>Configure routers and switches in a web-based lab</p>
+            <span class="tip-box">Coming soon</span>
+        </div>
+        <div class="card">
+            <h3>🔥 iptables Firewall Rules</h3>
+            <p>Block ports, allow specific IPs, log dropped packets</p>
+            <span class="tip-box">Coming soon</span>
+        </div>
+        <div class="card">
+            <h3>🐧 Linux Security Hardening</h3>
+            <p>SSH config, fail2ban, auditd, and SELinux basics</p>
+            <span class="tip-box">Coming soon</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        🧪 Lab Library — Hands-on learning for network security | New labs added weekly
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>
