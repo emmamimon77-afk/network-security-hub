@@ -1,12 +1,27 @@
 // Module Loader - Network Security Hub
-// Automatically adds reusable modules to lessons
+// Adds reusable modules to lessons (without duplicates)
 
 function addAttackExplainerModule() {
-    // Check if module already exists
-    if (document.querySelector('.attack-explainer-module')) return;
+    // Check if module already exists (from HTML)
+    if (document.querySelector('.attack-explainer-module')) {
+        console.log('Module already exists, skipping');
+        return;
+    }
+    
+    // Also check for the heading text as fallback
+    const existingHeadings = Array.from(document.querySelectorAll('h2')).filter(h2 => 
+        h2.textContent.includes('Understanding Security Terms')
+    );
+    if (existingHeadings.length > 0) {
+        console.log('Module heading found, skipping');
+        return;
+    }
     
     const pageNav = document.querySelector('.page-nav');
-    if (!pageNav) return;
+    if (!pageNav) {
+        console.log('No page-nav found, skipping module');
+        return;
+    }
     
     const moduleHtml = `
         <div class="card attack-explainer-module">
@@ -26,12 +41,18 @@ function addAttackExplainerModule() {
     
     // Insert before page navigation
     pageNav.insertAdjacentHTML('beforebegin', moduleHtml);
+    console.log('Attack explainer module added');
 }
 
-// Auto-run when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Only add explainer module on lesson pages (tables present)
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.querySelector('table')) {
+            addAttackExplainerModule();
+        }
+    });
+} else {
     if (document.querySelector('table')) {
         addAttackExplainerModule();
     }
-});
+}
