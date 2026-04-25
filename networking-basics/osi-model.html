@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSI Model | Network Security Hub</title>
+    <title>OSI Model - Full Lesson | Network Security Hub</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,7 +14,6 @@
             line-height: 1.6;
         }
 
-        /* Same navbar as homepage */
         .navbar {
             position: sticky;
             top: 0;
@@ -34,54 +33,51 @@
             font-weight: 500;
             font-size: 0.9rem;
             transition: 0.2s;
-            padding: 0.25rem 0;
         }
-        .navbar a:hover {
-            color: white;
-            border-bottom: 2px solid #58a6ff;
-        }
+        .navbar a:hover { color: white; border-bottom: 2px solid #58a6ff; }
 
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+        .card { background: white; border-radius: 1rem; padding: 1.8rem; margin-bottom: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+        h1 { color: #0f3b5c; margin-bottom: 0.5rem; font-size: 2rem; }
+        h2 { color: #0f3b5c; margin: 1.5rem 0 1rem 0; border-left: 4px solid #2c7da0; padding-left: 0.8rem; }
+        h3 { color: #1e4a6b; margin: 1rem 0 0.5rem 0; }
 
-        /* card styling */
-        .card {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.8rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-        }
-
-        h1 { color: #0f3b5c; margin-bottom: 0.5rem; }
-        h2 { color: #0f3b5c; margin: 1.2rem 0 0.8rem 0; border-left: 4px solid #2c7da0; padding-left: 0.8rem; }
-
-        .osi-grid { max-width: 550px; margin: 1.5rem auto; border: 1px solid #cbd5e1; border-radius: 0.75rem; overflow: hidden; }
-        .osi-layer { display: flex; padding: 0.7rem 1rem; border-bottom: 1px solid #e2edf2; }
+        .osi-grid { max-width: 700px; margin: 1.5rem auto; border: 1px solid #cbd5e1; border-radius: 0.75rem; overflow: hidden; }
+        .osi-layer { display: flex; padding: 0.8rem 1rem; border-bottom: 1px solid #e2edf2; flex-wrap: wrap; }
         .layer-number { width: 70px; font-weight: bold; color: #155f7c; }
-        .layer-name { width: 130px; font-weight: 600; }
-        .layer-desc { flex: 1; }
+        .layer-name { width: 140px; font-weight: 600; color: #1a4d6b; }
+        .layer-desc { flex: 1; color: #2d4a6e; }
 
         .ascii-box {
             background: #1e2a36; color: #cbd5e6;
             padding: 1rem;
             font-family: monospace;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             overflow-x: auto;
             white-space: pre;
             border-radius: 0.75rem;
             margin: 1rem 0;
         }
 
-        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-        th, td { border: 1px solid #cbd5e1; padding: 0.7rem; text-align: left; }
-        th { background: #eef2ff; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        th, td { border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; vertical-align: top; }
+        th { background: #eef2ff; color: #0f3b5c; }
 
-        /* Page Navigation Buttons */
+        .tip-box {
+            background: #e6f7f0;
+            border-left: 4px solid #2c8c5e;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+        .warning-box {
+            background: #fff5e6;
+            border-left: 4px solid #e68a2e;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
         .page-nav {
             display: flex;
             justify-content: space-between;
@@ -95,16 +91,17 @@
             text-decoration: none;
             color: #1f5068;
             font-weight: 500;
-            transition: 0.2s;
         }
-        .nav-btn:hover {
-            background: #cbd5e1;
-        }
+        .nav-btn:hover { background: #cbd5e1; }
 
         .footer { text-align: center; font-size: 0.8rem; color: #5a6e7c; margin-top: 2rem; padding: 1rem; border-top: 1px solid #e2e8f0; }
 
-        @media (max-width: 680px) {
+        details { margin: 0.5rem 0; padding: 0.5rem; background: #f8fafc; border-radius: 0.5rem; }
+        summary { font-weight: 600; cursor: pointer; color: #155f7c; }
+
+        @media (max-width: 700px) {
             .osi-layer { flex-direction: column; gap: 0.3rem; }
+            table, th, td { font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -121,73 +118,226 @@
 
 <div class="container">
     <div class="card">
-        <h1>📚 The OSI Model</h1>
-        <p>Open Systems Interconnection Model — A conceptual framework used to understand network communication in 7 layers.</p>
+        <h1>📚 The OSI Model — Complete Guide</h1>
+        <p><strong>Open Systems Interconnection Model</strong> | A 7-layer framework that standardizes network communication. Every networking professional must understand this inside out.</p>
     </div>
 
+    <!-- Section 1: Why OSI Matters -->
     <div class="card">
-        <h2>🧠 Why Learn the OSI Model?</h2>
-        <ul><li>✅ Troubleshoot networks layer by layer</li><li>✅ Understand how data travels</li><li>✅ Speak the language of network security</li></ul>
-    </div>
-
-    <div class="card">
-        <h2>📊 The 7 Layers of OSI</h2>
-        <div class="osi-grid">
-            <div class="osi-layer"><span class="layer-number">Layer 7</span><span class="layer-name">Application</span><span class="layer-desc">HTTP, FTP, SMTP, DNS</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 6</span><span class="layer-name">Presentation</span><span class="layer-desc">Encryption, compression (TLS, JPEG)</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 5</span><span class="layer-name">Session</span><span class="layer-desc">Session mgmt (NetBIOS, RPC)</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 4</span><span class="layer-name">Transport</span><span class="layer-desc">TCP/UDP, segmentation, ports</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 3</span><span class="layer-name">Network</span><span class="layer-desc">IP addressing, routing (Routers)</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 2</span><span class="layer-name">Data Link</span><span class="layer-desc">MAC addresses, switches, Ethernet</span></div>
-            <div class="osi-layer"><span class="layer-number">Layer 1</span><span class="layer-name">Physical</span><span class="layer-desc">Cables, fiber, voltage</span></div>
+        <h2>🎯 Why the OSI Model Still Matters</h2>
+        <p>Even though the modern internet uses TCP/IP, the OSI model gives you a <strong>universal language</strong> to:</p>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>🔍 <strong>Troubleshoot systematically</strong> — "Which layer is failing?"</li>
+            <li>🛡️ <strong>Understand security attacks</strong> — Each layer has unique threats</li>
+            <li>💬 <strong>Communicate with other engineers</strong> — Common reference frame</li>
+            <li>📖 <strong>Learn any networking technology</strong> — Everything fits into a layer</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Interview Tip:</strong> "Can you explain what happens when you type google.com?" — Your answer should walk down the OSI layers!
         </div>
     </div>
 
+    <!-- Section 2: The 7 Layers — Detailed -->
     <div class="card">
-        <h2>📝 Data Flow (Encapsulation)</h2>
-        <div class="ascii-box">
-+-------------+
-|  Layer 7    |  "Hello" (data)
-+-------------+
-       ⬇️
-+-------------+
-|  Layer 4    |  TCP segment (ports)
-+-------------+
-       ⬇️
-+-------------+
-|  Layer 3    |  IP packet (IP addresses)
-+-------------+
-       ⬇️
-+-------------+
-|  Layer 2    |  Ethernet frame (MAC)
-+-------------+
-       ⬇️
-+-------------+
-|  Layer 1    |  Bits on the wire
-+-------------+</div>
+        <h2>📊 The 7 Layers — Detailed Breakdown</h2>
+        <div class="osi-grid">
+            <div class="osi-layer"><span class="layer-number">Layer 7</span><span class="layer-name">Application</span><span class="layer-desc">HTTP/80, HTTPS/443, FTP/21, SSH/22, DNS/53, SMTP/25, DHCP</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 6</span><span class="layer-name">Presentation</span><span class="layer-desc">Encryption (TLS/SSL), compression (gzip), translation (ASCII→EBCDIC), JPEG, GIF</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 5</span><span class="layer-name">Session</span><span class="layer-desc">Session establishment, maintenance, termination. NetBIOS, RPC, PPTP, SIP</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 4</span><span class="layer-name">Transport</span><span class="layer-desc">TCP (reliable, connection-oriented), UDP (fast, connectionless). Ports 0-65535</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 3</span><span class="layer-name">Network</span><span class="layer-desc">IPv4, IPv6, ICMP (ping), ARP, routing protocols (OSPF, BGP, EIGRP)</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 2</span><span class="layer-name">Data Link</span><span class="layer-desc">Ethernet, MAC addresses, switches, VLANs, PPP, ARP (actually sits between L2/L3)</span></div>
+            <div class="osi-layer"><span class="layer-number">Layer 1</span><span class="layer-name">Physical</span><span class="layer-desc">Copper (Cat5e/6), Fiber (single/multi-mode), Wireless (2.4GHz/5GHz), voltage, bits</span></div>
+        </div>
     </div>
 
+    <!-- Section 3: Deep Dive Each Layer -->
     <div class="card">
-        <h2>🔐 Security Relevance</h2>
+        <h2>🔬 Layer-by-Layer Deep Dive</h2>
+        
+        <h3>📱 Layer 7 — Application (The User Interface)</h3>
+        <p><strong>What it does:</strong> Provides network services directly to applications. NOT the application itself (Chrome/Firefox) — but the protocols apps use.</p>
+        <p><strong>Real example:</strong> When you open YouTube, your browser uses <strong>HTTPS (port 443)</strong> — that's Layer 7. The video data is requested here.</p>
+        
+        <h3>🔐 Layer 6 — Presentation (The Translator)</h3>
+        <p><strong>What it does:</strong> Converts data between application format and network format. Handles encryption, compression, and character encoding.</p>
+        <p><strong>Real example:</strong> When you see 🔒 in your browser — TLS encryption happens at Layer 6. Also, when a website compresses images (JPEG) — that's Layer 6.</p>
+        
+        <h3>🤝 Layer 5 — Session (The Manager)</h3>
+        <p><strong>What it does:</strong> Establishes, maintains, and ends communication sessions. Keeps different conversations separate.</p>
+        <p><strong>Real example:</strong> You have 5 tabs open in Chrome — each is a separate session. Layer 5 keeps YouTube's data from mixing with Gmail's data.</p>
+        
+        <h3>🚚 Layer 4 — Transport (The Carrier)</h3>
+        <p><strong>What it does:</strong> Segments data, provides reliability (TCP) or speed (UDP), manages flow control, and uses port numbers.</p>
+        <p><strong>Real example:</strong> TCP = "Certified mail" (tracking, confirmation). UDP = "Postcard" (fast, but no confirmation). Gaming uses UDP; banking uses TCP.</p>
+        
+        <h3>🗺️ Layer 3 — Network (The Navigator)</h3>
+        <p><strong>What it does:</strong> Logical addressing (IP addresses), routing packets between networks, path selection.</p>
+        <p><strong>Real example:</strong> Your home router (192.168.1.1) uses Layer 3 to send your request to Google's server (8.8.8.8). Each hop is a router.</p>
+        
+        <h3>🔌 Layer 2 — Data Link (The Local Deliverer)</h3>
+        <p><strong>What it does:</strong> Physical addressing (MAC addresses), error detection (CRC), framing, and local network delivery via switches.</p>
+        <p><strong>Real example:</strong> Your phone has a MAC address like `AA:BB:CC:11:22:33`. When you join Wi-Fi, the switch learns your MAC to send data only to you.</p>
+        
+        <h3>⚡ Layer 1 — Physical (The Cable)</h3>
+        <p><strong>What it does:</strong> Transmits raw bits (1s and 0s) over physical media — voltage, light pulses, radio waves.</p>
+        <p><strong>Real example:</strong> An Ethernet cable has 8 wires. Voltage on certain wires means "1" — no voltage means "0". Fiber optic uses light flashes.</p>
+    </div>
+
+    <!-- Section 4: Encapsulation -->
+    <div class="card">
+        <h2>📦 How Data Travels — Encapsulation</h2>
+        <p>When you send data, each layer <strong>adds a header</strong> (like putting a letter in nested envelopes).</p>
+        <div class="ascii-box">
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 7:    [Data]  (e.g., "Hello, world!")                │
+└─────────────────────────────────────────────────────────────┘
+                              ⬇️
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 6-5:  [Presentation/Session Headers] + [Data]        │
+└─────────────────────────────────────────────────────────────┘
+                              ⬇️
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 4:    [TCP Header] + [Data]  →  Segment              │
+│             (Source Port: 54321, Dest Port: 443)           │
+└─────────────────────────────────────────────────────────────┘
+                              ⬇️
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 3:    [IP Header] + [TCP Header] + [Data] → Packet   │
+│             (Src IP: 192.168.1.100, Dest IP: 8.8.8.8)      │
+└─────────────────────────────────────────────────────────────┘
+                              ⬇️
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 2:    [MAC Header] + [IP Header] + ... → Frame       │
+│             (Src MAC: AA:BB:CC:11:22:33)                   │
+└─────────────────────────────────────────────────────────────┘
+                              ⬇️
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 1:    Bits on the wire: 101100111000...              │
+└─────────────────────────────────────────────────────────────┘</div>
+        <p><strong>At the destination:</strong> Each layer strips off its header and passes the remaining data up — <strong>de-encapsulation</strong>.</p>
+    </div>
+
+    <!-- Section 5: Security Attacks by Layer -->
+    <div class="card">
+        <h2>⚠️ Security Attacks at Each Layer</h2>
         <table>
-            <thead><tr><th>Layer</th><th>Threats</th><th>Controls</th></tr></thead>
+            <thead><tr><th>Layer</th><th>Common Attacks</th><th>Defense Mechanisms</th></tr></thead>
             <tbody>
-                <tr><td>Application</td><td>Web attacks, SQLi</td><td>WAF, HTTPS</td></tr>
-                <tr><td>Transport</td><td>SYN flood</td><td>Firewall rules</td></tr>
-                <tr><td>Network</td><td>IP spoofing</td><td>ACLs</td></tr>
-                <tr><td>Data Link</td><td>ARP spoofing</td><td>DAI</td></tr>
+                <tr><td>7 - Application</td><td>SQL Injection, XSS, CSRF, Buffer Overflows</td><td>WAF, Input Validation, HTTPS, Code Reviews</td></tr>
+                <tr><td>6 - Presentation</td><td>SSL Stripping, Weak Ciphers, Compression Oracle (CRIME)</td><td>TLS 1.3, Strong Cipher Suites, HSTS</td></tr>
+                <tr><td>5 - Session</td><td>Session Hijacking, Session Fixation, Replay Attacks</td><td>Secure Cookies, Short Timeouts, Token Regeneration</td></tr>
+                <tr><td>4 - Transport</td><td>SYN Flood, TCP RST Attack, Port Scanning</td><td>SYN Cookies, Firewall Rules, Rate Limiting</td></tr>
+                <tr><td>3 - Network</td><td>IP Spoofing, Ping of Death, Fragmentation Attacks, DDoS</td><td>ACLs, uRPF, IPSec, DDoS Mitigation</td></tr>
+                <tr><td>2 - Data Link</td><td>ARP Spoofing, MAC Flooding, CAM Table Overflow, VLAN Hopping</td><td>Dynamic ARP Inspection (DAI), Port Security, Private VLANs</td></tr>
+                <tr><td>1 - Physical</td><td>Wire Tapping, Eavesdropping, Device Theft, Signal Interception</td><td>Physical Locks, CCTV, Faraday Cages, Tamper Seals</td></tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Page Navigation: Previous (none) / Next (TCP/IP placeholder) -->
+    <!-- Section 6: Troubleshooting Guide -->
+    <div class="card">
+        <h2>🛠️ Troubleshooting by Layer (Real Scenarios)</h2>
+        
+        <details>
+            <summary><strong>❌ "Website loads slowly" — which layer?</strong></summary>
+            <p>Could be multiple layers: L1 (bad cable), L2 (switch congestion), L3 (routing issues), L4 (TCP windowing), L7 (server overload). Start from L1 and go up.</p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "Cannot ping 8.8.8.8 but can ping 192.168.1.1"</strong></summary>
+            <p>Layer 3 problem — your default gateway works, but internet routing is broken. Check your default route: <code>ip route show</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "Connected to Wi-Fi but no internet"</strong></summary>
+            <p>Layer 2 works (Wi-Fi association), but Layer 3 fails. Check DHCP (IP address). Run <code>ipconfig /renew</code> (Windows) or <code>sudo dhclient</code> (Linux).</p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "Websites work, but file transfer fails"</strong></summary>
+            <p>Layer 7 protocol-specific issue (FTP vs HTTP). Check if FTP ports (20/21) are blocked by firewall.</p>
+        </details>
+    </div>
+
+    <!-- Section 7: Mnemonics & Quick Reference -->
+    <div class="card">
+        <h2>🧠 Mnemonics (Remember the Layers)</h2>
+        
+        <p><strong>From Layer 7 → 1 (Top to Bottom):</strong></p>
+        <ul style="margin-left: 1.5rem;">
+            <li><strong>All People Seem To Need Data Processing</strong> (Application → Physical)</li>
+            <li><strong>Please Do Not Throw Sausage Pizza Away</strong> (Physical → Application — reversed)</li>
+        </ul>
+        
+        <p><strong>From Layer 1 → 7 (Bottom to Top):</strong></p>
+        <ul style="margin-left: 1.5rem;">
+            <li><strong>Please Do Not Teach Students Pointless Acronyms</strong></li>
+        </ul>
+        
+        <div class="tip-box">
+            💡 <strong>For Cisco exams:</strong> Remember "All People Seem To Need Data Processing" — it's the most common mnemonic in networking.
+        </div>
+    </div>
+
+    <!-- Section 8: Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (Check Your Understanding)</h2>
+        
+        <details>
+            <summary><strong>Question 1:</strong> Which layer handles logical addressing (IP addresses)?</summary>
+            <p><strong>Answer:</strong> Layer 3 — Network Layer.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Question 2:</strong> A user reports "no network connectivity" but the link light on their network card is on. Which OSI layer should you check first?</summary>
+            <p><strong>Answer:</strong> Layer 2 (Data Link) — The link light indicates L1 is working, so move up to L2 (MAC addressing, switch port).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Question 3:</strong> What's the difference between a segment, a packet, and a frame?</summary>
+            <p><strong>Answer:</strong> Segment = Layer 4 (TCP/UDP header + data). Packet = Layer 3 (IP header + segment). Frame = Layer 2 (MAC header + packet + trailer).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Question 4:</strong> Which layer does TLS (HTTPS encryption) operate at?</summary>
+            <p><strong>Answer:</strong> Layer 6 — Presentation Layer.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Question 5:</strong> Your ping fails with "Destination Host Unreachable." What layer is the issue?</summary>
+            <p><strong>Answer:</strong> Layer 3 — Network Layer (routing problem or no route to destination).</p>
+        </details>
+    </div>
+
+    <!-- Section 9: Comparison with TCP/IP Model -->
+    <div class="card">
+        <h2>🔄 OSI vs. TCP/IP Model</h2>
+        <table>
+            <thead><tr><th>OSI Model</th><th>TCP/IP Model</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>7 - Application</td><td rowspan="3">Application Layer</td><td rowspan="3">TCP/IP combines L5, L6, L7 into "Application"</td></tr>
+                <tr><td>6 - Presentation</td></tr>
+                <tr><td>5 - Session</td></tr>
+                <tr><td>4 - Transport</td><td>Transport Layer</td><td>Same concept (TCP/UDP)</td></tr>
+                <tr><td>3 - Network</td><td>Internet Layer</td><td>Same concept (IP routing)</td></tr>
+                <tr><td>2 - Data Link</td><td rowspan="2">Network Access Layer</td><td rowspan="2">TCP/IP combines L1 and L2</td></tr>
+                <tr><td>1 - Physical</td></tr>
+            </tbody>
+        </table>
+        <div class="warning-box">
+            📌 <strong>Exam Note:</strong> Most real-world networks use TCP/IP, but OSI is still used for troubleshooting and teaching.
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
     <div class="page-nav">
         <span class="nav-btn" style="opacity:0.5; cursor:default;">◀ Previous</span>
         <a href="#" class="nav-btn">Next: TCP/IP Model ▶</a>
     </div>
 
     <div class="footer">
-        Network Security Hub — OSI Model Lesson | Interactive & Mobile Ready
+        Network Security Hub — Complete OSI Model Lesson | 9 sections + practice questions | Last updated: April 2026
     </div>
 </div>
 </body>
