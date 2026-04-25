@@ -303,6 +303,44 @@
         </div>
     </div>
 
+    <!-- LAB EXERCISE - Expandable Section -->
+    <div class="card">
+         <h2>🧪 Lab Exercise: See the OSI Layers in Action</h2>
+         <p><strong>Goal:</strong> Observe how your own computer uses Layers 1–4 to communicate with a remote server.</p>
+    
+         <h3>🖥️ Step 1 – Check Layer 1 (Physical)</h3>
+         <p>Verify your physical connection:</p>
+         <pre><code># Linux / macOS
+    ip link show
+    # Look for "UP" and "LOWER_UP"
+
+    # Windows
+    ipconfig /all
+    # Check "Media State" and "Description"</code></pre>
+
+         <h3>📡 Step 2 – Check Layer 2 (Data Link / MAC)</h3>
+         <p>View your MAC address and ARP cache:</p>
+         <pre><code>arp -a</code></pre>
+         <p>This shows which IP addresses are linked to which MAC addresses (Layer 2 to Layer 3 mapping).</p>
+
+         <h3>🗺️ Step 3 – Check Layer 3 (Network / Routing)</h3>
+         <p>Trace the route to a remote server:</p>
+         <pre><code>traceroute 8.8.8.8   # Linux/macOS
+    tracert 8.8.8.8      # Windows</code></pre>
+         <p>Each hop = a router. This is Layer 3 in action.</p>
+
+         <h3>🚚 Step 4 – Check Layer 4 (Transport / Ports)</h3>
+         <p>See active connections and ports:</p>
+         <pre><code>netstat -tupan   # Linux
+    netstat -an      # Windows</code></pre>
+         <p>Look for <code>ESTABLISHED</code> connections. This shows TCP (Layer 4) sessions.</p>
+
+         <div class="tip-box">
+             💡 <strong>Discussion Question:</strong> Which OSI layer would you check if `ping 8.8.8.8` works but `traceroute` fails?
+    </div>
+    </div>
+
+
     <!-- Page Navigation -->
     <div class="page-nav">
         <span class="nav-btn disabled">◀ Previous Lesson</span>
