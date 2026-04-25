@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Network Security Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0a0c10;
+            color: #e6edf3;
+            line-height: 1.5;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            border-bottom: 1px solid #2d3a4a;
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #58a6ff, #d2a8ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .subhead {
+            color: #8b949e;
+            margin-top: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: #161b22;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #2d3a4a;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #58a6ff;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #58a6ff;
+        }
+
+        .card ul {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+
+        .card li {
+            margin: 0.5rem 0;
+        }
+
+        .card a {
+            color: #e6edf3;
+            text-decoration: none;
+            display: inline-block;
+            padding: 0.25rem 0;
+            transition: color 0.2s;
+        }
+
+        .card a:hover {
+            color: #58a6ff;
+            text-decoration: underline;
+        }
+
+        .coming-soon {
+            color: #6e7681;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid #2d3a4a;
+            margin-top: 2rem;
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.75rem;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🛡️ Network Security Hub</h1>
+        <p class="subhead">Routing · Switching · Firewalls · Virtualization · Server Admin</p>
+    </header>
+
+    <div class="grid">
+        <!-- Networking Basics -->
+        <div class="card">
+            <h2>📡 Networking Basics</h2>
+            <ul>
+                <li><a href="#">📘 OSI Model</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">🌐 TCP/IP</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">✂️ Subnetting</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">⚙️ Cisco Commands</a> <span class="coming-soon">(coming soon)</span></li>
+            </ul>
+        </div>
+
+        <!-- Routing & Switching -->
+        <div class="card">
+            <h2>🔀 Routing & Switching</h2>
+            <ul>
+                <li><a href="#">🗺️ Static Routing</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">🔄 OSPF</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">⚡ EIGRP</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">🏷️ VLAN Config</a> <span class="coming-soon">(coming soon)</span></li>
+            </ul>
+        </div>
+
+        <!-- Firewalls -->
+        <div class="card">
+            <h2>🔥 Firewalls</h2>
+            <ul>
+                <li><a href="#">🛠️ iptables</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">🧱 Zone-Based Firewall</a> <span class="coming-soon">(coming soon)</span></li>
+            </ul>
+        </div>
+
+        <!-- Virtualization -->
+        <div class="card">
+            <h2>🖥️ Virtualization</h2>
+            <ul>
+                <li><a href="#">📦 VirtualBox Setup</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">⚡ VMware Setup</a> <span class="coming-soon">(coming soon)</span></li>
+            </ul>
+        </div>
+
+        <!-- Server Admin -->
+        <div class="card">
+            <h2>🐧 Server Admin</h2>
+            <ul>
+                <li><a href="#">💻 Linux Commands</a> <span class="coming-soon">(coming soon)</span></li>
+                <li><a href="#">🪟 Windows Server</a> <span class="coming-soon">(coming soon)</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        🧪 Expandable · Mobile & Desktop Ready · More lessons added weekly
+    </footer>
+</div>
+</body>
+</html>
