@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP/IP Model - Complete Lesson | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .key-point { background: #fef9e3; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; }
+        .takeaway { background: #e6f7f0; border: 1px solid #2c8c5e; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; }
+        .external-link { background: #eef2ff; padding: 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; }
+        .protocol-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem; margin: 1rem 0; }
+        .protocol-item { background: #f1f5f9; padding: 0.5rem; border-radius: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🌐 The TCP/IP Model — Complete Guide</h1>
+        <p><strong>Transmission Control Protocol / Internet Protocol Suite</strong> | The actual foundation of the modern internet. Used everywhere — from your phone to cloud servers.</p>
+    </div>
+
+    <!-- Why TCP/IP Matters -->
+    <div class="card">
+        <h2>🎯 Why TCP/IP Matters More Than OSI</h2>
+        <ul>
+            <li>🌍 <strong>The real internet runs on TCP/IP</strong> — OSI is theoretical, TCP/IP is practical</li>
+            <li>📡 <strong>Every device uses it</strong> — phones, laptops, servers, IoT devices</li>
+            <li>🛡️ <strong>Security professionals MUST understand it</strong> — firewalls, IDS/IPS, packet analysis</li>
+            <li>🔧 <strong>Troubleshooting is easier</strong> — fewer layers to remember</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Interview Tip:</strong> "What happens when you send an email?" — Your answer should follow TCP/IP layers (Application → Transport → Internet → Network Access).
+        </div>
+    </div>
+
+    <!-- The 4 Layers - Detailed -->
+    <div class="card">
+        <h2>📊 The 4 Layers of TCP/IP (vs OSI)</h2>
+        <div style="overflow-x: auto;">
+            <table style="min-width: 500px;">
+                <thead>
+                    <tr><th>TCP/IP Layer</th><th>What It Does</th><th>OSI Equivalent</th><th>Key Protocols</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Layer 4 - Application</strong></td><td>User-facing protocols, data formatting, sessions</td><td>Layers 5,6,7 (Session, Presentation, Application)</td><td>HTTP, HTTPS, FTP, SSH, DNS, SMTP, DHCP</td></tr>
+                    <tr><td><strong>Layer 3 - Transport</strong></td><td>Reliability, flow control, port-based addressing</td><td>Layer 4 (Transport)</td><td>TCP, UDP, SCTP</td></tr>
+                    <tr><td><strong>Layer 2 - Internet</strong></td><td>Logical addressing, routing between networks</td><td>Layer 3 (Network)</td><td>IPv4, IPv6, ICMP, ARP, IPsec</td></tr>
+                    <tr><td><strong>Layer 1 - Network Access</strong></td><td>Physical transmission, MAC addressing, framing</td><td>Layers 1,2 (Physical, Data Link)</td><td>Ethernet, Wi-Fi, PPP, ARP (partially)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Real-World Examples -->
+    <div class="card">
+        <h2>🌐 Real-World Examples (TCP/IP in Action)</h2>
+        
+        <h3>📧 Sending an Email (SMTP)</h3>
+        <p><strong>Application Layer:</strong> Outlook/Gmail uses SMTP protocol.<br>
+        <strong>Transport Layer:</strong> TCP port 25 ensures reliable delivery.<br>
+        <strong>Internet Layer:</strong> Your email is split into packets with source/dest IPs.<br>
+        <strong>Network Access:</strong> Packets converted to Ethernet frames, sent via Wi-Fi.</p>
+        
+        <h3>🎥 Watching Netflix</h3>
+        <p><strong>Application:</strong> HTTPS (port 443) requests video chunks.<br>
+        <strong>Transport:</strong> TCP for control, UDP for streaming (fast).<br>
+        <strong>Internet:</strong> IP packets routed across multiple networks.<br>
+        <strong>Network Access:</strong> Data travels via fiber/cable to your home.</p>
+        
+        <h3>🔍 Using ping (ICMP)</h3>
+        <p><strong>Internet Layer:</strong> ICMP protocol (no port). Used for testing connectivity.<br>
+        <strong>Network Access:</strong> ICMP packets encapsulated in Ethernet frames.</p>
+    </div>
+
+    <!-- Encapsulation in TCP/IP -->
+    <div class="card">
+        <h2>📦 TCP/IP Encapsulation (Simpler than OSI)</h2>
+        <div class="ascii-box">
+┌─────────────────────────────────────────────────┐
+│ Application Layer:  [HTTP Request "GET /index"] │
+└─────────────────────────────────────────────────┘
+                        ⬇️
+┌─────────────────────────────────────────────────┐
+│ Transport Layer:    [TCP Header] + [Data]       │
+│                     (Port 443, Sequence #)      │
+└─────────────────────────────────────────────────┘
+                        ⬇️
+┌─────────────────────────────────────────────────┐
+│ Internet Layer:     [IP Header] + [Segment]     │
+│                     (Src IP, Dest IP)           │
+└─────────────────────────────────────────────────┘
+                        ⬇️
+┌─────────────────────────────────────────────────┐
+│ Network Access:     [Ethernet Frame]            │
+│                     (MAC addresses)             │
+└─────────────────────────────────────────────────┘</div>
+    </div>
+
+    <!-- Security Attacks by TCP/IP Layer -->
+    <div class="card">
+        <h2>⚠️ Security Attacks & Defenses (TCP/IP View)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>TCP/IP Layer</th><th>Common Attacks</th><th>Defense Mechanisms</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Application</strong></td><td>Web attacks, DNS spoofing, phishing</td><td>WAF, DNSSEC, HTTPS, Email filtering</td></tr>
+                    <tr><td><strong>Transport</strong></td><td>SYN flood, TCP hijacking, port scanning</td><td>SYN cookies, TCP-AO, firewalls, port knocking</td></tr>
+                    <tr><td><strong>Internet</strong></td><td>IP spoofing, ICMP tunneling, fragmentation attacks</td><td>Ingress/egress filtering, uRPF, IPsec, rate limiting</td></tr>
+                    <tr><td><strong>Network Access</strong></td><td>ARP spoofing, MAC flooding, evil twin APs</td><td>DAI, port security, 802.1X, wireless encryption (WPA3)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Troubleshooting Scenarios -->
+    <div class="card">
+        <h2>🛠️ Troubleshooting TCP/IP Networks</h2>
+        
+        <details>
+            <summary><strong>❌ "Can reach local network but not internet"</strong></summary>
+            <p><strong>Check Internet Layer:</strong> Default gateway? Run <code>ip route show | grep default</code>. Missing gateway = no internet.</p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "DNS works (can ping 8.8.8.8) but website fails"</strong></summary>
+            <p><strong>Application Layer issue:</strong> DNS resolves but HTTP fails. Check proxy settings, browser config, or firewall blocking port 80/443.</p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "Video streaming is slow but downloads are fast"</strong></summary>
+            <p><strong>Transport Layer:</strong> UDP (streaming) has issues, TCP (downloads) is fine. Check QoS policies or ISP throttling.</p>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "Wi-Fi connected but no IP address"</strong></summary>
+            <p><strong>Application Layer:</strong> DHCP failure. Run <code>sudo dhclient -v</code> (Linux) or <code>ipconfig /renew</code> (Windows).</p>
+        </details>
+    </div>
+
+    <!-- Protocol Reference -->
+    <div class="card">
+        <h2>📡 Important TCP/IP Protocols (Cheat Sheet)</h2>
+        <div class="protocol-list">
+            <div class="protocol-item"><strong>HTTP/80</strong> - Web (unencrypted)</div>
+            <div class="protocol-item"><strong>HTTPS/443</strong> - Secure web</div>
+            <div class="protocol-item"><strong>SSH/22</strong> - Secure shell</div>
+            <div class="protocol-item"><strong>DNS/53</strong> - Domain resolution</div>
+            <div class="protocol-item"><strong>DHCP/67,68</strong> - IP assignment</div>
+            <div class="protocol-item"><strong>FTP/21</strong> - File transfer</div>
+            <div class="protocol-item"><strong>SMTP/25</strong> - Email sending</div>
+            <div class="protocol-item"><strong>IMAP/143,993</strong> - Email retrieval</div>
+            <div class="protocol-item"><strong>ICMP</strong> - Ping & diagnostics</div>
+            <div class="protocol-item"><strong>ARP</strong> - IP to MAC mapping</div>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (TCP/IP Focus)</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Which TCP/IP layer handles port numbers (like 443 for HTTPS)?</summary>
+            <p><strong>Answer:</strong> Transport Layer (TCP/UDP). Ports identify which application should receive the data.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What's the difference between TCP and UDP?</summary>
+            <p><strong>Answer:</strong> TCP = Reliable, connection-oriented, slower (web, email). UDP = Fast, connectionless, no verification (streaming, gaming, DNS).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> Which TCP/IP layer does a router operate at?</summary>
+            <p><strong>Answer:</strong> Internet Layer (Layer 3 in OSI). Routers forward packets based on IP addresses.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> A switch operates at which TCP/IP layer?</summary>
+            <p><strong>Answer:</strong> Network Access Layer (Layer 2 in OSI). Switches forward based on MAC addresses.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Name two protocols at the Application Layer.</summary>
+            <p><strong>Answer:</strong> HTTP, HTTPS, FTP, SSH, DNS, SMTP (any two).</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card">
+        <h2>🧪 Lab Exercise: Explore TCP/IP on Your Machine</h2>
+        <p><strong>Goal:</strong> Observe TCP/IP layers working together using standard commands.</p>
+        
+        <h3>📡 Step 1 – View IP Configuration (Internet Layer)</h3>
+        <pre><code># Linux/macOS
+ip addr show
+# Windows
+ipconfig /all</code></pre>
+        
+        <h3>🔌 Step 2 – Check Active TCP Connections (Transport Layer)</h3>
+        <pre><code># Linux
+netstat -tupan | grep ESTABLISHED
+# Windows
+netstat -an | findstr EST</code></pre>
+        
+        <h3>🌍 Step 3 – Trace Route (Internet Layer)</h3>
+        <pre><code>traceroute google.com   # Linux/macOS
+tracert google.com      # Windows</code></pre>
+        
+        <h3>📝 Step 4 – Capture DNS Query (Application Layer)</h3>
+        <pre><code># Linux (install tcpdump if needed)
+sudo tcpdump -i eth0 port 53 -n
+# Then run: nslookup google.com</code></pre>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Which TCP/IP layer would you investigate if `ping google.com` works but `curl google.com` fails?
+        </div>
+    </div>
+
+    <!-- OSI vs TCP/IP Summary -->
+    <div class="card">
+        <h2>📊 OSI vs TCP/IP: Which One to Use?</h2>
+        <ul>
+            <li>✅ <strong>Use OSI</strong> for: Teaching, troubleshooting complex issues, exams (CompTIA, Cisco)</li>
+            <li>✅ <strong>Use TCP/IP</strong> for: Real-world debugging, firewall rules, packet analysis, interviews</li>
+        </ul>
+        <div class="note-box">
+            📌 <strong>Real Talk:</strong> Most network engineers think in TCP/IP (4 layers), but use OSI language when problems are weird.
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (TCP/IP)</h3>
+            <ul>
+                <li>✅ <strong>4 layers:</strong> Application → Transport → Internet → Network Access</li>
+                <li>✅ <strong>TCP = reliable, UDP = fast</strong> (choose based on use case)</li>
+                <li>✅ <strong>Ports = door numbers</strong> (80 = web, 443 = secure web, 22 = SSH)</li>
+                <li>✅ <strong>IP addresses = house addresses</strong> (Internet Layer)</li>
+                <li>✅ <strong>MAC addresses = person names</strong> (Network Access Layer)</li>
+                <li>✅ <strong>TCP/IP is what the internet actually uses</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More About TCP/IP</h2>
+        <div class="external-link">📖 <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite" target="_blank" rel="noopener">Wikipedia: Internet Protocol Suite</a></div>
+        <div class="external-link">📘 <a href="https://www.cloudflare.com/learning/network-layer/what-is-the-tcp-ip-model/" target="_blank" rel="noopener">Cloudflare: TCP/IP Model Explained</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/support/docs/ip/tcp-properties/17060-tcp-ip-model.html" target="_blank" rel="noopener">Cisco: TCP/IP Overview</a></div>
+        <div class="external-link">🔬 <a href="https://www.geeksforgeeks.org/tcp-ip-model/" target="_blank" rel="noopener">GeeksforGeeks: TCP/IP Model</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="osi-model.html" class="nav-btn">◀ Previous: OSI Model</a>
+        <a href="subnetting.html" class="nav-btn">Next: Subnetting ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — TCP/IP Model | Complete lesson with examples, security, lab, and quiz | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>
