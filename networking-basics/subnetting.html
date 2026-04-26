@@ -231,6 +231,120 @@
         </details>
     </div>
 
+    <!-- Strategic Network Design Module -->
+    <div class="card">
+        <h2>🏗️ Strategic Network Design: How to Plan Subnets for Real Companies</h2>
+        <p><strong>Stop guessing — learn the systematic method used by network architects.</strong></p>
+        
+        <h3>📊 Step 1: Gather Requirements</h3>
+        <p>Ask these questions before touching a calculator:</p>
+        <ul>
+            <li>📌 <strong>How many devices NOW?</strong> (workstations, servers, printers, IoT)</li>
+            <li>📈 <strong>Growth rate?</strong> (20% per year? Double in 2 years?)</li>
+            <li>🔒 <strong>Security zones?</strong> (HR separate from Guest? Finance isolated?)</li>
+            <li>🌍 <strong>Physical locations?</strong> (One building? Multiple cities?)</li>
+            <li>💰 <strong>Available IP space?</strong> (Do you have a /24, /20, or /16?)</li>
+        </ul>
+        
+        <h3>🧮 Step 2: The "Powers of 2" Method (Find Smallest Usable Mask)</h3>
+        <div class="tip-box">
+            💡 <strong>Formula:</strong> 2^(host bits) - 2 ≥ Required hosts<br>
+            <strong>Host bits = 32 - CIDR prefix</strong>
+        </div>
+        
+        <h4>Example: Department needs 50 hosts</h4>
+        <ul>
+            <li>Try /26: 2^(6) - 2 = 64 - 2 = 62 hosts ✅ (fits, but 12 wasted)</li>
+            <li>Try /27: 2^(5) - 2 = 32 - 2 = 30 hosts ❌ (too small)</li>
+            <li><strong>Winner:</strong> /26 (62 usable, room for 20% growth)</li>
+        </ul>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead><tr><th>Required Hosts</th><th>Minimum CIDR</th><th>Usable IPs</th><th>Wasted %</th></tr></thead>
+                <tbody>
+                    <tr><td>1-2</td><td>/30</td><td>2</td><td>0-50%</td></tr>
+                    <tr><td>3-6</td><td>/29</td><td>6</td><td>0-50%</td></tr>
+                    <tr><td>7-14</td><td>/28</td><td>14</td><td>0-50%</td></tr>
+                    <tr><td>15-30</td><td>/27</td><td>30</td><td>0-50%</td></tr>
+                    <tr><td>31-62</td><td>/26</td><td>62</td><td>0-50%</td></tr>
+                    <tr><td>63-126</td><td>/25</td><td>126</td><td>0-50%</td></tr>
+                    <tr><td>127-254</td><td>/24</td><td>254</td><td>0-50%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>🗺️ Step 3: Hierarchical Addressing (The Professional Way)</h3>
+        <p>Instead of random subnets, build a <strong>hierarchy</strong>:</p>
+        
+        <div class="ascii-box">
+    Organization: 10.0.0.0/16 (65k addresses)
+    │
+    ├── Site A (10.0.0.0/18) → 16k addresses
+    │   ├── HR (10.0.0.0/22)
+    │   ├── IT (10.0.4.0/22)
+    │   └── Sales (10.0.8.0/22)
+    │
+    ├── Site B (10.0.64.0/18)
+    │   ├── HR (10.0.64.0/22)
+    │   └── Manufacturing (10.0.68.0/22)
+    │
+    └── Site C (10.0.128.0/18)
+        └── DR Backup (10.0.128.0/21)
+        </div>
+        
+        <h3>📐 Step 4: The "Biggest-First" Allocation Rule</h3>
+        <p><strong>Always assign subnets to the largest requirements first.</strong> This prevents fragmentation.</p>
+        
+        <div class="practice-box">
+            <strong>📝 Exercise: Design a network for:</strong><br>
+            • Finance: 100 hosts<br>
+            • HR: 30 hosts<br>
+            • IT: 15 hosts<br>
+            • Guest Wi-Fi: 200 hosts<br>
+            • Available space: 192.168.10.0/24<br><br>
+            <details>
+                <summary>🎯 Show solution (largest first)</summary>
+                1. Guest (200 hosts) → /24 not possible (256 total). Need larger block or separate /24.<br>
+                2. Finance (100 hosts) → /25 (126 usable): 192.168.10.0/25<br>
+                3. HR (30 hosts) → /27 (30 usable): 192.168.10.128/27<br>
+                4. IT (15 hosts) → /27 (30 usable): 192.168.10.160/27<br>
+                <strong>Note:</strong> Guest Wi-Fi would need its own separate /24 or use a different private range (172.16.0.0/12).
+            </details>
+        </div>
+        
+        <h3>⚖️ Step 5: Right-Sizing vs. Future Growth</h3>
+        <ul>
+            <li>✅ <strong>Conservative:</strong> Exact fit + 10% — minimal waste</li>
+            <li>✅ <strong>Aggressive:</strong> Exact fit — risky if growth happens</li>
+            <li>✅ <strong>Liberal:</strong> Double the size — 50% waste but safe</li>
+        </ul>
+        <div class="warning-box">
+            ⚠️ <strong>Real-world advice:</strong> Always leave 20-30% free in each subnet. Running out of IPs is a painful redesign.
+        </div>
+        
+        <h3>🔧 Quick Reference: Matching CIDR to Business Needs</h3>
+        <table>
+            <thead><tr><th>Use Case</th><th>Typical CIDR</th><th>Why</th></tr></thead>
+            <tbody>
+                <tr><td>Point-to-point link (routers)</td><td>/30 or /31</td><td>Only 2 IPs needed, efficient</td></tr>
+                <tr><td>Small branch (5-10 people)</td><td>/28</td><td>14 IPs, room for printers + growth</td></tr>
+                <tr><td>Department (20-50 people)</td><td>/26</td><td>62 IPs, standard for workgroups</td></tr>
+                <tr><td>Office floor (100-200 people)</td><td>/24</td><td>254 IPs, easy to remember</td></tr>
+                <tr><td>Data center</td><td>/23 or /22</td><td>Servers + VMs + storage networks</td></tr>
+                <tr><td>Guest Wi-Fi</td><td>/22</td><td>Public space, many devices, isolated</td></tr>
+            </tbody>
+        </table>
+        
+        <h3>💼 Real-World Case Study: Startup Growth</h3>
+        <p><strong>Scenario:</strong> Startup has 192.168.1.0/24. Currently 20 employees. Projecting 100 in 12 months.</p>
+        <ul>
+            <li>❌ <strong>Bad design:</strong> /27 per department (wasteful, complex)</li>
+            <li>✅ <strong>Good design:</strong> Single /24 for now, but plan to migrate to 10.0.0.0/16</li>
+            <li>✅ <strong>Best design:</strong> Start with 10.0.0.0/22 for HQ, use /24 per floor, /27 per team</li>
+        </ul>
+    </div>
+
     <!-- Lab Exercise -->
     <div class="card" id="lab">
         <h2>🧪 Lab Exercise: Subnetting with ipcalc & Manual Calculation</h2>

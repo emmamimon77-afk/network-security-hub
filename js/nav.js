@@ -10,7 +10,7 @@ function loadNavigation() {
             <div class="nav-dropdown-content">
                 <a href="../networking-basics/osi-model.html">📘 OSI Model</a>
                 <a href="../networking-basics/tcp-ip-model.html">🌐 TCP/IP Model</a>
-                <a href="#">✂️ Subnetting (Coming Soon)</a>
+                <a href="../networking-basics/subnetting.html">✂️ Subnetting</a>
                 <a href="#">⚙️ Cisco Commands (Coming Soon)</a>
             </div>
         </div>
