@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco Commands - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .cli-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .cli-prompt {
+            color: #58a6ff;
+        }
+        .cli-output {
+            color: #cbd5e6;
+        }
+        .command-table {
+            font-size: 0.85rem;
+        }
+        .mode-indicator {
+            background: #0f3b5c;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⚙️ Cisco Commands — Complete CLI Guide</h1>
+        <p><strong>Cisco IOS (Internetwork Operating System)</strong> — The industry-standard CLI for routers and switches. Master these commands for CCNA, network admin, and security roles.</p>
+    </div>
+
+    <!-- Why Cisco Matters -->
+    <div class="card">
+        <h2>🎯 Why Cisco Commands Matter</h2>
+        <ul>
+            <li>✅ <strong>Industry standard</strong> — 80%+ of enterprise networks run Cisco</li>
+            <li>✅ <strong>CCNA/CCNP certification</strong> — CLI mastery is required</li>
+            <li>✅ <strong>Real troubleshooting</strong> — Most network issues are fixed in CLI</li>
+            <li>✅ <strong>Transferable skills</strong> — Other vendors (Juniper, Arista) use similar concepts</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> When a router crashes or a switch floods, GUI is useless. CLI saves the day.
+        </div>
+    </div>
+
+    <!-- CLI Modes -->
+    <div class="card">
+        <h2>🔐 Cisco CLI Modes (The Hierarchy)</h2>
+        <p>Every Cisco device has <strong>multiple security levels</strong>. You must climb the ladder:</p>
+        
+        <div class="ascii-box">
+    ┌─────────────────────────────────────────────────────────┐
+    │  User EXEC Mode (>)                                    │
+    │  └── Limited viewing, no changes                       │
+    │      │                                                 │
+    │      │ enable                                          │
+    │      ▼                                                 │
+    │  Privileged EXEC Mode (#)                              │
+    │  └── Full viewing, some testing (ping, traceroute)    │
+    │      │                                                 │
+    │      │ configure terminal                              │
+    │      ▼                                                 │
+    │  Global Configuration Mode (config)#                    │
+    │  └── Changes affect entire device                     │
+    │      │                                                 │
+    │      │ interface gigabit0/1                            │
+    │      ▼                                                 │
+    │  Interface Configuration Mode (config-if)#             │
+    │      └── Changes affect only that port                │
+    └─────────────────────────────────────────────────────────┘
+        </div>
+        
+        <h3>Mode Transition Commands</h3>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>From</th><th>To</th><th>Command</th><th>Prompt Changes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>User EXEC</td><td>Privileged EXEC</td><td><code>enable</code></td><td><code>></code> → <code>#</code></td></tr>
+                    <tr><td>Privileged EXEC</td><td>Global Config</td><td><code>configure terminal</code> (or <code>conf t</code>)</td><td><code>#</code> → <code>(config)#</code></td></tr>
+                    <tr><td>Global Config</td><td>Interface Config</td><td><code>interface [type] [number]</code></td><td><code>(config)#</code> → <code>(config-if)#</code></td></tr>
+                    <tr><td>Any mode</td><td>Previous mode</td><td><code>exit</code></td><td>Moves back one level</td></tr>
+                    <tr><td>Any mode</td><td>Privileged EXEC</td><td><code>end</code> or <code>Ctrl+Z</code></td><td>Jumps directly to <code>#</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Essential Show Commands (Viewing) -->
+    <div class="card">
+        <h2>👁️ Essential Show Commands (View Configuration)</h2>
+        <p><strong>Show commands never change anything</strong> — they just display information. Always start here when troubleshooting.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>What It Shows</th><th>Example Output</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>show running-config</code></td>
+                        <td>Current active configuration (RAM)</td>
+                        <td>All settings since last boot</td>
+                    </tr>
+                    <tr>
+                        <td><code>show startup-config</code></td>
+                        <td>Saved configuration (NVRAM)</td>
+                        <td>What loads on next reboot</td>
+                    </tr>
+                    <tr>
+                        <td><code>show ip interface brief</code></td>
+                        <td>All interfaces with IPs and status</td>
+                        <td>Gig0/0: 192.168.1.1, up/up</td>
+                    </tr>
+                    <tr>
+                        <td><code>show interfaces</code></td>
+                        <td>Detailed stats for all interfaces</td>
+                        <td>Packets, errors, speed, duplex</td>
+                    </tr>
+                    <tr>
+                        <td><code>show vlan brief</code></td>
+                        <td>VLANs and assigned ports</td>
+                        <td>VLAN 10: Gig0/1-24</td>
+                    </tr>
+                    <tr>
+                        <td><code>show mac address-table</code></td>
+                        <td>MAC addresses learned by switch</td>
+                        <td>MAC → Port mapping</td>
+                    </tr>
+                    <tr>
+                        <td><code>show ip route</code></td>
+                        <td>Routing table</td>
+                        <td>Networks and next hops</td>
+                    </tr>
+                    <tr>
+                        <td><code>show version</code></td>
+                        <td>Device info, uptime, IOS version</td>
+                        <td>Model, RAM, flash, uptime</td>
+                    </tr>
+                    <tr>
+                        <td><code>show cdp neighbors</code></td>
+                        <td>Directly connected Cisco devices</td>
+                        <td>Neighbor device names and ports</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="cli-box">
+            <span class="cli-prompt">Router#</span> <span class="cli-output">show ip interface brief</span><br>
+            Interface              IP-Address      OK? Method Status Protocol<br>
+            GigabitEthernet0/0    192.168.1.1     YES manual up    up<br>
+            GigabitEthernet0/1    unassigned      YES unset  up    down<br>
+            VLAN1                 unassigned      YES unset  administratively down down
+        </div>
+    </div>
+
+    <!-- Configuration Commands -->
+    <div class="card">
+        <h2>⚙️ Configuration Commands (Making Changes)</h2>
+        <p><strong>Changes are active immediately</strong> but not saved unless you write them.</p>
+        
+        <h3>Basic Device Configuration</h3>
+        <div class="cli-box">
+            <span class="cli-prompt">Router&gt;</span> <span class="cli-output">enable</span><br>
+            <span class="cli-prompt">Router#</span> <span class="cli-output">configure terminal</span><br>
+            <span class="cli-prompt">Router(config)#</span> <span class="cli-output">hostname BRANCH-ROUTER</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">banner motd ^C Unauthorized access prohibited ^C</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">enable secret Cisco123</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">line console 0</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config-line)#</span> <span class="cli-output">password admin123</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config-line)#</span> <span class="cli-output">login</span>
+        </div>
+        
+        <h3>Interface Configuration (IP Address)</h3>
+        <div class="cli-box">
+            <span class="cli-prompt">Router(config)#</span> <span class="cli-output">interface gigabitEthernet 0/0</span><br>
+            <span class="cli-prompt">Router(config-if)#</span> <span class="cli-output">ip address 192.168.1.1 255.255.255.0</span><br>
+            <span class="cli-prompt">Router(config-if)#</span> <span class="cli-output">no shutdown</span><br>
+            <span class="cli-prompt">Router(config-if)#</span> <span class="cli-output">description Link to Main Office</span>
+        </div>
+        
+        <h3>VLAN Configuration (Switch)</h3>
+        <div class="cli-box">
+            <span class="cli-prompt">Switch(config)#</span> <span class="cli-output">vlan 10</span><br>
+            <span class="cli-prompt">Switch(config-vlan)#</span> <span class="cli-output">name Engineering</span><br>
+            <span class="cli-prompt">Switch(config-vlan)#</span> <span class="cli-output">exit</span><br>
+            <span class="cli-prompt">Switch(config)#</span> <span class="cli-output">interface range gigabitEthernet 0/1-24</span><br>
+            <span class="cli-prompt">Switch(config-if-range)#</span> <span class="cli-output">switchport mode access</span><br>
+            <span class="cli-prompt">Switch(config-if-range)#</span> <span class="cli-output">switchport access vlan 10</span>
+        </div>
+        
+        <h3>Static Route Configuration</h3>
+        <div class="cli-box">
+            <span class="cli-prompt">Router(config)#</span> <span class="cli-output">ip route 192.168.2.0 255.255.255.0 10.0.0.2</span><br>
+            <span class="cli-prompt">Router(config)#</span> <span class="cli-output">ip route 0.0.0.0 0.0.0.0 10.0.0.1</span>  <span class="cli-output" style="color: #8b949e;"># Default route</span>
+        </div>
+        
+        <h3>Saving Configuration</h3>
+        <div class="cli-box">
+            <span class="cli-prompt">Router#</span> <span class="cli-output">copy running-config startup-config</span><br>
+            Or:<br>
+            <span class="cli-prompt">Router#</span> <span class="cli-output">write memory</span>
+        </div>
+    </div>
+
+    <!-- Troubleshooting Commands -->
+    <div class="card">
+        <h2>🔧 Troubleshooting Commands (Testing Connectivity)</h2>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>Purpose</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ping [ip]</code></td>
+                        <td>Test Layer 3 connectivity</td>
+                        <td><code>ping 192.168.1.2</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>traceroute [ip]</code></td>
+                        <td>Show each hop to destination</td>
+                        <td><code>traceroute 8.8.8.8</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>telnet / ssh</code></td>
+                        <td>Remote access to another device</td>
+                        <td><code>ssh -l admin 10.0.0.2</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>show log</code></td>
+                        <td>View system messages</td>
+                        <td>Interface up/down, errors</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Real-World Scenarios -->
+    <div class="card">
+        <h2>🌐 Real-World Scenarios (What Would You Do?)</h2>
+        
+        <details>
+            <summary><strong>Scenario 1:</strong> New switch, need to configure VLANs for HR and IT.</summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>enable → conf t → vlan 20 → name HR → exit → vlan 30 → name IT → exit → interface range gig0/1-12 → switchport mode access → switchport access vlan 20 → exit → interface range gig0/13-24 → switchport mode access → switchport access vlan 30</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Scenario 2:</strong> Router interface down — how to check and fix?</summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Troubleshooting steps:</strong><br>
+                1. <code>show ip interface brief</code> (find down interface)<br>
+                2. <code>show interface gig0/0</code> (check for errors)<br>
+                3. <code>interface gig0/0</code> → <code>no shutdown</code> (turn on)<br>
+                4. <code>end → copy run start</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Scenario 3:</strong> Can't remember if you saved config before reboot.</summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>show running-config vs show startup-config</code> — compare timestamps or use <code>show version</code> (last reload reason).
+            </div>
+        </details>
+    </div>
+
+    <!-- Security Commands -->
+    <div class="card">
+        <h2>🛡️ Security Commands (Protecting the Device)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>enable secret [password]</code></td><td>Encrypted enable password</td></tr>
+                    <tr><td><code>line vty 0 4</code> → <code>password [pass]</code> → <code>login</code></td><td>Telnet/SSH password</td></tr>
+                    <tr><td><code>access-list 100 deny ip 10.0.0.0 0.0.255.255 any</code></td><td>Block traffic from 10.0.0.0/16</td></tr>
+                    <tr><td><code>service password-encryption</code></td><td>Encrypts all passwords in config</td></tr>
+                    <tr><td><code>logging buffer 4096</code></td><td>Enable local logging</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (Cisco-Style)</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command moves from User EXEC to Privileged EXEC?</summary>
+            <p><strong>Answer:</strong> <code>enable</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> You're in interface config mode. How do you return to Privileged EXEC immediately?</summary>
+            <p><strong>Answer:</strong> <code>end</code> or <code>Ctrl+Z</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> Which command shows all interfaces with IP addresses and status?</summary>
+            <p><strong>Answer:</strong> <code>show ip interface brief</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> You configured a new VLAN but it's not working after reboot. Why?</summary>
+            <p><strong>Answer:</strong> You need to save with <code>copy running-config startup-config</code> or <code>write memory</code>.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What's the difference between <code>show running-config</code> and <code>show startup-config</code>?</summary>
+            <p><strong>Answer:</strong> Running = current active config (RAM). Startup = saved config (NVRAM) loaded on reboot.</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Build a Small Office Network</h2>
+        <p><strong>Goal:</strong> Configure a router and switch using Cisco CLI commands.</p>
+        
+        <h3>📡 Step 1 – Access CLI (Packet Tracer or Real Device)</h3>
+        <p>If you don't have equipment, download <strong>Cisco Packet Tracer</strong> (free for Cisco NetAcad members).</p>
+        
+        <h3>🔢 Step 2 – Basic Router Setup</h3>
+        <div class="cli-box">
+            Router> enable<br>
+            Router# configure terminal<br>
+            Router(config)# hostname OFFICE-ROUTER<br>
+            OFFICE-ROUTER(config)# enable secret class123<br>
+            OFFICE-ROUTER(config)# line console 0<br>
+            OFFICE-ROUTER(config-line)# password cisco123<br>
+            OFFICE-ROUTER(config-line)# login<br>
+            OFFICE-ROUTER(config-line)# exit
+        </div>
+        
+        <h3>🖥️ Step 3 – Configure Interface</h3>
+        <div class="cli-box">
+            OFFICE-ROUTER(config)# interface gig0/0<br>
+            OFFICE-ROUTER(config-if)# ip address 192.168.1.1 255.255.255.0<br>
+            OFFICE-ROUTER(config-if)# no shutdown<br>
+            OFFICE-ROUTER(config-if)# description LAN Interface<br>
+            OFFICE-ROUTER(config-if)# exit
+        </div>
+        
+        <h3>🌍 Step 4 – Add Default Route</h3>
+        <div class="cli-box">
+            OFFICE-ROUTER(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.1
+        </div>
+        
+        <h3>📝 Step 5 – Save Configuration</h3>
+        <div class="cli-box">
+            OFFICE-ROUTER# copy running-config startup-config
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> After saving, reboot the router (<code>reload</code>) and verify your config is still there with <code>show running-config</code>.
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Cisco CLI Mastery)</h3>
+            <ul>
+                <li>✅ <strong>CLI modes ladder:</strong> User EXEC → Privileged EXEC → Global Config → Interface Config</li>
+                <li>✅ <strong>Enable vs Enable Secret:</strong> <code>enable secret</code> is encrypted, always use it</li>
+                <li>✅ <strong>Show commands never change config</strong> — safe for troubleshooting</li>
+                <li>✅ <strong>Always save:</strong> <code>copy running-config startup-config</code> or config lost on reboot</li>
+                <li>✅ <strong>Basic pattern:</strong> <code>conf t → changes → exit → write memory</code></li>
+                <li>✅ <strong>Context-sensitive help:</strong> <code>?</code> shows available commands, <code>show ip ?</code> narrows down</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ios-nx-os-software/ios-software-releases-121-mainline/17361-ios-cli.html" target="_blank">Cisco: CLI Basics</a></div>
+        <div class="external-link">📘 <a href="https://www.netacad.com/" target="_blank">Cisco NetAcad (Free courses + Packet Tracer)</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="subnetting.html" class="nav-btn">◀ Previous: Subnetting</a>
+        <a href="linux-commands.html" class="nav-btn">Next: Linux Commands ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Cisco Commands | Complete CLI guide with labs, scenarios, and practice | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
