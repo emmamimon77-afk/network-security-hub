@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subnetting - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .binary-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.25rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .binary-bit {
+            background: #eef2ff;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .practice-box {
+            background: #fef9e3;
+            border: 1px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        .calculator {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+        .calculator input, .calculator select {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            margin: 0.5rem 0;
+            width: 100%;
+            max-width: 200px;
+        }
+        .calculator button {
+            background: #2c7da0;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .result-box {
+            background: #0f3b5c;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        @media (max-width: 700px) {
+            .binary-grid { gap: 0.1rem; }
+            .binary-bit { padding: 0.25rem; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>✂️ Subnetting — Complete Guide</h1>
+        <p><strong>Subnetting</strong> = Dividing a large network into smaller, manageable subnetworks. Essential for IP address efficiency, security, and routing.</p>
+    </div>
+
+    <!-- Why Subnetting Matters -->
+    <div class="card">
+        <h2>🎯 Why Subnetting Matters</h2>
+        <ul>
+            <li>✅ <strong>Conserves IP addresses</strong> — Don't waste scarce IPv4 addresses</li>
+            <li>✅ <strong>Improves security</strong> — Isolate departments (HR, Finance, Guest)</li>
+            <li>✅ <strong>Reduces broadcast traffic</strong> — Less noise on each subnet</li>
+            <li>✅ <strong>Simplifies troubleshooting</strong> — Smaller failure domains</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> A company with 200 devices doesn't need a /16 (65,534 addresses). Subnetting gives them a /24 (254 addresses) — efficient and secure.
+        </div>
+    </div>
+
+    <!-- Binary Refresher -->
+    <div class="card">
+        <h2>🔢 Binary & Decimal (The Foundation)</h2>
+        <p>IP addresses and subnet masks are binary at heart. Each octet = 8 bits.</p>
+        
+        <h3>Binary Place Values (1 octet = 8 bits)</h3>
+        <div class="binary-grid">
+            <div class="binary-bit">128</div>
+            <div class="binary-bit">64</div>
+            <div class="binary-bit">32</div>
+            <div class="binary-bit">16</div>
+            <div class="binary-bit">8</div>
+            <div class="binary-bit">4</div>
+            <div class="binary-bit">2</div>
+            <div class="binary-bit">1</div>
+        </div>
+        
+        <p><strong>Example:</strong> 192 = 128 + 64 = <code>11000000</code> (first two bits on, rest off)</p>
+        <p><strong>Example:</strong> 168 = 128 + 32 + 8 = <code>10101000</code></p>
+        
+        <details>
+            <summary>📋 Practice: Convert these to binary (click for answers)</summary>
+            <ul>
+                <li>255 = <span style="color: #2c8c5e;">11111111</span></li>
+                <li>10 = <span style="color: #2c8c5e;">00001010</span></li>
+                <li>224 = <span style="color: #2c8c5e;">11100000</span></li>
+            </ul>
+        </details>
+    </div>
+
+    <!-- CIDR Notation -->
+    <div class="card">
+        <h2>📝 CIDR Notation (Classless Inter-Domain Routing)</h2>
+        <p><strong>CIDR</strong> = <code>IP address / prefix-length</code> (number of network bits)</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>CIDR</th><th>Subnet Mask</th><th>Total IPs</th><th>Usable IPs</th><th>Common Use</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>/8</td><td>255.0.0.0</td><td>16,777,216</td><td>16,777,214</td><td>HUGE networks (rare)</td></tr>
+                    <tr><td>/16</td><td>255.255.0.0</td><td>65,536</td><td>65,534</td><td>Large organizations</td></tr>
+                    <tr><td>/24</td><td>255.255.255.0</td><td>256</td><td>254</td><td>Standard LAN</td></tr>
+                    <tr><td>/25</td><td>255.255.255.128</td><td>128</td><td>126</td><td>Small department</td></tr>
+                    <tr><td>/26</td><td>255.255.255.192</td><td>64</td><td>62</td><td>Smaller group</td></tr>
+                    <tr><td>/27</td><td>255.255.255.224</td><td>32</td><td>30</td><td>Very small team</td></tr>
+                    <tr><td>/28</td><td>255.255.255.240</td><td>16</td><td>14</td><td>Point-to-point links</td></tr>
+                    <tr><td>/30</td><td>255.255.255.252</td><td>4</td><td>2</td><td>Router-to-router links</td></tr>
+                    <tr><td>/32</td><td>255.255.255.255</td><td>1</td><td>1</td><td>Single host (loopback)</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="note-box">
+            📌 <strong>Formula:</strong> Total IPs = 2^(32 - prefix). Usable = Total - 2 (network + broadcast).
+        </div>
+    </div>
+
+    <!-- Finding Network, Broadcast, First/Last Host -->
+    <div class="card">
+        <h2>🎯 Finding Network Address, Broadcast, First & Last Host</h2>
+        
+        <h3>Example: 192.168.1.45 /24</h3>
+        <ul>
+            <li><strong>Network address:</strong> 192.168.1.0 (all host bits 0)</li>
+            <li><strong>First usable host:</strong> 192.168.1.1</li>
+            <li><strong>Last usable host:</strong> 192.168.1.254</li>
+            <li><strong>Broadcast address:</strong> 192.168.1.255 (all host bits 1)</li>
+        </ul>
+        
+        <h3>Example: 10.0.0.100 /26 (mask 255.255.255.192)</h3>
+        <ul>
+            <li>Blocks of 64 addresses (0-63, 64-127, 128-191, 192-255)</li>
+            <li><strong>Network:</strong> 10.0.0.64</li>
+            <li><strong>First host:</strong> 10.0.0.65</li>
+            <li><strong>Last host:</strong> 10.0.0.126</li>
+            <li><strong>Broadcast:</strong> 10.0.0.127</li>
+        </ul>
+        
+        <div class="tip-box">
+            💡 <strong>Quick trick:</strong> Find the block size = 256 - octet value. For /26 (255.255.255.192), block = 256 - 192 = 64.
+        </div>
+    </div>
+
+    <!-- VLSM - Real World -->
+    <div class="card">
+        <h2>🏢 VLSM (Variable Length Subnet Mask) — Real Company Example</h2>
+        <p>You have <strong>192.168.1.0/24</strong> (256 addresses). Assign subnets to:</p>
+        <ul>
+            <li>📍 HR: 50 devices → needs /26 (64 addresses)</li>
+            <li>📍 IT: 30 devices → needs /27 (32 addresses)</li>
+            <li>📍 Marketing: 20 devices → needs /27 (32 addresses)</li>
+            <li>📍 Finance: 10 devices → needs /28 (16 addresses)</li>
+            <li>📍 Guest Wi-Fi: 50 devices → needs /26 (64 addresses)</li>
+        </ul>
+        
+        <h3>Proposed Allocation:</h3>
+        <table>
+            <thead><tr><th>Subnet</th><th>Network</th><th>CIDR</th><th>Usable</th></tr></thead>
+            <tbody>
+                <tr><td>HR</td><td>192.168.1.0</td><td>/26</td><td>192.168.1.1 - 192.168.1.62</td></tr>
+                <tr><td>Guest</td><td>192.168.1.64</td><td>/26</td><td>192.168.1.65 - 192.168.1.126</td></tr>
+                <tr><td>IT</td><td>192.168.1.128</td><td>/27</td><td>192.168.1.129 - 192.168.1.158</td></tr>
+                <tr><td>Marketing</td><td>192.168.1.160</td><td>/27</td><td>192.168.1.161 - 192.168.1.190</td></tr>
+                <tr><td>Finance</td><td>192.168.1.192</td><td>/28</td><td>192.168.1.193 - 192.168.1.206</td></tr>
+            </tbody>
+        </table>
+        <div class="warning-box">
+            ⚠️ VLSM requires careful planning — always start with the largest subnet first!
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (Test Yourself)</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the subnet mask for /20?</summary>
+            <p><strong>Answer:</strong> 255.255.240.0 (16 + 4 = 20 bits, so 11111111.11111111.11110000.00000000)</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> 192.168.5.35/28 — What is the network address?</summary>
+            <p><strong>Answer:</strong> 192.168.5.32 (block size 16: 0,16,32,48 → 32-47 range)</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> How many usable IPs in a /29?</summary>
+            <p><strong>Answer:</strong> 2^(32-29)=8 total, minus 2 = 6 usable addresses.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What CIDR gives subnet mask 255.255.254.0?</summary>
+            <p><strong>Answer:</strong> /23 (255.255.254.0 = 23 network bits)</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> A /26 subnet — what are the valid host ranges in 10.0.0.0/26?</summary>
+            <p><strong>Answer:</strong> 10.0.0.1 - 10.0.0.62, 10.0.0.65 - 10.0.0.126, 10.0.0.129 - 10.0.0.190, 10.0.0.193 - 10.0.0.254</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Subnetting with ipcalc & Manual Calculation</h2>
+        <p><strong>Goal:</strong> Practice subnetting using both manual math and verification tools.</p>
+        
+        <h3>📡 Step 1 – Install ipcalc (Linux)</h3>
+        <pre><code>sudo apt install ipcalc   # Debian/Ubuntu
+sudo yum install ipcalc   # RHEL/CentOS</code></pre>
+        
+        <h3>🔢 Step 2 – Calculate Manually</h3>
+        <p>Given: <code>172.25.0.0/20</code></p>
+        <ul>
+            <li>What's the subnet mask?</li>
+            <li>How many total addresses?</li>
+            <li>How many subnets of /24 can you create?</li>
+        </ul>
+        
+        <h3>🖥️ Step 3 – Verify with ipcalc</h3>
+        <pre><code>ipcalc 172.25.0.0/20</code></pre>
+        
+        <h3>📝 Step 4 – Design a Real Subnet Plan</h3>
+        <p>You have <code>10.10.0.0/16</code>. Create subnets for:</p>
+        <ul>
+            <li>Engineering: 500 devices</li>
+            <li>Sales: 200 devices</li>
+            <li>Support: 100 devices</li>
+            <li>Management: 25 devices</li>
+        </ul>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Which subnet mask fits each department? (Hint: /23 = 510 usable, /24 = 254, /25 = 126, /27 = 30)
+        </div>
+    </div>
+
+    <!-- Subnet Calculator (Interactive - At the End) -->
+    <div class="card">
+        <h2>🧮 Subnet Calculator (Verify Your Work)</h2>
+        <p><em>Use this tool <strong>after</strong> you calculate manually — to check, not cheat!</em></p>
+        
+        <div class="calculator">
+            <label>IP Address:</label>
+            <input type="text" id="ipAddress" placeholder="192.168.1.0" value="192.168.1.0">
+            <br>
+            <label>CIDR (prefix):</label>
+            <select id="cidrSelect">
+                <option value="8">/8 (255.0.0.0)</option>
+                <option value="16">/16 (255.255.0.0)</option>
+                <option value="20">/20 (255.255.240.0)</option>
+                <option value="24" selected>/24 (255.255.255.0)</option>
+                <option value="25">/25 (255.255.255.128)</option>
+                <option value="26">/26 (255.255.255.192)</option>
+                <option value="27">/27 (255.255.255.224)</option>
+                <option value="28">/28 (255.255.255.240)</option>
+                <option value="29">/29 (255.255.255.248)</option>
+                <option value="30">/30 (255.255.255.252)</option>
+            </select>
+            <br>
+            <button onclick="calculateSubnet()">Calculate</button>
+            
+            <div id="calcResult" class="result-box" style="margin-top: 1rem;">
+                Results will appear here
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Subnetting Essentials)</h3>
+            <ul>
+                <li>✅ <strong>Subnetting = Borrow bits from host portion</strong> to create smaller networks</li>
+                <li>✅ <strong>Formula:</strong> Total IPs = 2^(32 - prefix), Usable = Total - 2</li>
+                <li>✅ <strong>Block size = 256 - last non-zero octet in mask</strong> (for /24 to /32)</li>
+                <li>✅ <strong>VLSM = Different subnets per department</strong> (start with largest)</li>
+                <li>✅ <strong>Practice order:</strong> Binary → CIDR → Block size → Network/Broadcast → VLSM</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More About Subnetting</h2>
+        <div class="external-link">📖 <a href="https://en.wikipedia.org/wiki/Subnetwork" target="_blank">Wikipedia: Subnetwork</a></div>
+        <div class="external-link">📘 <a href="https://www.cloudflare.com/learning/network-layer/what-is-subnetting/" target="_blank">Cloudflare: Subnetting Explained</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/support/docs/ip/routing-information-protocol-rip/13788-3.html" target="_blank">Cisco: Subnetting Tutorial</a></div>
+        <div class="external-link">🔬 <a href="https://subnetcalculator.info/" target="_blank">Online Subnet Calculator (for checking)</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="tcp-ip-model.html" class="nav-btn">◀ Previous: TCP/IP Model</a>
+        <a href="cisco-commands.html" class="nav-btn">Next: Cisco Commands ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Subnetting | Complete lesson with binary, VLSM, lab, and calculator | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+<!-- Calculator JavaScript -->
+<script>
+function calculateSubnet() {
+    const ip = document.getElementById('ipAddress').value;
+    const cidr = parseInt(document.getElementById('cidrSelect').value);
+    
+    // Parse IP
+    const ipParts = ip.split('.').map(Number);
+    if (ipParts.length !== 4 || ipParts.some(isNaN)) {
+        document.getElementById('calcResult').innerHTML = '❌ Invalid IP address';
+        return;
+    }
+    
+    // Convert IP to 32-bit number
+    let ipNum = (ipParts[0] << 24) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3];
+    
+    // Calculate subnet mask (32-bit)
+    let maskNum = 0xFFFFFFFF << (32 - cidr);
+    let networkNum = ipNum & maskNum;
+    let broadcastNum = networkNum | ~maskNum;
+    
+    // Convert back to dotted decimal
+    function toIP(num) {
+        return `${(num >>> 24) & 0xFF}.${(num >>> 16) & 0xFF}.${(num >>> 8) & 0xFF}.${num & 0xFF}`;
+    }
+    
+    const networkAddr = toIP(networkNum);
+    const broadcastAddr = toIP(broadcastNum);
+    const firstHost = toIP(networkNum + 1);
+    const lastHost = toIP(broadcastNum - 1);
+    const totalIPs = Math.pow(2, 32 - cidr);
+    const usableIPs = totalIPs - 2;
+    
+    // Subnet mask dotted
+    const maskOctets = [
+        (maskNum >>> 24) & 0xFF,
+        (maskNum >>> 16) & 0xFF,
+        (maskNum >>> 8) & 0xFF,
+        maskNum & 0xFF
+    ];
+    const maskDotted = maskOctets.join('.');
+    
+    // Build result HTML
+    document.getElementById('calcResult').innerHTML = `
+        <strong>📡 Network:</strong> ${networkAddr}/${cidr}<br>
+        <strong>🔢 Subnet Mask:</strong> ${maskDotted}<br>
+        <strong>🎯 First Usable Host:</strong> ${firstHost}<br>
+        <strong>🏁 Last Usable Host:</strong> ${lastHost}<br>
+        <strong>📢 Broadcast:</strong> ${broadcastAddr}<br>
+        <strong>📊 Total IPs:</strong> ${totalIPs}<br>
+        <strong>✅ Usable IPs:</strong> ${usableIPs}<br>
+        <hr style="border-color: #2d3a46;">
+        <strong>💡 Block size:</strong> ${256 - maskOctets[3]} (last octet)
+    `;
+}
+</script>
+
+</body>
+</html>
