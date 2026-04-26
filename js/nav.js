@@ -18,10 +18,10 @@ function loadNavigation() {
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🔀 Routing & Switching ▾</a>
             <div class="nav-dropdown-content">
+                <a href="../routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
                 <a href="#">🗺️ Static Routing (Coming Soon)</a>
                 <a href="#">🔄 OSPF (Coming Soon)</a>
                 <a href="#">⚡ EIGRP (Coming Soon)</a>
-                <a href="#">🏷️ VLAN Config (Coming Soon)</a>
             </div>
         </div>
         

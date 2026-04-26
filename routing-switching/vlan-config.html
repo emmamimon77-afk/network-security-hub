@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLAN Configuration - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .vlan-table td, .vlan-table th {
+            padding: 0.5rem;
+        }
+        .security-badge {
+            background: #dc2626;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🏷️ VLAN Configuration — Complete Guide</h1>
+        <p><strong>Virtual Local Area Networks (VLANs)</strong> = Divide one physical switch into multiple isolated broadcast domains. Essential for security, performance, and network design.</p>
+    </div>
+
+    <!-- Why VLANs Matter -->
+    <div class="card">
+        <h2>🎯 Why VLANs Matter</h2>
+        <ul>
+            <li>✅ <strong>Security</strong> — Isolate sensitive departments (HR, Finance) from guest Wi-Fi</li>
+            <li>✅ <strong>Performance</strong> — Reduce broadcast traffic (ARP, DHCP)</li>
+            <li>✅ <strong>Cost savings</strong> — One switch does the work of many</li>
+            <li>✅ <strong>Flexibility</strong> — Move devices without re-cabling</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> A university uses VLANs to separate Students (VLAN 10), Faculty (VLAN 20), and IT (VLAN 99). No student can reach faculty servers.
+        </div>
+    </div>
+
+    <!-- VLAN Types -->
+    <div class="card">
+        <h2>📊 VLAN Types (Standard Ranges)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>VLAN Range</th><th>Type</th><th>Usage</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Default</td><td>All ports start here. <span class="security-badge">Security Risk</span> — avoid using</td></tr>
+                    <tr><td>2-1001</td><td>Normal</td><td>Standard user VLANs (can be created/deleted)</td></tr>
+                    <tr><td>1002-1005</td><td>Reserved</td><td>Token Ring / FDDI — not used in Ethernet</td></tr>
+                    <tr><td>1006-4094</td><td>Extended</td><td>Need VTP Transparent mode to use</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>Special VLANs to Know</h3>
+        <ul>
+            <li><strong>Native VLAN (default 1):</strong> Untagged traffic on trunk ports — <span class="security-badge">Change this!</span></li>
+            <li><strong>Management VLAN:</strong> For SSH/Telnet access to switch</li>
+            <li><strong>Voice VLAN:</strong> QoS priority for IP phones</li>
+            <li><strong>Blackhole VLAN:</strong> Unused ports assigned here for security</li>
+        </ul>
+    </div>
+
+    <!-- VLAN Configuration Commands -->
+    <div class="card">
+        <h2>⚙️ VLAN Configuration (Cisco CLI)</h2>
+        
+        <h3>Creating a VLAN</h3>
+        <div class="cli-box">
+            Switch&gt; enable<br>
+            Switch# configure terminal<br>
+            Switch(config)# vlan 10<br>
+            Switch(config-vlan)# name Engineering<br>
+            Switch(config-vlan)# vlan 20<br>
+            Switch(config-vlan)# name Marketing<br>
+            Switch(config-vlan)# end
+        </div>
+        
+        <h3>Assigning Ports to VLAN (Access Mode)</h3>
+        <div class="cli-box">
+            Switch(config)# interface range gigabitEthernet 0/1-12<br>
+            Switch(config-if-range)# switchport mode access<br>
+            Switch(config-if-range)# switchport access vlan 10<br>
+            Switch(config-if-range)# no shutdown<br>
+            Switch(config-if-range)# exit<br><br>
+            Switch(config)# interface range gigabitEthernet 0/13-24<br>
+            Switch(config-if-range)# switchport mode access<br>
+            Switch(config-if-range)# switchport access vlan 20
+        </div>
+        
+        <h3>Verifying VLAN Configuration</h3>
+        <div class="cli-box">
+            Switch# show vlan brief<br>
+            Switch# show interfaces status<br>
+            Switch# show interfaces trunk
+        </div>
+        
+        <h3>Trunk Configuration (Connect Switches)</h3>
+        <div class="cli-box">
+            Switch1(config)# interface gigabitEthernet 0/24<br>
+            Switch1(config-if)# switchport mode trunk<br>
+            Switch1(config-if)# switchport trunk native vlan 999  <span class="cli-output" style="color: #8b949e;"># Change native VLAN for security</span><br>
+            Switch1(config-if)# switchport trunk allowed vlan 10,20,30<br>
+            Switch1(config-if)# no shutdown
+        </div>
+    </div>
+
+    <!-- Trunking Protocols -->
+    <div class="card">
+        <h2>🔌 Trunking Protocols (802.1Q vs ISL)</h2>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>802.1Q (Standard)</th><th>ISL (Cisco proprietary)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Encapsulation</td><td>Inserts 4-byte tag</td><td>Adds 30-byte header</td></tr>
+                    <tr><td>Native VLAN</td><td>✅ Yes</td><td>❌ No</td></tr>
+                    <tr><td>Interoperability</td><td>Multi-vendor</td><td>Cisco only</td></tr>
+                    <tr><td>Overhead</td><td>Low</td><td>Higher</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Modern networks use 802.1Q exclusively.</strong> ISL is obsolete.
+        </div>
+    </div>
+
+    <!-- Inter-VLAN Routing -->
+    <div class="card">
+        <h2>🌐 Inter-VLAN Routing (Making VLANs Talk)</h2>
+        <p>VLANs are isolated by default. To communicate, you need a router.</p>
+        
+        <h3>Option 1: Router-on-a-Stick (Single Router Interface)</h3>
+        <div class="cli-box">
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# no shutdown<br>
+            Router(config)# interface gigabitEthernet 0/0.10<br>
+            Router(config-subif)# encapsulation dot1Q 10<br>
+            Router(config-subif)# ip address 192.168.10.1 255.255.255.0<br>
+            Router(config-subif)# exit<br>
+            Router(config)# interface gigabitEthernet 0/0.20<br>
+            Router(config-subif)# encapsulation dot1Q 20<br>
+            Router(config-subif)# ip address 192.168.20.1 255.255.255.0
+        </div>
+        
+        <h3>Option 2: Layer 3 Switch (SVI - Switch Virtual Interface)</h3>
+        <div class="cli-box">
+            Switch(config)# ip routing<br>
+            Switch(config)# interface vlan 10<br>
+            Switch(config-if)# ip address 192.168.10.1 255.255.255.0<br>
+            Switch(config-if)# no shutdown<br>
+            Switch(config)# interface vlan 20<br>
+            Switch(config-if)# ip address 192.168.20.1 255.255.255.0<br>
+            Switch(config-if)# no shutdown
+        </div>
+    </div>
+
+    <!-- VLAN Security -->
+    <div class="card">
+        <h2>🛡️ VLAN Security (Critical!)</h2>
+        
+        <h3>🔴 Threat 1: VLAN Hopping</h3>
+        <p>Attacker tricks switch into sending packets to another VLAN.</p>
+        <ul>
+            <li><strong>Switch Spoofing:</strong> Attacker pretends to be a switch using DTP</li>
+            <li><strong>Double Tagging:</strong> Attacker adds two VLAN tags</li>
+        </ul>
+        <div class="warning-box">
+            <strong>Defenses:</strong>
+            <ul>
+                <li>✅ Disable DTP: <code>switchport nonegotiate</code> on all access ports</li>
+                <li>✅ Set unused ports to <code>switchport mode access</code> + assign to blackhole VLAN</li>
+                <li>✅ Change native VLAN to unused number (e.g., 999)</li>
+                <li>✅ <code>switchport trunk native vlan 999</code></li>
+            </ul>
+        </div>
+        
+        <h3>🔴 Threat 2: ARP Spoofing / MAC Flooding</h3>
+        <div class="warning-box">
+            <strong>Defenses:</strong>
+            <ul>
+                <li>✅ <strong>DAI (Dynamic ARP Inspection):</strong> <code>ip arp inspection vlan 10,20</code></li>
+                <li>✅ <strong>Port Security:</strong> <code>switchport port-security maximum 2</code></li>
+                <li>✅ <strong>DHCP Snooping:</strong> <code>ip dhcp snooping vlan 10</code></li>
+            </ul>
+        </div>
+        
+        <h3>🔴 Threat 3: Native VLAN Mismatch</h3>
+        <div class="warning-box">
+            <strong>Defense:</strong> Explicitly set same native VLAN on both ends:<br>
+            <code>switchport trunk native vlan 999</code>
+        </div>
+        
+        <h3>🟢 Security Best Practices Checklist</h3>
+        <ul>
+            <li>✅ Never use VLAN 1 for user traffic</li>
+            <li>✅ Change native VLAN from 1 to unused number</li>
+            <li>✅ Disable DTP on all access ports</li>
+            <li>✅ Shut down unused ports and assign to blackhole VLAN</li>
+            <li>✅ Enable port security with MAC limits</li>
+            <li>✅ Use DHCP snooping + DAI on user VLANs</li>
+            <li>✅ Encrypt management traffic (SSH not Telnet)</li>
+        </ul>
+    </div>
+
+    <!-- VTP (VLAN Trunking Protocol) -->
+    <div class="card">
+        <h2>📡 VTP (VLAN Trunking Protocol) — Cisco Proprietary</h2>
+        <p>VTP synchronizes VLAN databases across switches.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Mode</th><th>Can create VLANs?</th><th>Can delete VLANs?</th><th>Learns from others?</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Server</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td>Client</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>Transparent</td><td>✅</td><td>✅</td><td>❌</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>VTP Warning:</strong> A server with higher revision number can wipe out entire VLAN database! Use Transparent mode for security.
+        </div>
+        
+        <div class="cli-box">
+            Switch(config)# vtp mode transparent<br>
+            Switch(config)# vtp domain MyCompany<br>
+            Switch(config)# vtp password SecurePass123
+        </div>
+    </div>
+
+    <!-- Private VLANs -->
+    <div class="card">
+        <h2>🔒 Private VLANs (PVLANs) — Ultra Isolation</h2>
+        <p>Prevents devices in same VLAN from talking to each other. Used for DMZ, guest Wi-Fi, multi-tenant environments.</p>
+        
+        <div class="cli-box">
+            Switch(config)# vlan 100<br>
+            Switch(config-vlan)# private-vlan primary<br>
+            Switch(config-vlan)# vlan 101<br>
+            Switch(config-vlan)# private-vlan isolated<br>
+            Switch(config)# interface gigabitEthernet 0/1<br>
+            Switch(config-if)# switchport mode private-vlan host<br>
+            Switch(config-if)# switchport private-vlan host-association 100 101
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Use case:</strong> Hotel guest network — guests cannot see each other's devices, only the gateway.
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command creates VLAN 30 named "Sales"?</summary>
+            <p><strong>Answer:</strong> <code>vlan 30 → name Sales</code> in global config mode.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Two switches connected via trunk. What must match on both ends?</summary>
+            <p><strong>Answer:</strong> Native VLAN, allowed VLAN list, trunk encapsulation (802.1Q).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> How do you prevent VLAN hopping attacks?</summary>
+            <p><strong>Answer:</strong> Disable DTP, change native VLAN, use allowed VLAN list on trunks, shut unused ports.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What's the difference between access and trunk ports?</summary>
+            <p><strong>Answer:</strong> Access = single VLAN (end devices). Trunk = multiple VLANs (switch-to-switch).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Why is VLAN 1 dangerous?</summary>
+            <p><strong>Answer:</strong> It's the default native VLAN, carries untagged traffic, and is often used for management — creating a security risk.</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Secure VLAN Design for a Small Office</h2>
+        
+        <h3>Scenario:</h3>
+        <p>You have a 24-port switch. Design VLANs for:</p>
+        <ul>
+            <li>Management (IT admins) — 5 devices</li>
+            <li>Engineering — 8 devices (with server)</li>
+            <li>HR — 3 devices (sensitive data)</li>
+            <li>Guest Wi-Fi — 10 devices (isolated)</li>
+        </ul>
+        
+        <h3>Step 1: Plan VLAN IDs</h3>
+        <ul>
+            <li>VLAN 99: Management</li>
+            <li>VLAN 10: Engineering</li>
+            <li>VLAN 20: HR</li>
+            <li>VLAN 200: Guest (private VLAN)</li>
+        </ul>
+        
+        <h3>Step 2: Configure on Switch</h3>
+        <div class="cli-box">
+            enable<br>
+            conf t<br>
+            vlan 10<br>
+            name Engineering<br>
+            vlan 20<br>
+            name HR<br>
+            vlan 99<br>
+            name Management<br>
+            end
+        </div>
+        
+        <h3>Step 3: Assign Ports with Security</h3>
+        <div class="cli-box">
+            # Access ports with port security<br>
+            interface range gig0/1-8<br>
+            switchport mode access<br>
+            switchport access vlan 10<br>
+            switchport port-security maximum 2<br>
+            switchport port-security violation shutdown<br>
+            !
+            interface range gig0/9-11<br>
+            switchport mode access<br>
+            switchport access vlan 20<br>
+            switchport port-security maximum 1<br>
+            !
+            interface gig0/24<br>
+            switchport mode trunk<br>
+            switchport trunk native vlan 999<br>
+            switchport trunk allowed vlan 10,20,99
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Configure SSH on the management VLAN so only IT can access the switch remotely.
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (VLAN Mastery)</h3>
+            <ul>
+                <li>✅ <strong>VLANs = Security + Performance</strong> — Isolate broadcast domains</li>
+                <li>✅ <strong>802.1Q is the standard</strong> — Avoid ISL (obsolete)</li>
+                <li>✅ <strong>Never use VLAN 1 for user traffic</strong> — Change native VLAN!</li>
+                <li>✅ <strong>Inter-VLAN routing</strong> needs router (ROAS) or L3 switch (SVI)</li>
+                <li>✅ <strong>VTP Transparent</strong> is safer than Server/Client</li>
+                <li>✅ <strong>Private VLANs</strong> prevent host-to-host communication</li>
+                <li>✅ <strong>Security checklist:</strong> disable DTP, port security, DHCP snooping, DAI</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/vlans/109371-vlan-config.html" target="_blank">Cisco: VLAN Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/16-9/configuration_guide/sec/b_169_sec_9300_cg.pdf" target="_blank">Cisco: VLAN Security Best Practices (PDF)</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="cisco-commands.html" class="nav-btn">◀ Previous: Cisco Commands</a>
+        <a href="static-routing.html" class="nav-btn">Next: Static Routing ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — VLAN Configuration | Complete lesson with security, trunking, PVLANs, and lab | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
