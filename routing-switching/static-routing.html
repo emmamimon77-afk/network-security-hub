@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Routing - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .routing-diagram {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .route-calc {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .metric-box {
+            background: #fef9e3;
+            border-left: 4px solid #f59e0b;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🗺️ Static Routing — Complete Guide</h1>
+        <p><strong>Static Routing</strong> = Manually configured routes that tell a router exactly where to send traffic. No dynamic discovery, no protocols — just explicit instructions.</p>
+    </div>
+
+    <!-- Why Static Routing Matters -->
+    <div class="card">
+        <h2>🎯 Why Static Routing Matters</h2>
+        <ul>
+            <li>✅ <strong>Security</strong> — No routing updates to intercept or spoof</li>
+            <li>✅ <strong>Zero overhead</strong> — No bandwidth wasted on routing protocols</li>
+            <li>✅ <strong>Predictable</strong> — Routes never change unless you change them</li>
+            <li>✅ <strong>Simplicity</strong> — Perfect for small networks (1-5 routers)</li>
+            <li>✅ <strong>Foundation skill</strong> — Dynamic routing builds on static concepts</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Stub networks (branch offices, home routers) use a default static route. Edge routers use static routes to ISP.
+        </div>
+    </div>
+
+    <!-- Static Route Anatomy -->
+    <div class="card">
+        <h2>📐 Static Route Anatomy (The Formula)</h2>
+        <p><strong>Cisco Syntax:</strong> <code>ip route [destination_network] [subnet_mask] [next_hop_ip | exit_interface] [administrative_distance]</code></p>
+        
+        <div class="route-calc">
+            <strong>Example 1 — Next-hop IP:</strong><br>
+            <code>ip route 192.168.2.0 255.255.255.0 10.0.0.2</code><br>
+            <em>"To reach 192.168.2.0/24, send packets to router at 10.0.0.2."</em>
+        </div>
+        
+        <div class="route-calc">
+            <strong>Example 2 — Exit interface:</strong><br>
+            <code>ip route 10.1.1.0 255.255.255.0 serial0/0/0</code><br>
+            <em>"To reach 10.1.1.0/24, send packets out serial0/0/0."</em>
+        </div>
+        
+        <div class="route-calc">
+            <strong>Example 3 — Default route (gateway of last resort):</strong><br>
+            <code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code><br>
+            <em>"If no specific route matches, send to 203.0.113.1 (ISP gateway)."</em>
+        </div>
+    </div>
+
+    <!-- Routing Table Components -->
+    <div class="card">
+        <h2>📊 Routing Table Components (What the Router Sees)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Code</th><th>Source</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>S</td><td>Static</td><td>Manually configured — highest trust</td></tr>
+                    <tr><td>C</td><td>Connected</td><td>Directly attached network — automatically added when interface has IP</td></tr>
+                    <tr><td>L</td><td>Local</td><td>Local host route for router's own IP</td></tr>
+                    <tr><td>O</td><td>OSPF</td><td>Dynamic routing protocol</td></tr>
+                    <tr><td>D</td><td>EIGRP</td><td>Dynamic routing protocol</td></tr>
+                    <tr><td>R</td><td>RIP</td><td>Dynamic routing protocol</td></tr>
+                    <tr><td>S*</td><td>Default Static</td><td>Default route (0.0.0.0/0)</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="cli-box">
+            Router# show ip route<br>
+            <br>
+            Codes: L - local, C - connected, S - static, R - RIP, O - OSPF<br>
+            <br>
+            Gateway of last resort is 203.0.113.1 to network 0.0.0.0<br>
+            <br>
+            C    192.168.1.0/24 is directly connected, GigabitEthernet0/0<br>
+            L    192.168.1.1/32 is directly connected, GigabitEthernet0/0<br>
+            S    192.168.2.0/24 [1/0] via 10.0.0.2<br>
+            S*   0.0.0.0/0 [1/0] via 203.0.113.1
+        </div>
+    </div>
+
+    <!-- Real Network Topology Examples -->
+    <div class="card">
+        <h2>🏗️ Real Network Topology Examples</h2>
+        
+        <h3>Scenario 1: 2 Routers (Simple Office)</h3>
+        <div class="routing-diagram">
+    [PC-A] ── [RouterA] ════════════ [RouterB] ── [PC-B]
+             192.168.1.1   10.0.0.0/30   10.0.0.2   192.168.2.1
+            
+    Networks:
+    - RouterA LAN: 192.168.1.0/24
+    - Point-to-point: 10.0.0.0/30 (10.0.0.1 ←→ 10.0.0.2)
+    - RouterB LAN: 192.168.2.0/24
+        </div>
+        
+        <h4>RouterA Configuration:</h4>
+        <div class="cli-box">
+            interface gigabitEthernet0/0<br>
+            ip address 192.168.1.1 255.255.255.0<br>
+            no shutdown<br>
+            !<br>
+            interface serial0/0/0<br>
+            ip address 10.0.0.1 255.255.255.252<br>
+            no shutdown<br>
+            !<br>
+            <strong>ip route 192.168.2.0 255.255.255.0 10.0.0.2</strong>
+        </div>
+        
+        <h4>RouterB Configuration:</h4>
+        <div class="cli-box">
+            interface gigabitEthernet0/0<br>
+            ip address 192.168.2.1 255.255.255.0<br>
+            no shutdown<br>
+            !<br>
+            interface serial0/0/0<br>
+            ip address 10.0.0.2 255.255.255.252<br>
+            no shutdown<br>
+            !<br>
+            <strong>ip route 192.168.1.0 255.255.255.0 10.0.0.1</strong>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Note:</strong> Both routers need routes to each other's networks. Static routing is NOT automatic!
+        </div>
+        
+        <h3>Scenario 2: 3 Routers (Multisite Office)</h3>
+        <div class="routing-diagram">
+        HQ ────── BRANCH1 ────── BRANCH2
+    10.0.0.0/30  10.0.0.4/30  10.0.0.8/30
+        </div>
+        
+        <div class="metric-box">
+            <strong>Branch2 needs to reach HQ (192.168.1.0/24):</strong><br>
+            Route: <code>ip route 192.168.1.0 255.255.255.0 10.0.0.6</code><br>
+            (Send to Branch1, which knows how to reach HQ)<br><br>
+            <strong>Each router must know how to reach ALL non-local networks!</strong>
+        </div>
+    </div>
+
+    <!-- Administrative Distance (Trustworthiness) -->
+    <div class="card">
+        <h2>🏆 Administrative Distance (Which Route Wins?)</h2>
+        <p><strong>Administrative Distance (AD)</strong> = Trustworthiness of route source. Lower = preferred.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Route Source</th><th>AD</th><th>When Used</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Connected interface</td><td>0</td><td>Router's own IP networks — always highest priority</td></tr>
+                    <tr><td>Static route</td><td>1</td><td>Manually configured — very trusted</td></tr>
+                    <tr><td>EIGRP (internal)</td><td>90</td><td>Cisco's IGP</td></tr>
+                    <tr><td>OSPF</td><td>110</td><td>Open standard IGP</td></tr>
+                    <tr><td>RIP</td><td>120</td><td>Old distance vector protocol</td></tr>
+                    <tr><td>External EIGRP</td><td>170</td><td>Routes redistributed into EIGRP</td></tr>
+                    <tr><td>Unknown / Invalid</td><td>255</td><td>Never used</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="route-calc">
+            <strong>Modifying AD (Backup Route):</strong><br>
+            <code>ip route 192.168.2.0 255.255.255.0 10.0.0.2</code> ← AD 1 (primary)<br>
+            <code>ip route 192.168.2.0 255.255.255.0 10.0.0.5 2</code> ← AD 2 (backup)<br>
+            <em>Primary route AD 1 wins. If failed, AD 2 takes over!</em>
+        </div>
+    </div>
+
+    <!-- Floating Static Routes (Backup) -->
+    <div class="card">
+        <h2>🔄 Floating Static Routes (Backup Links)</h2>
+        <p>When you have two paths to a destination, use a higher AD for the backup path.</p>
+        
+        <div class="routing-diagram">
+    Primary link (fiber):     RouterA ──10.0.0.0/30── RouterB  (AD 1)
+    Backup link (cellular):   RouterA ──10.0.0.4/30── RouterB  (AD 100)
+        </div>
+        
+        <div class="cli-box">
+            <strong>Primary (preferred):</strong><br>
+            ip route 192.168.2.0 255.255.255.0 10.0.0.2<br>
+            <br>
+            <strong>Backup (only if primary down):</strong><br>
+            ip route 192.168.2.0 255.255.255.0 10.0.0.6 <strong>100</strong>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Use case:</strong> Branch office with fiber + 4G LTE backup. Fiber is primary (AD 1), cellular is backup (AD 100).
+        </div>
+    </div>
+
+    <!-- Routing Table Lookup Process -->
+    <div class="card">
+        <h2>🎯 Routing Table Lookup (How Router Decides)</h2>
+        <p><strong>Algorithm:</strong> Longest prefix match wins.</p>
+        
+        <div class="cli-box">
+    Routing table entries:<br>
+    S    192.168.0.0/16 [1/0] via 10.0.0.2<br>
+    S    192.168.5.0/24 [1/0] via 10.0.0.4<br>
+    S*   0.0.0.0/0 [1/0] via 203.0.113.1<br>
+        </div>
+        
+        <p><strong>Destination 192.168.5.1:</strong> Matches /24 (24 bits) → 10.0.0.4<br>
+        <strong>Destination 192.168.9.1:</strong> Matches /16 (16 bits) → 10.0.0.2<br>
+        <strong>Destination 8.8.8.8:</strong> Only matches default route → 203.0.113.1</p>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Common mistake:</strong> Adding a static route with <code>0.0.0.0 0.0.0.0</code> (default) does NOT override existing specific routes. Specific always wins!
+        </div>
+    </div>
+
+    <!-- Static Route Types Summary -->
+    <div class="card">
+        <h2>📝 Static Route Types Summary</h2>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Type</th><th>Syntax</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Standard</td><td><code>ip route 192.168.1.0 255.255.255.0 10.0.0.2</code></td><td>Specific network</td></tr>
+                    <tr><td>Default</td><td><code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code></td><td>Gateway of last resort (internet)</td></tr>
+                    <tr><td>Directly connected</td><td><code>ip route 10.1.1.0 255.255.255.0 serial0/0/0</code></td><td>Point-to-point links only</td></tr>
+                    <tr><td>Floating</td><td><code>ip route 192.168.3.0 255.255.255.0 10.0.0.6 100</code></td><td>Backup (higher AD)</td></tr>
+                    <tr><td>Null0 (discard)</td><td><code>ip route 192.168.0.0 255.255.0.0 Null0</code></td><td>Prevent routing loops, summarization</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Security Considerations -->
+    <div class="card">
+        <h2>🛡️ Static Routing Security</h2>
+        
+        <ul>
+            <li>✅ <strong>No route advertisements</strong> — Attackers can't inject fake OSPF/EIGRP updates</li>
+            <li>✅ <strong>No route calculations</strong> — Less CPU overhead = more resistant to DOS</li>
+            <li>⚠️ <strong>Risk:</strong> If route is wrong, traffic loops until manually fixed</li>
+            <li>⚠️ <strong>Risk:</strong> No automatic failover (unless floating static configured)</li>
+        </ul>
+        
+        <div class="warning-box">
+            <strong>Best Practice:</strong> Use static routes only for:<br>
+            - Stub networks (single exit point)<br>
+            - Default routes to ISP<br>
+            - Backup for dynamic routing<br>
+            - Very small networks (≤5 routers)
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command adds a static route to 10.1.1.0/24 via next-hop 172.16.1.1?</summary>
+            <p><strong>Answer:</strong> <code>ip route 10.1.1.0 255.255.255.0 172.16.1.1</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Your router has two static routes to 192.168.5.0/24 — one AD 1, one AD 100. Which is used?</summary>
+            <p><strong>Answer:</strong> AD 1 (lower AD wins). AD 100 is backup only.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What does <code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code> do?</summary>
+            <p><strong>Answer:</strong> Default route — sends all traffic without a specific match to 203.0.113.1 (gateway of last resort).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> In <code>show ip route</code>, what does "S*" indicate?</summary>
+            <p><strong>Answer:</strong> Default static route (0.0.0.0/0).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Two static routes exist: /16 and /24 to same destination. Which wins?</summary>
+            <p><strong>Answer:</strong> /24 (longest prefix match).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q6:</strong> Why would you use a floating static route?</summary>
+            <p><strong>Answer:</strong> For automatic backup when primary route fails (higher AD = backup).</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Build a 3-Router Static Route Network</h2>
+        
+        <div class="routing-diagram">
+    [PC1]     [PC2]     [PC3]
+      │         │         │
+    VLAN10    VLAN20    VLAN30
+      │         │         │
+    [R1]──────[R2]──────[R3]
+     │         │         │
+    10.0.0.0/30 10.0.0.4/30 10.0.0.8/30
+      │         │         │
+    LAN:       LAN:       LAN:
+    192.168.1.0/24 192.168.2.0/24 192.168.3.0/24
+        </div>
+        
+        <h3>Step 1: Configure Interfaces on Each Router</h3>
+        
+        <div class="cli-box">
+            <strong>Router1 (R1):</strong><br>
+            interface gig0/0<br>
+            ip address 192.168.1.1 255.255.255.0<br>
+            no shutdown<br>
+            interface serial0/0/0<br>
+            ip address 10.0.0.1 255.255.255.252<br>
+            no shutdown
+        </div>
+        
+        <div class="cli-box">
+            <strong>Router2 (R2):</strong><br>
+            interface gig0/0<br>
+            ip address 192.168.2.1 255.255.255.0<br>
+            no shutdown<br>
+            interface serial0/0/0<br>
+            ip address 10.0.0.2 255.255.255.252<br>
+            no shutdown<br>
+            interface serial0/0/1<br>
+            ip address 10.0.0.5 255.255.255.252<br>
+            no shutdown
+        </div>
+        
+        <div class="cli-box">
+            <strong>Router3 (R3):</strong><br>
+            interface gig0/0<br>
+            ip address 192.168.3.1 255.255.255.0<br>
+            no shutdown<br>
+            interface serial0/0/0<br>
+            ip address 10.0.0.6 255.255.255.252<br>
+            no shutdown
+        </div>
+        
+        <h3>Step 2: Add Static Routes</h3>
+        
+        <div class="cli-box">
+            <strong>R1 needs routes to R2's LAN and R3's LAN:</strong><br>
+            ip route 192.168.2.0 255.255.255.0 10.0.0.2<br>
+            ip route 192.168.3.0 255.255.255.0 10.0.0.2<br>
+            <br>
+            <strong>R2 needs routes to both R1 and R3 LANs:</strong><br>
+            ip route 192.168.1.0 255.255.255.0 10.0.0.1<br>
+            ip route 192.168.3.0 255.255.255.0 10.0.0.6<br>
+            <br>
+            <strong>R3 needs routes to R1 and R2 LANs:</strong><br>
+            ip route 192.168.1.0 255.255.255.0 10.0.0.5<br>
+            ip route 192.168.2.0 255.255.255.0 10.0.0.5
+        </div>
+        
+        <h3>Step 3: Verify Connectivity</h3>
+        <div class="cli-box">
+            R1# show ip route<br>
+            R1# ping 192.168.2.1<br>
+            R1# ping 192.168.3.1<br>
+            R1# traceroute 192.168.3.1
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Add a backup link between R1 and R3 directly (10.0.0.8/30). Create floating static routes with AD 100 for failover.
+        </div>
+    </div>
+
+    <!-- Quick Reference Cheat Sheet -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Static Routing Mastery)</h3>
+            <ul>
+                <li>✅ <strong>Syntax:</strong> <code>ip route [dest] [mask] [next-hop | interface] [AD]</code></li>
+                <li>✅ <strong>Connected routes (C/L)</strong> appear automatically — no config needed</li>
+                <li>✅ <strong>Default route (S*)</strong> = <code>ip route 0.0.0.0 0.0.0.0 [gateway]</code></li>
+                <li>✅ <strong>Lower AD = preferred</strong> (static default AD 1)</li>
+                <li>✅ <strong>Floating static</strong> = Higher AD for backup links</li>
+                <li>✅ <strong>Longest prefix match</strong> wins in routing table lookup</li>
+                <li>✅ <strong>Static routes are NOT automatic</strong> — both ends need routes</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/16406-eigrp-toc.html" target="_blank">Cisco: Static vs Dynamic Routing</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute/command/ir-cr-book/ir-ip-route.html" target="_blank">Cisco: IP Route Command Reference</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="vlan-config.html" class="nav-btn">◀ Previous: VLAN Configuration</a>
+        <a href="ospf.html" class="nav-btn">Next: OSPF ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Static Routing | Complete lesson with examples, topology labs, and practice | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
