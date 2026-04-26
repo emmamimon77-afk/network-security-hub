@@ -383,6 +383,127 @@
         </div>
     </div>
 
+    <!-- Advanced Cisco Concepts: Router vs Switch, L2 vs L3 -->
+    <div class="card">
+        <h2>🔍 Advanced Cisco Concepts: Router vs Switch CLI Differences</h2>
+        <p><strong>Not all Cisco devices are equal.</strong> The CLI changes based on device type and software level.</p>
+        
+        <!-- Comparison Table -->
+        <h3>📊 Router vs Layer 2 Switch vs Layer 3 Switch</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Router</th><th>Layer 2 Switch</th><th>Layer 3 Switch</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>CLI Prompt</strong></td><td><code>Router#</code></td><td><code>Switch#</code></td><td><code>Switch#</code></td></tr>
+                    <tr><td><strong>Can assign IP to interface?</strong></td><td>✅ Yes (<code>ip address 10.0.0.1 255.0.0.0</code>)</td><td>❌ No (only VLAN interface)</td><td>✅ Yes (on routed ports)</td></tr>
+                    <tr><td><strong>Supports routing protocols (OSPF, EIGRP)?</strong></td><td>✅ Yes</td><td>❌ No</td><td>✅ Yes (IP routing must be enabled)</td></tr>
+                    <tr><td><strong>Supports <code>ip route</code>?</strong></td><td>✅ Yes</td><td>❌ No</td><td>✅ Yes (after <code>ip routing</code>)</td></tr>
+                    <tr><td><strong>Switches between ports?</strong></td><td>❌ No (needs switch module)</td><td>✅ Yes (hardware)</td><td>✅ Yes (hardware)</td></tr>
+                    <tr><td><strong>VLANs supported?</strong></td><td>❌ Limited (sub-interfaces)</td><td>✅ Yes (access/trunk)</td><td>✅ Yes (full)</td></tr>
+                    <tr><td><strong>Inter-VLAN routing?</strong></td><td>✅ Yes (router-on-a-stick)</td><td>❌ No</td><td>✅ Yes (internal)</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>🔐 CLI Rights Hierarchy (Detailed)</h3>
+        <div class="ascii-box">
+    Level 0: User EXEC (">")  
+    └── Basic monitoring (ping, traceroute, show version)
+         │
+         │  "enable" (with secret)
+         ▼
+    Level 1: Privileged EXEC ("#")
+    └── Full viewing, debugging, configuration access
+         │
+         │  "configure terminal"
+         ▼
+    Level 2: Global Config ("(config)#")
+    └── Device-wide settings (hostname, passwords, routing)
+         │
+         ├── "interface [type] [number]"
+         │    ▼
+         │    Interface Config ("(config-if)#")
+         │    └── Per-port settings (IP, VLAN, speed)
+         │
+         ├── "line vty 0 4"  or "line console 0"
+         │    ▼
+         │    Line Config ("(config-line)#")
+         │    └── Login settings, passwords, timeouts
+         │
+         └── "router ospf 1"  or "router rip"
+              ▼
+              Routing Config ("(config-router)#")
+              └── Network advertisements, metrics
+        </div>
+        
+        <h3>🌐 Router-to-Router Connections (Point-to-Point)</h3>
+        <p>Two routers connected directly need a small subnet - typically /30 (4 IPs, 2 usable).</p>
+        
+        <div class="cli-box">
+            <!-- Router A -->
+            RouterA(config)# interface serial 0/0/0<br>
+            RouterA(config-if)# ip address 10.0.0.1 255.255.255.252<br>
+            RouterA(config-if)# no shutdown<br>
+            RouterA(config-if)# description Link to RouterB<br><br>
+            
+            <!-- Router B -->
+            RouterB(config)# interface serial 0/0/0<br>
+            RouterB(config-if)# ip address 10.0.0.2 255.255.255.252<br>
+            RouterB(config-if)# no shutdown<br>
+            RouterB(config-if)# description Link to RouterA
+        </div>
+        
+        <h3>🔌 Router-on-a-Stick (Inter-VLAN Routing)</h3>
+        <p>When a router connects to a switch with multiple VLANs, you use sub-interfaces:</p>
+        
+        <div class="cli-box">
+            Router(config)# interface gigabitEthernet 0/0.10<br>
+            Router(config-subif)# encapsulation dot1Q 10<br>
+            Router(config-subif)# ip address 192.168.10.1 255.255.255.0<br>
+            Router(config-subif)# exit<br>
+            Router(config)# interface gigabitEthernet 0/0.20<br>
+            Router(config-subif)# encapsulation dot1Q 20<br>
+            Router(config-subif)# ip address 192.168.20.1 255.255.255.0
+        </div>
+        
+        <h3>⚡ Enabling Layer 3 on a Switch</h3>
+        <p>By default, Cisco switches are Layer 2 (switching only). To enable routing:</p>
+        
+        <div class="cli-box">
+            Switch(config)# ip routing<br>
+            Switch(config)# interface vlan 10<br>
+            Switch(config-if)# ip address 192.168.10.1 255.255.255.0<br>
+            Switch(config-if)# no shutdown
+        </div>
+        <div class="warning-box">
+            ⚠️ <strong>Warning:</strong> Only Layer 3 switches (eg: 3560, 3650, 9300) support <code>ip routing</code>. Basic switches (2960) are Layer 2 only.
+        </div>
+        
+        <h3>📋 Command Permission by Device Type</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>Router</th><th>L2 Switch</th><th>L3 Switch</th><th>Privilege Level</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>show ip route</code></td><td>✅</td><td>❌</td><td>✅</td><td>Privileged EXEC</td></tr>
+                    <tr><td><code>ip route 0.0.0.0 0.0.0.0</code></td><td>✅</td><td>❌</td><td>✅</td><td>Global Config</td></tr>
+                    <tr><td><code>router ospf 1</code></td><td>✅</td><td>❌</td><td>✅</td><td>Global Config</td></tr>
+                    <tr><td><code>vlan 10</code></td><td>❌</td><td>✅</td><td>✅</td><td>Global Config</td></tr>
+                    <tr><td><code>switchport mode trunk</code></td><td>❌</td><td>✅</td><td>✅</td><td>Interface Config</td></tr>
+                    <tr><td><code>no shutdown</code></td><td>✅</td><td>✅</td><td>✅</td><td>Interface Config</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Interview Question:</strong> "You have a 2960 switch and need routing. Can you enable <code>ip routing</code>?"<br>
+            <strong>Answer:</strong> No — 2960 is Layer 2 only. You need a Layer 3 switch (3650, 9300) or add a router.
+        </div>
+    </div>
+
     <!-- Key Takeaways -->
     <div class="card">
         <div class="takeaway">
@@ -394,6 +515,10 @@
                 <li>✅ <strong>Always save:</strong> <code>copy running-config startup-config</code> or config lost on reboot</li>
                 <li>✅ <strong>Basic pattern:</strong> <code>conf t → changes → exit → write memory</code></li>
                 <li>✅ <strong>Context-sensitive help:</strong> <code>?</code> shows available commands, <code>show ip ?</code> narrows down</li>
+                <li>✅ <strong>Routers route between networks</strong> — L2 switches switch within VLANs, L3 switches do both</li>
+                <li>✅ <strong>Router-to-router links use /30 or /31</strong> — Only 2 usable IPs, no waste</li>
+                <li>✅ <strong>Router-on-a-stick</strong> = Single router interface serving multiple VLANs via sub-interfaces</li>
+                <li>✅ <strong><code>ip routing</code></strong> must be enabled on L3 switches before they can route</li>
             </ul>
         </div>
     </div>
