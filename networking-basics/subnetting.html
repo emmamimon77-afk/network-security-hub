@@ -345,6 +345,170 @@
         </ul>
     </div>
 
+    <!-- Network Design Patterns Module -->
+    <div class="card">
+        <h2>🎨 Network Design Patterns (Proven Solutions to Common Problems)</h2>
+        <p><strong>Design patterns = reusable templates</strong> that save time and prevent mistakes.</p>
+        
+        <!-- Pattern 1: Route Summarization -->
+        <h3>📌 Pattern 1: Route Summarization (Aggregation)</h3>
+        <p><strong>Problem:</strong> Routers have too many routes, memory fills up, convergence slows.</p>
+        <p><strong>Solution:</strong> Advertise one summary route instead of many detailed routes.</p>
+        
+        <div class="ascii-box">
+    Without summarization (256 routes):
+    192.168.0.0/24, 192.168.1.0/24, 192.168.2.0/24 ... 192.168.255.0/24
+    
+    With summarization (1 route):
+    192.168.0.0/16  ← One route covers ALL 256 subnets
+        </div>
+        
+        <p><strong>How to find summary route:</strong></p>
+        <ul>
+            <li>Find common bits in all networks</li>
+            <li>192.168.x.x has first 16 bits identical → /16 summary</li>
+            <li>192.168.0.0/24 + 192.168.1.0/24 → summarize to 192.168.0.0/23</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Exam trick:</strong> To summarize 10.1.0.0/24, 10.1.1.0/24, 10.1.2.0/24, 10.1.3.0/24 → look for common first 22 bits → 10.1.0.0/22
+        </div>
+        
+        <!-- Pattern 2: VLSM Templates -->
+        <h3>📌 Pattern 2: VLSM Templates (Standardized Sizes)</h3>
+        <p><strong>Problem:</strong> Every subnet is different, hard to document and troubleshoot.</p>
+        <p><strong>Solution:</strong> Create a template with fixed sizes for each use case.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Use Case</th><th>Template CIDR</th><th>Usable IPs</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Router-to-router (2 hosts)</td><td>/30</td><td>2</td><td>10.0.0.0/30</td></tr>
+                    <tr><td>Management VLAN</td><td>/28</td><td>14</td><td>10.0.1.16/28</td></tr>
+                    <tr><td>Small workgroup (&lt;30 users)</td><td>/27</td><td>30</td><td>10.0.2.32/27</td></tr>
+                    <tr><td>Standard department (&lt;62 users)</td><td>/26</td><td>62</td><td>10.0.2.64/26</td></tr>
+                    <tr><td>Large floor (&lt;254 users)</td><td>/24</td><td>254</td><td>10.0.3.0/24</td></tr>
+                    <tr><td>Data center server rack</td><td>/23</td><td>510</td><td>10.0.8.0/23</td></tr>
+                    <tr><td>Guest Wi-Fi / public space</td><td>/22</td><td>1022</td><td>10.0.12.0/22</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pattern 3: Hierarchical Addressing -->
+        <h3>📌 Pattern 3: Hierarchical Addressing (The Scalability Pattern)</h3>
+        <p><strong>Problem:</strong> Flat networks don't scale — routing tables explode.</p>
+        <p><strong>Solution:</strong> Assign addresses by geography or function.</p>
+        
+        <div class="ascii-box">
+    Global company using 10.0.0.0/8 as private space:
+    
+    Level 1: Continent (10.0.0.0/12)
+    │
+    ├── North America (10.0.0.0/13)
+    │   ├── NY (10.0.0.0/18)
+    │   │   ├── Engineering (10.0.0.0/24)
+    │   │   └── Sales (10.0.1.0/24)
+    │   └── CA (10.0.64.0/18)
+    │       ├── Engineering (10.0.64.0/24)
+    │       └── Sales (10.0.65.0/24)
+    │
+    └── Europe (10.8.0.0/13)
+        ├── London (10.8.0.0/18)
+        └── Berlin (10.8.64.0/18)
+        </div>
+        
+        <p><strong>Benefits:</strong> Route summarization at each level, easy to add new sites, quick troubleshooting.</p>
+        
+        <!-- Pattern 4: Sparse vs Dense Allocation -->
+        <h3>📌 Pattern 4: Sparse Allocation (Leave Growth Gaps)</h3>
+        <p><strong>Problem:</strong> You run out of IPs in a subnet and have to redesign everything.</p>
+        <p><strong>Solution:</strong> Leave gaps between subnets for future expansion.</p>
+        
+        <div class="practice-box">
+            <strong>❌ Dense allocation (no gaps):</strong><br>
+            HR: 10.0.0.0/24, IT: 10.0.1.0/24, Sales: 10.0.2.0/24 (no room for growth)<br><br>
+            
+            <strong>✅ Sparse allocation (gaps):</strong><br>
+            HR: 10.0.0.0/24, (gap .1.0/24), IT: 10.0.2.0/24, (gap .3.0/24), Sales: 10.0.4.0/24<br>
+            <em>Gaps allow you to expand HR into 10.0.1.0/24 without redesigning IT or Sales!</em>
+        </div>
+        
+        <!-- Pattern 5: Supernetting -->
+        <h3>📌 Pattern 5: Supernetting (CIDR Aggregation)</h3>
+        <p><strong>Problem:</strong> You have multiple small networks that need to be advertised as one.</p>
+        <p><strong>Solution:</strong> Combine them into a larger block (opposite of subnetting).</p>
+        
+        <ul>
+            <li>Two /25s combine to one /24: 192.168.0.0/25 + 192.168.0.128/25 → 192.168.0.0/24</li>
+            <li>Four /24s combine to one /22: 10.1.0.0/24 + 10.1.1.0/24 + 10.1.2.0/24 + 10.1.3.0/24 → 10.1.0.0/22</li>
+        </ul>
+        <div class="warning-box">
+            ⚠️ Supernetting only works when networks are contiguous (in a row, no gaps).
+        </div>
+        
+        <!-- Pattern 6: Overlay Networks -->
+        <h3>📌 Pattern 6: Overlay Networks (Virtual Topologies)</h3>
+        <p><strong>Problem:</strong> You need to connect subnets across different physical locations or incompatible networks.</p>
+        <p><strong>Solution:</strong> Create a virtual network on top of physical infrastructure.</p>
+        
+        <ul>
+            <li><strong>VPNs:</strong> Secure tunnel between two subnets over internet</li>
+            <li><strong>VXLAN:</strong> Extend Layer 2 across Layer 3 networks (data centers)</li>
+            <li><strong>GRE/ IPIP:</strong> Generic encapsulation for custom routing</li>
+        </ul>
+        
+        <!-- Pattern 7: IP Conservation Patterns -->
+        <h3>📌 Pattern 7: IP Conservation (For IPv4 Scarcity)</h3>
+        <p><strong>Problem:</strong> IPv4 addresses are expensive and limited.</p>
+        <p><strong>Solution:</strong> Use these patterns to save addresses:</p>
+        
+        <ul>
+            <li><strong>/31 for point-to-point:</strong> Modern routers support /31 (2 hosts, no waste instead of /30's 50% waste)</li>
+            <li><strong>NAT (Network Address Translation):</strong> Many private IPs share one public IP</li>
+            <li><strong>RFC 6598 (CGNAT):</strong> 100.64.0.0/10 for carrier-grade NAT</li>
+            <li><strong>IPv6 dual-stack:</strong> Run IPv6 alongside IPv4</li>
+        </ul>
+        
+        <!-- Decision Tree: Which Pattern to Use -->
+        <h3>🤔 Decision Tree: Which Design Pattern Should You Use?</h3>
+        
+        <div class="ascii-box">
+    Start here:
+    │
+    ├── Need to save routing table space?
+    │   └── YES → Use Route Summarization / Supernetting
+    │
+    ├── Need consistent, repeatable designs?
+    │   └── YES → Use VLSM Templates
+    │
+    ├── Need to scale to multiple locations?
+    │   └── YES → Use Hierarchical Addressing
+    │
+    ├── Worried about running out of space later?
+    │   └── YES → Use Sparse Allocation
+    │
+    ├── Need to connect disjointed networks?
+    │   └── YES → Use Overlay Networks (VPN, VXLAN)
+    │
+    ├── Running out of IPv4 addresses?
+    │   └── YES → Use IP Conservation (NAT, /31)
+        </div>
+        
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways: Design Patterns</h3>
+            <ul>
+                <li>✅ <strong>Summarization</strong> = One route instead of many (smaller routing tables)</li>
+                <li>✅ <strong>VLSM templates</strong> = Standard sizes for common scenarios</li>
+                <li>✅ <strong>Hierarchical</strong> = Addresses reflect physical/logical topology</li>
+                <li>✅ <strong>Sparse allocation</strong> = Leave gaps for future growth</li>
+                <li>✅ <strong>Supernetting</strong> = Combine multiple networks into one</li>
+                <li>✅ <strong>Overlays</strong> = Virtual networks on top of physical</li>
+                <li>✅ <strong>Conservation</strong> = Strategies to save IPv4 addresses</li>
+            </ul>
+        </div>
+    </div>
+
     <!-- Lab Exercise -->
     <div class="card" id="lab">
         <h2>🧪 Lab Exercise: Subnetting with ipcalc & Manual Calculation</h2>
