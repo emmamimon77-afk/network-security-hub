@@ -142,9 +142,65 @@
             </table>
         </div>
         
-        <div class="note-box">
-            📌 <strong>Formula:</strong> Total IPs = 2^(32 - prefix). Usable = Total - 2 (network + broadcast).
+        <!-- CIDR Formula - Clear Explanation -->
+        <div class="card">
+            <h2>📐 Understanding the Subnet Formula (Step by Step)</h2>
+        
+            <h3>Formula 1: Total IP Addresses</h3>
+            <p><strong>Total IPs = 2 ^ (32 - CIDR_prefix)</strong></p>
+            <p>Where <code>^</code> means "raised to the power of" (exponent).</p>
+        
+            <div class="route-calc">
+                <strong>Example: /24 network</strong><br>
+                Total IPs = 2 ^ (32 - 24) = 2 ^ 8 = <strong>256 addresses</strong>
+            </div>
+        
+            <div class="route-calc">
+                <strong>Example: /26 network</strong><br>
+                Total IPs = 2 ^ (32 - 26) = 2 ^ 6 = <strong>64 addresses</strong>
+            </div>
+        
+            <div class="tip-box">
+                💡 <strong>Read as:</strong> "2 raised to the power of (32 minus the CIDR prefix)"
+                <br>Not "2 times (32 - prefix)" — the ^ means exponent/power!
+            </div>
+        
+            <h3>Formula 2: Usable IP Addresses</h3>
+            <p><strong>Usable IPs = Total IPs - 2</strong></p>
+            <p>Why subtract 2? Every subnet reserves:</p>
+            <ul>
+               <li><strong>Network address</strong> (all host bits 0) — cannot assign to devices</li>
+               <li><strong>Broadcast address</strong> (all host bits 1) — used to reach all devices</li>
+            </ul>
+        
+            <div class="route-calc">
+                <strong>Example: /24 network</strong><br>
+                Usable = 256 - 2 = <strong>254 devices</strong> (192.168.1.1 → 192.168.1.254)
+            </div>
+        
+            <h3>Formula 3: Block Size (Quick Mental Math)</h3>
+            <p><strong>Block size = 256 - last_non_zero_octet_of_mask</strong></p>
+            <p>This works for <strong>/24 to /32</strong> (where mask changes in the last octet).</p>
+        
+            <div class="route-calc">
+                <strong>Example: Mask 255.255.255.192 (/26)</strong><br>
+                Block = 256 - 192 = <strong>64</strong><br>
+                Subnets: 0, 64, 128, 192
+            </div>
+        
+            <div class="route-calc">
+                <strong>Example: Mask 255.255.255.224 (/27)</strong><br>
+                Block = 256 - 224 = <strong>32</strong><br>
+                Subnets: 0, 32, 64, 96, 128, 160, 192, 224
+            </div>
+        
+            <div class="warning-box">
+               📌 <strong>Remember:</strong> 2^something means "2 multiplied by itself that many times"<br>
+               2^8 = 2×2×2×2×2×2×2×2 = 256<br>
+               2^6 = 2×2×2×2×2×2 = 64
+            </div>
         </div>
+
     </div>
 
     <!-- Finding Network, Broadcast, First/Last Host -->
