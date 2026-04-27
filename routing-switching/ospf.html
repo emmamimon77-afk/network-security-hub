@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSPF - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .ospf-diagram {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .area-box {
+            background: #0f3b5c;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .metric-calc {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔄 OSPF — Complete Guide</h1>
+        <p><strong>Open Shortest Path First (OSPF)</strong> = A dynamic link-state routing protocol used by routers to automatically find the best path to destinations. Industry standard for enterprise networks.</p>
+    </div>
+
+    <!-- Why OSPF Matters -->
+    <div class="card">
+        <h2>🎯 Why OSPF Matters</h2>
+        <ul>
+            <li>✅ <strong>Industry standard</strong> — Works across Cisco, Juniper, Huawei, Arista</li>
+            <li>✅ <strong>Fast convergence</strong> — Reacts to failures in seconds (not minutes)</li>
+            <li>✅ <strong>Scalable</strong> — Supports thousands of routers via areas</li>
+            <li>✅ <strong>No loop issues</strong> — Link-state protocols inherently loop-free</li>
+            <li>✅ <strong>Vendor neutral</strong> — Open standard (unlike EIGRP, which is Cisco proprietary)</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Your ISP, cloud providers (AWS/Azure), and most large enterprises run OSPF internally.
+        </div>
+    </div>
+
+    <!-- OSPF vs Static Routing -->
+    <div class="card">
+        <h2>📊 OSPF vs Static Routing (When to Use Each)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Static Routing</th><th>OSPF (Dynamic)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Configuration</strong></td><td>Manual per route</td><td>Automatic learning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong></td>
+                        <td>Small networks (≤5 routers)</td>
+                        <td>Large networks (1000+ routers)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Failure recovery</strong></td>
+                        <td>Manual intervention</td>
+                        <td>Automatic (seconds)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandwidth overhead</strong></td>
+                        <td>Zero</td>
+                        <td>Small (hello packets, LSAs)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best path</strong></td>
+                        <td>Fixed by admin</td>
+                        <td>Dynamic based on cost</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="warning-box">
+            📌 <strong>Rule of thumb:</strong> Static for stub networks (branch offices). OSPF for core/backbone networks.
+        </div>
+    </div>
+
+    <!-- OSPF Concepts -->
+    <div class="card">
+        <h2>📚 Core OSPF Concepts (Must Know)</h2>
+        
+        <h3>1. Router ID (RID)</h3>
+        <p>Unique 32-bit identifier for each OSPF router. Used to track neighbors.</p>
+        <div class="metric-calc">
+            <strong>Selection order:</strong><br>
+            1. Manually configured: <code>router-id 1.1.1.1</code><br>
+            2. Highest IP on loopback interface<br>
+            3. Highest IP on physical interface
+        </div>
+        
+        <h3>2. Areas</h3>
+        <p>Logical grouping of routers to reduce routing table size and LSA flooding.</p>
+        <ul>
+            <li><strong>Area 0 (Backbone):</strong> Connects all other areas — must exist</li>
+            <li><strong>Standard areas:</strong> Any number (1-4 billion)</li>
+            <li><strong>Stub areas:</strong> Block external routes (reduces table size)</li>
+        </ul>
+        
+        <h3>3. Hello Protocol</h3>
+        <p>Routers send Hello packets to discover and maintain neighbors.</p>
+        <ul>
+            <li>Default Hello interval: <strong>10 seconds</strong> (broadcast networks)</li>
+            <li>Dead interval: <strong>40 seconds</strong> (4× Hello)</li>
+        </ul>
+        
+        <h3>4. Cost (Metric)</h3>
+        <p>OSPF uses <strong>cost = reference bandwidth / interface bandwidth</strong>.<br>
+        Lower cost = better path.</p>
+        <div class="metric-calc">
+            <strong>Default reference bandwidth: 100 Mbps</strong><br>
+            • FastEthernet (100 Mbps): cost = 100/100 = 1<br>
+            • GigabitEthernet (1000 Mbps): cost = 100/1000 = 1 (problem!)<br>
+            • Fix: <code>auto-cost reference-bandwidth 10000</code> (10 Gbps reference)
+        </div>
+        
+        <h3>5. Link State Database (LSDB)</h3>
+        <p>Every router builds the exact same map of the network using LSAs.</p>
+    </div>
+
+    <!-- OSPF Network Types -->
+    <div class="card">
+        <h2>🌐 OSPF Network Types</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Network Type</th><th>Neighbor Discovery</th><th>DR/BDR?</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Broadcast</td>
+                        <td>Multicast (224.0.0.5, 224.0.0.6)</td>
+                        <td>Yes (Election required)</td>
+                        <td>Ethernet, Wi-Fi</td>
+                    </tr>
+                    <tr>
+                        <td>Point-to-point</td>
+                        <td>Multicast</td>
+                        <td>No</td>
+                        <td>Serial links, /30 subnets</td>
+                    </tr>
+                    <tr>
+                        <td>Non-Broadcast (NBMA)</td>
+                        <td>Manual (neighbor statements)</td>
+                        <td>Yes</td>
+                        <td>Frame Relay, ATM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>DR/BDR = Designated Router / Backup Designated Router</strong><br>
+            Only on broadcast networks. Reduces OSPF traffic by centralizing updates.
+        </div>
+    </div>
+
+    <!-- OSPF Configuration Examples -->
+    <div class="card">
+        <h2>⚙️ OSPF Configuration (Cisco CLI)</h2>
+        
+        <h3>Basic OSPF on Single Router</h3>
+        <div class="cli-box">
+            Router(config)# router ospf 1<br>
+            Router(config-router)# router-id 1.1.1.1<br>
+            Router(config-router)# network 192.168.1.0 0.0.0.255 area 0<br>
+            Router(config-router)# network 10.0.0.0 0.0.0.3 area 0<br>
+            Router(config-router)# passive-interface gigabitEthernet 0/0<br>
+            Router(config-router)# end
+        </div>
+        
+        <h3>Understanding Wildcard Masks (Inverse Mask)</h3>
+        <p>OSPF uses <strong>wildcard masks</strong> = 255.255.255.255 - subnet mask.</p>
+        <div class="metric-calc">
+            • Subnet 192.168.1.0/24 → Wildcard: 0.0.0.255<br>
+            • Subnet 10.0.0.0/30 → Wildcard: 0.0.0.3<br>
+            • Single IP (host) → Wildcard: 0.0.0.0
+        </div>
+        
+        <h3>Verification Commands</h3>
+        <div class="cli-box">
+            Router# show ip ospf neighbor<br>
+            Router# show ip ospf interface<br>
+            Router# show ip route ospf<br>
+            Router# show ip ospf database
+        </div>
+    </div>
+
+    <!-- Topology Example: 3-Router OSPF -->
+    <div class="card">
+        <h2>🏗️ Real Topology: 3-Router OSPF Network</h2>
+        
+        <div class="ospf-diagram">
+            <pre style="margin: 0; font-family: monospace;">
+                          Area 0 (Backbone)
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │   ┌──────────┐     10.0.0.0/30      ┌──────────┐          │
+    │   │ Router1  │══════════════════════│ Router2  │          │
+    │   │ RID:1.1.1│     10.0.0.1 ←→ 10.0.0.2   │RID:2.2.2│          │
+    │   └─────┬────┘                       └─────┬────┘          │
+    │         │                                   │               │
+    │         │ 10.0.0.4/30                       │ 10.0.0.8/30   │
+    │         │ 10.0.0.5 ←→ 10.0.0.6              │ 10.0.0.9 ←→ 10.0.0.10
+    │         │                                   │               │
+    │         ▼                                   ▼               │
+    │   ┌──────────┐                       ┌──────────┐          │
+    │   │ Router3  │══════════════════════│ Router4  │          │
+    │   │ RID:3.3.3│     10.0.0.12/30     │RID:4.4.4│          │
+    │   └─────┬────┘     10.0.0.13 ←→ 10.0.0.14 └─────┬────┘          │
+    │         │                                   │               │
+    └─────────┼───────────────────────────────────┼───────────────┘
+              │                                   │
+         Stub Area 1                         Stub Area 2
+         (Area 1)                             (Area 2)
+              
+    <strong>LAN Networks:</strong>
+    • Router1 LAN: 192.168.1.0/24
+    • Router2 LAN: 192.168.2.0/24
+    • Router3 LAN: 192.168.3.0/24
+    • Router4 LAN: 192.168.4.0/24
+            </pre>
+        </div>
+        
+        <h4>Configuration Summary:</h4>
+        <div class="cli-box">
+            <strong>Router1 (Area 0 + Area 1):</strong><br>
+            router ospf 1<br>
+            network 192.168.1.0 0.0.0.255 area 1<br>
+            network 10.0.0.0 0.0.0.3 area 0<br>
+            network 10.0.0.4 0.0.0.3 area 0<br>
+            area 1 stub
+        </div>
+    </div>
+
+    <!-- LSAs and OSPF Operation -->
+    <div class="card">
+        <h2>🔄 OSPF Operation (How It Works)</h2>
+        
+        <h3>Step-by-Step Process:</h3>
+        <ol>
+            <li><strong>Discover neighbors</strong> → Send Hello packets (multicast 224.0.0.5)</li>
+            <li><strong>Establish adjacency</strong> → Exchange database descriptions</li>
+            <li><strong>Synchronize LSDB</strong> → Request/update missing LSAs</li>
+            <li><strong>Run SPF algorithm</strong> → Calculate shortest paths (Dijkstra)</li>
+            <li><strong>Populate routing table</strong> → Install best routes</li>
+            <li><strong>Maintain neighbors</strong> → Periodic Hellos (10 sec)</li>
+            <li><strong>React to changes</strong> → Triggered updates on failure</li>
+        </ol>
+        
+        <h3>LSA Types (For CCNA/Exams)</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Type</th><th>Name</th><th>What It Contains</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Router LSA</td><td>Router's links within its area</td>
+                    </tr>
+                    <tr>
+                        <td>2</td><td>Network LSA</td><td>List of routers on a broadcast segment (DR sends)</td>
+                    </tr>
+                    <tr>
+                        <td>3</td><td>Summary LSA</td><td>Routes from one area to another (ABR sends)</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>ASBR Summary</td><td>Route to ASBR</td>
+                    </tr>
+                    <tr>
+                        <td>5</td><td>External LSA</td><td>Routes redistributed from other protocols (ASBR sends)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- OSPF Special Area Types -->
+    <div class="card">
+        <h2>📡 OSPF Special Area Types (Reduce Routing Tables)</h2>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Area Type</th><th>Allows LSA3?</th><th>Allows LSA4/5?</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Normal</td><td>Yes</td><td>Yes</td><td>Standard areas</td>
+                    </tr>
+                    <tr>
+                        <td>Stub</td>
+                        <td>Yes (summary route)</td>
+                        <td>No</td>
+                        <td>Remote sites (block external routes)</td>
+                    </tr>
+                    <tr>
+                        <td>Totally Stubby</td>
+                        <td>Yes (default only)</td>
+                        <td>No</td>
+                        <td>Maximum reduction (Cisco proprietary)</td>
+                    </tr>
+                    <tr>
+                        <td>NSSA (Not-So-Stubby)</td>
+                        <td>Yes</td>
+                        <td>Limited (Type 7)</td>
+                        <td>When you need to redistribute into stub</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Exam Tip:</strong> Stub areas block Type 5 LSAs. Totally stubby blocks Type 3 and 5.
+        </div>
+    </div>
+
+    <!-- OSPF Security -->
+    <div class="card">
+        <h2>🛡️ OSPF Security</h2>
+        
+        <h3>Authentication Types</h3>
+        <ul>
+            <li><strong>Null (Type 0):</strong> No authentication — default, insecure</li>
+            <li><strong>Plain text (Type 1):</strong> Password in clear text — avoid</li>
+            <li><strong>MD5 (Type 2):</strong> Hashed password — recommended</li>
+            <li><strong>SHA (Type 3):</strong> Stronger hashing — modern networks</li>
+        </ul>
+        
+        <div class="cli-box">
+            <strong>Enable MD5 Authentication:</strong><br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip ospf authentication message-digest<br>
+            Router(config-if)# ip ospf message-digest-key 1 md5 SecurePass123
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Always authenticate OSPF!</strong> Without authentication, attackers can inject fake routes and redirect traffic.
+        </div>
+    </div>
+
+    <!-- Load Balancing -->
+    <div class="card">
+        <h2>⚖️ OSPF Load Balancing Equal-Cost Multi-Path (ECMP)</h2>
+        <p>When OSPF finds <strong>multiple paths with identical cost</strong>, it load balances across all of them.</p>
+        
+        <div class="ospf-diagram">
+            <pre>
+                    ┌──────────┐
+                    │ Router1  │
+                    └────┬──┬──┘
+                         │  │
+            Cost 10 ─────┘  └───── Cost 10
+                         │  │
+                    ┌────┴──┴──┐
+                    │ Router2  │
+                    └──────────┘
+            
+            Router1 can reach Router2 via two equal-cost links.
+            OSPF installs BOTH routes!
+            </pre>
+        </div>
+        
+        <div class="cli-box">
+            Router# show ip route<br>
+            O    192.168.2.0/24 [110/2] via 10.0.0.2, 00:00:01, Gig0/0<br>
+                                 [110/2] via 10.0.0.6, 00:00:01, Gig0/1
+        </div>
+        
+        <div class="tip-box">
+            💡 Default ECMP maximum: <strong>4 paths</strong> (can increase to 16 with <code>maximum-paths 16</code>)
+        </div>
+    </div>
+
+    <!-- Troubleshooting Common Issues -->
+    <div class="card">
+        <h2>🔧 Troubleshooting OSPF</h2>
+        
+        <details>
+            <summary><strong>❌ Neighbors not forming?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Same area ID on both routers?<br>
+                2. Same Hello/Dead timers?<br>
+                3. Same authentication key if configured?<br>
+                4. Interfaces in same subnet?<br>
+                5. No ACL blocking 224.0.0.5?
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Routes missing from routing table?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Are routes in OSPF database? <code>show ip ospf database</code><br>
+                2. Stub area blocking external routes?<br>
+                3. Passive-interface preventing Hellos?<br>
+                4. Inbound filtering on neighbor?<br>
+                5. Auto-cost reference bandwidth mismatch?
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Wrong path selected?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Interface costs (<code>show ip ospf interface</code>)<br>
+                2. Reference bandwidth (<code>auto-cost reference-bandwidth</code>)<br>
+                3. Manually set cost with <code>ip ospf cost [value]</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Real-World Case Study -->
+    <div class="card">
+        <h2>💼 Real-World Case Study: University Campus OSPF Design</h2>
+        
+        <p><strong>Scenario:</strong> A university with 4 campuses (Main, North, South, East) wants OSPF for internal routing.</p>
+        
+        <h3>Requirements:</h3>
+        <ul>
+            <li>7,500 students + 500 staff → 8,000 devices</li>
+            <li>Main campus = data center (servers, admin)</li>
+            <li>Remote campuses need internet via Main</li>
+            <li>Guest Wi-Fi should be isolated</li>
+        </ul>
+        
+        <h3>Solution:</h3>
+        <ul>
+            <li><strong>Area 0 (Backbone):</strong> Main campus core routers</li>
+            <li><strong>Area 1,2,3:</strong> Remote campuses (stub areas)</li>
+            <li><strong>Guest VLAN:</strong> Separate OSPF process or static route to firewall</li>
+            <li><strong>Redundancy:</strong> Dual links from each campus to Main</li>
+        </ul>
+        
+        <div class="ospf-diagram">
+            <pre>
+                              Area 0 (Backbone)
+                          ┌──────────────────┐
+                          │   Main Campus    │
+                          │   Core Routers   │
+                          │  (Data Center)   │
+                          └────┬──────┬──────┘
+                               │      │
+                ┌──────────────┘      └──────────────┐
+                │ (Area 1 Stub)       (Area 2 Stub)  │
+                ▼                                     ▼
+          ┌──────────┐                         ┌──────────┐
+          │  North   │                         │  South   │
+          │ Campus   │                         │ Campus   │
+          │ Branch1  │                         │ Branch2  │
+          └──────────┘                         └──────────┘
+            </pre>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Result:</strong> Automatic failover, optimal routing, and reduced routing tables at branch campuses (stub areas block external routes).
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (CCNA-Style)</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command enables OSPF process 1 on a Cisco router?</summary>
+            <p><strong>Answer:</strong> <code>router ospf 1</code> in global configuration mode.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the default Hello interval on a broadcast network?</summary>
+            <p><strong>Answer:</strong> 10 seconds.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> A router has a GigabitEthernet interface and FastEthernet. Which has lower cost?</summary>
+            <p><strong>Answer:</strong> GigabitEthernet (1000 Mbps) has lower cost (1) than FastEthernet (100 Mbps, cost 1) — but only if reference bandwidth is set correctly (10000 for Gigabit to show difference).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What is the purpose of Area 0?</summary>
+            <p><strong>Answer:</strong> Backbone area — all other areas must connect through Area 0.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Which LSA type is flooded within an area and contains router links?</summary>
+            <p><strong>Answer:</strong> Type 1 (Router LSA).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q6:</strong> A customer has 100+ routers and slow CPU. Which OSPF feature reduces routing table size?</summary>
+            <p><strong>Answer:</strong> Stub areas or totally stubby areas (block external or summary routes).</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Configure Basic OSPF (3 Routers)</h2>
+        
+        <div class="ospf-diagram">
+            <pre>
+        R1 ────────────── R2 ────────────── R3
+         │                 │                 │
+       LAN1               LAN2               LAN3
+    10.1.1.0/24       10.2.2.0/24       10.3.3.0/24
+     
+     Point-to-point links: 10.0.12.0/30, 10.0.23.0/30
+     All routers in Area 0
+            </pre>
+        </div>
+        
+        <h3>Step 1: Configure Interfaces</h3>
+        <div class="cli-box">
+            <strong>R1:</strong><br>
+            int g0/0 → ip add 10.1.1.1 255.255.255.0 → no shut<br>
+            int s0/0/0 → ip add 10.0.12.1 255.255.255.252 → no shut
+        </div>
+        
+        <h3>Step 2: Enable OSPF</h3>
+        <div class="cli-box">
+            <strong>R1:</strong><br>
+            router ospf 1<br>
+            router-id 1.1.1.1<br>
+            network 10.1.1.0 0.0.0.255 area 0<br>
+            network 10.0.12.0 0.0.0.3 area 0
+        </div>
+        
+        <h3>Step 3: Verify OSPF</h3>
+        <div class="cli-box">
+            R1# show ip ospf neighbor<br>
+            R1# show ip route ospf<br>
+            R1# ping 10.3.3.1
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Change the cost on R1's serial interface to 100. Watch OSPF recalculate best path!
+        </div>
+    </div>
+
+    <!-- OSPF vs EIGRP Quick Comparison -->
+    <div class="card">
+        <h2>📊 OSPF vs EIGRP (Brief Comparison)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>OSPF</th><th>EIGRP</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Standard</td><td>Open (RFC 2328)</td><td>Cisco proprietary</td>
+                    </tr>
+                    <tr>
+                        <td>Algorithm</td>
+                        <td>Link-state (Dijkstra)</td>
+                        <td>Advanced distance vector</td>
+                    </tr>
+                    <tr>
+                        <td>Metric</td>
+                        <td>Cost (bandwidth)</td>
+                        <td>Composite (bandwidth + delay)</td>
+                    </tr>
+                    <tr>
+                        <td>Convergence</td>
+                        <td>Fast (seconds)</td>
+                        <td>Very fast (sub-second with good neighbors)</td>
+                    </tr>
+                    <tr>
+                        <td>Use case</td>
+                        <td>Multi-vendor, enterprise</td>
+                        <td>Cisco-only shops</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (OSPF Mastery)</h3>
+            <ul>
+                <li>✅ <strong>OSPF = Link-state routing protocol</strong> — maintains complete network map</li>
+                <li>✅ <strong>Area 0 required</strong> — all areas connect through backbone</li>
+                <li>✅ <strong>Cost = reference / bandwidth</strong> — lower cost = better path</li>
+                <li>✅ <strong>Hello = 10 sec, Dead = 40 sec</strong> on broadcast networks</li>
+                <li>✅ <strong>Wildcard masks</strong> = inverse of subnet mask</li>
+                <li>✅ <strong>Stub areas reduce routing tables</strong> — block external routes</li>
+                <li>✅ <strong>Always authenticate OSPF</strong> — prevent route injection</li>
+                <li>✅ <strong>ECMP = Load balancing</strong> across equal-cost paths</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/7039-1.html" target="_blank">Cisco: OSPF Design Guide</a></div>
+        <div class="external-link">📘 <a href="https://datatracker.ietf.org/doc/html/rfc2328" target="_blank">RFC 2328 (OSPFv2 Specification)</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="static-routing.html" class="nav-btn">◀ Previous: Static Routing</a>
+        <a href="eigrp.html" class="nav-btn">Next: EIGRP ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — OSPF | Complete lesson with examples, topology, lab, and practice | Last updated: April 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

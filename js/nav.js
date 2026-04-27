@@ -20,7 +20,7 @@ function loadNavigation() {
             <div class="nav-dropdown-content">
                 <a href="../routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
                 <a href="../routing-switching/static-routing.html">🗺️ Static Routing</a>
-                <a href="#">🔄 OSPF (Coming Soon)</a>
+                <a href="../routing-switching/ospf.html">🔄 OSPF</a>
                 <a href="#">⚡ EIGRP (Coming Soon)</a>
             </div>
         </div>
