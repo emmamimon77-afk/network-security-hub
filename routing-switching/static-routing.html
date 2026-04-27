@@ -78,6 +78,10 @@
             <code>ip route 0.0.0.0 0.0.0.0 203.0.113.1</code><br>
             <em>"If no specific route matches, send to 203.0.113.1 (ISP gateway)."</em>
         </div>
+        
+        <div class="warning-box">
+            <strong>📌 L3 Switch Users:</strong> Before adding static routes, ensure <code>ip routing</code> is enabled and SVIs (<code>interface vlan X</code>) or <code>no switchport</code> ports are used. Same <code>ip route</code> commands work!
+        </div>
     </div>
 
     <!-- Routing Table Components -->

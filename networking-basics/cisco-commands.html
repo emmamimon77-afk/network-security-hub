@@ -467,7 +467,7 @@
             Router(config-subif)# encapsulation dot1Q 20<br>
             Router(config-subif)# ip address 192.168.20.1 255.255.255.0
         </div>
-        
+                
         <h3>⚡ Enabling Layer 3 on a Switch</h3>
         <p>By default, Cisco switches are Layer 2 (switching only). To enable routing:</p>
         
@@ -477,6 +477,105 @@
             Switch(config-if)# ip address 192.168.10.1 255.255.255.0<br>
             Switch(config-if)# no shutdown
         </div>
+
+        <!-- L3 Switch Specific Configuration -->
+        <div class="card">
+            <h2>🔌 Layer 3 Switch Configuration (vs Router)</h2>
+            <p><strong>Critical difference:</strong> L3 switches need explicit routing enablement and use SVIs (Switch Virtual Interfaces) instead of physical interface IPs.</p>
+        
+            <h3>Step 1: Enable IP Routing</h3>
+            <div class="cli-box">
+                 Switch(config)# <strong>ip routing</strong>   ← Required! Routers have this on by default
+            </div>
+        
+            <h3>Step 2: Create VLANs and SVIs</h3>
+            <div class="cli-box">
+                Switch(config)# vlan 10<br>
+                Switch(config-vlan)# name Engineering<br>
+                Switch(config-vlan)# exit<br>
+                Switch(config)# vlan 20<br>
+                Switch(config-vlan)# name Marketing<br>
+                Switch(config-vlan)# exit<br><br>
+                <strong>! Create SVIs (Layer 3 interfaces for each VLAN)</strong><br>
+                Switch(config)# interface vlan 10<br>
+                Switch(config-if)# ip address 192.168.10.1 255.255.255.0<br>
+                Switch(config-if)# no shutdown<br>
+                Switch(config-if)# exit<br><br>
+                Switch(config)# interface vlan 20<br>
+                Switch(config-if)# ip address 192.168.20.1 255.255.255.0<br>
+                Switch(config-if)# no shutdown
+            </div>
+        
+            <h3>Step 3: Assign Physical Ports to VLANs</h3>
+            <div class="cli-box">
+                Switch(config)# interface range gigabitEthernet 0/1-12<br>
+                Switch(config-if-range)# switchport mode access<br>
+                Switch(config-if-range)# switchport access vlan 10<br>
+                Switch(config-if-range)# no shutdown<br>
+                Switch(config-if-range)# exit<br><br>
+                Switch(config)# interface range gigabitEthernet 0/13-24<br>
+                Switch(config-if-range)# switchport mode access<br>
+                Switch(config-if-range)# switchport access vlan 20
+            </div>
+        
+            <h3>Step 4: Configure Routed Port (Dedicated Layer 3)</h3>
+            <div class="cli-box">
+                Switch(config)# interface gigabitEthernet 0/24<br>
+                Switch(config-if)# <strong>no switchport</strong>   ← Makes it routed (not switched)<br>
+                Switch(config-if)# ip address 10.0.0.1 255.255.255.252<br>
+                Switch(config-if)# no shutdown
+            </div>
+        
+            <h3>📊 Router vs L3 Switch Comparison Table</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>Configuration Task</th><th>Router</th><th>Layer 3 Switch</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                           <td><strong>Enable routing</strong></td>
+                           <td>Automatic (no command needed)</td>
+                           <td>Must use <code>ip routing</code></td>
+                        </tr>
+                        <tr>
+                           <td><strong>Inter-VLAN IP</strong></td>
+                           <td>Sub-interface: <code>int g0/0.10</code> <br> <code>encapsulation dot1Q 10</code></td>
+                           <td>SVI: <code>interface vlan 10</code> <br> <code>ip address 192.168.10.1 255.255.255.0</code></td>
+                        </tr>
+                        <tr>
+                           <td><strong>Physical port as routed</strong></td>
+                           <td>Directly: <code>int g0/0</code> <br> <code>ip address ...</code></td>
+                           <td>Must use: <code>no switchport</code> <br> THEN <code>ip address ...</code></td>
+                        </tr>
+                        <tr>
+                           <td><strong>Default gateway</strong> (management)</td>
+                           <td>Not needed (router)</td>
+                           <td>May need: <code>ip default-gateway 10.0.0.254</code> (for out-of-band mgmt)</td>
+                        </tr>
+                        <tr>
+                           <td><strong>NAT support</strong></td>
+                           <td>✅ Yes (full)</td>
+                           <td>❌ No (very limited on most models)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="warning-box">
+                ⚠️ <strong>Common mistake:</strong> Configuring <code>ip address</code> on a switch port without <code>no switchport</code> first — the switch will reject it!
+            </div>
+        
+            <h3>🔄 L3 Switch OSPF Configuration (Same but Different)</h3>
+            <div class="cli-box">
+                Switch(config)# ip routing<br>
+                Switch(config)# router ospf 1<br>
+                Switch(config-router)# network 192.168.10.0 0.0.0.255 area 0<br>
+                Switch(config-router)# network 10.0.0.0 0.0.0.3 area 0<br>
+                <strong>! The OSPF config is IDENTICAL to router — only interface config differs!</strong>
+            </div>
+        </div>       
+
         <div class="warning-box">
             ⚠️ <strong>Warning:</strong> Only Layer 3 switches (eg: 3560, 3650, 9300) support <code>ip routing</code>. Basic switches (2960) are Layer 2 only.
         </div>
