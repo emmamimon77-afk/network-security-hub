@@ -145,13 +145,14 @@ th {
 }
 
 /* ===== CLI BOXES - FIXED MOBILE OVERFLOW ===== */
-.ascii-box, .cli-box, .routing-diagram, .ospf-diagram {
+.ascii-box, .cli-box, .routing-diagram, .ospf-diagram, .eigrp-diagram {
     background: #dff0e8;
     color: #1a3b32;
     padding: 1rem;
-    font-family: 'Courier New', 'Fira Code', monospace;
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-family: 'Courier New', 'Fira Code', 'Monaco', monospace;
+    font-size: 0.85rem;      /* Slightly larger base */
+    font-weight: 500;         /* Medium weight for readability */
+    line-height: 1.5;
     overflow-x: auto;
     white-space: pre;
     border-radius: 0.75rem;
@@ -161,15 +162,23 @@ th {
     -webkit-overflow-scrolling: touch;
 }
 
-/* Mobile-specific CLI box improvements */
+/* Mobile-specific CLI box improvements - MATCH DIAGRAM STYLE */
 @media (max-width: 768px) {
-    .ascii-box, .cli-box, .routing-diagram, .ospf-diagram {
-        font-size: 0.85rem;      /* Larger font on mobile */
-        line-height: 1.5;         /* More line spacing */
-        background: #c8e0d5;      /* Slightly darker contrast background */
-        color: #0a2a20;           /* Darker text for better contrast */
-        font-weight: 500;         /* Slightly bolder text */
-        padding: 0.85rem;         /* Slightly less padding to show more content */
+    .ascii-box, .cli-box, .routing-diagram, .ospf-diagram, .eigrp-diagram {
+        font-size: 0.9rem;           /* Even larger - matches diagram size */
+        line-height: 1.6;             /* More breathing room */
+        background: #dff0e8;          /* Keep consistent */
+        color: #0a2a20;               /* Dark text for contrast */
+        font-weight: 600;             /* Bolder - like diagram text */
+        padding: 1rem;                /* Comfortable padding */
+        letter-spacing: 0.02em;       /* Slight spacing for readability */
+    }
+    
+    /* Also improve the pre text inside */
+    .ascii-box pre, .cli-box pre, .routing-diagram pre, .ospf-diagram pre, .eigrp-diagram pre {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0a2a20;
     }
 }
 
@@ -280,7 +289,7 @@ code {
         padding: 0.85rem 0.75rem;
     }
     .navbar a {
-        font-size: 1rem;   /* Larger than before */
+        font-size: 1rem;
         font-weight: 600;
     }
     .nav-dropdown-content {
@@ -289,8 +298,6 @@ code {
         box-shadow: none;
         margin-top: 0.5rem;
         border: 1px solid #cfe3dc;
-        min-width: auto;
-        width: 100%;         /* Full width on mobile */
     }
     .container {
         padding: 0 1rem;
@@ -301,8 +308,31 @@ code {
     table, th, td {
         font-size: 0.75rem;
     }
-    .ascii-box, .cli-box {
-        font-size: 0.7rem;
-        padding: 0.75rem;
+    
+    /* UNIFIED CLI/DIAGRAM BOXES - Mobile Optimized */
+    .ascii-box, .cli-box, .routing-diagram, .ospf-diagram, .eigrp-diagram {
+        font-size: 0.9rem;           /* Large, readable */
+        line-height: 1.6;             /* Spacious lines */
+        background: #dff0e8;          /* Consistent background */
+        color: #0a2a20;               /* Dark, high contrast text */
+        font-weight: 600;             /* Bold for clarity */
+        padding: 1rem;                /* Comfortable padding */
+        letter-spacing: 0.02em;       /* Slight spacing */
+    }
+    
+    /* All preformatted text inside */
+    .ascii-box pre, .cli-box pre, .routing-diagram pre, 
+    .ospf-diagram pre, .eigrp-diagram pre {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0a2a20;
+        font-family: 'Courier New', 'Fira Code', monospace;
+    }
+    
+    /* Inline code */
+    code {
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 0.2rem 0.4rem;
     }
 }
