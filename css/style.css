@@ -158,7 +158,19 @@ th {
     margin: 1rem 0;
     border-left: 4px solid #52b788;
     border: 1px solid #bdd9cf;
-    -webkit-overflow-scrolling: touch;  /* Smooth scroll on mobile */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-specific CLI box improvements */
+@media (max-width: 768px) {
+    .ascii-box, .cli-box, .routing-diagram, .ospf-diagram {
+        font-size: 0.85rem;      /* Larger font on mobile */
+        line-height: 1.5;         /* More line spacing */
+        background: #c8e0d5;      /* Slightly darker contrast background */
+        color: #0a2a20;           /* Darker text for better contrast */
+        font-weight: 500;         /* Slightly bolder text */
+        padding: 0.85rem;         /* Slightly less padding to show more content */
+    }
 }
 
 code {
@@ -168,6 +180,15 @@ code {
     font-family: monospace;
     font-size: 0.85rem;
     color: #1b4332;
+}
+
+/* Mobile code improvements */
+@media (max-width: 768px) {
+    code {
+        font-size: 0.9rem;
+        font-weight: 500;
+        background: #d4e4dc;
+    }
 }
 
 .tip-box {
