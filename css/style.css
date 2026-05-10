@@ -36,7 +36,7 @@ body {
     color: #2d6a4f;
     text-decoration: none;
     font-weight: 600;  /* Bolder */
-    font-size: 1rem;   /* Larger text */
+    font-size: 1.1rem;   /* Larger text */
     transition: 0.2s;
     padding: 0.25rem 0;
     position: relative;
@@ -70,7 +70,7 @@ body {
     display: block;
     text-align: left;
     border-bottom: 1px solid #e9f0ed;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 .nav-dropdown-content a:last-child {
@@ -247,7 +247,7 @@ code {
         padding: 0.85rem 0.75rem;
     }
     .navbar a {
-        font-size: 0.9rem;   /* Larger than before */
+        font-size: 1rem;   /* Larger than before */
         font-weight: 600;
     }
     .nav-dropdown-content {
