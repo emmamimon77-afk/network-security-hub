@@ -1,5 +1,5 @@
 // Network Security Hub - Navigation Component
-// Version 2.0: Dropdown menus enabled + interactive
+// Version 3.0: Mobile tap support for dropdowns
 
 function loadNavigation() {
     const navHtml = `
@@ -11,7 +11,7 @@ function loadNavigation() {
                 <a href="../networking-basics/osi-model.html">📘 OSI Model</a>
                 <a href="../networking-basics/tcp-ip-model.html">🌐 TCP/IP Model</a>
                 <a href="../networking-basics/subnetting.html">✂️ Subnetting</a>
-                <a href="../networking-basics/cisco-commands.html">⚙️ Cisco Commands</a> 
+                <a href="../networking-basics/cisco-commands.html">⚙️ Cisco Commands</a>
             </div>
         </div>
         
@@ -57,7 +57,7 @@ function loadNavigation() {
     });
 }
 
-// Add CSS for dropdowns if not already in style.css
+// Add CSS for dropdowns
 function addDropdownStyles() {
     if (document.querySelector('#dropdown-styles')) return;
     
@@ -71,53 +71,104 @@ function addDropdownStyles() {
         .nav-dropdown-content {
             display: none;
             position: absolute;
-            background: #1a2a3a;
+            background: white;
             min-width: 220px;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             top: 100%;
             left: 0;
             z-index: 1001;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            border: 1px solid #2d3a46;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: 1px solid #cfe3dc;
+        }
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+        .nav-dropdown.active .nav-dropdown-content {
+            display: block;
         }
         .nav-dropdown-content a {
-            color: #cbd5e1;
+            color: #2d6a4f;
             padding: 0.75rem 1rem;
             display: block;
             text-align: left;
-            border-bottom: 1px solid #2d3a46;
+            border-bottom: 1px solid #e9f0ed;
+            font-size: 1rem;
+            font-weight: 500;
         }
         .nav-dropdown-content a:last-child {
             border-bottom: none;
         }
         .nav-dropdown-content a:hover {
-            background: #2d3a46;
-            color: white;
-            border-bottom-color: #2d3a46;
-        }
-        .nav-dropdown:hover .nav-dropdown-content {
-            display: block;
+            background: #e9f0ed;
+            color: #1b4332;
         }
         @media (max-width: 768px) {
             .nav-dropdown-content {
                 position: static;
-                background: #1a2a3a;
+                background: #f0f7f4;
                 box-shadow: none;
                 margin-top: 0.5rem;
+                border: 1px solid #cfe3dc;
             }
-            .nav-dropdown:hover .nav-dropdown-content {
-                display: none;
-            }
-            .nav-dropdown-content a {
-                padding-left: 2rem;
+            .nav-dropdown.active .nav-dropdown-content {
+                display: block;
             }
         }
     `;
     document.head.appendChild(style);
 }
 
-// Load navigation when DOM is ready
+// Mobile tap support for dropdowns
+function initMobileDropdowns() {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    
+    dropdowns.forEach(dropdown => {
+        const link = dropdown.querySelector('a');
+        if (!link) return;
+        
+        link.removeEventListener('click', handleMobileTap);
+        link.addEventListener('click', handleMobileTap);
+    });
+}
+
+function handleMobileTap(e) {
+    // Only handle on mobile screens
+    if (window.innerWidth > 768) return;
+    
+    e.preventDefault();
+    const dropdown = this.closest('.nav-dropdown');
+    if (!dropdown) return;
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.nav-dropdown').forEach(d => {
+        if (d !== dropdown) {
+            d.classList.remove('active');
+        }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('active');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (window.innerWidth > 768) return;
+    
+    if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown').forEach(d => {
+            d.classList.remove('active');
+        });
+    }
+});
+
+// Initialize everything
 document.addEventListener('DOMContentLoaded', () => {
     loadNavigation();
     addDropdownStyles();
+    initMobileDropdowns();
+});
+
+// Re-initialize on orientation change
+window.addEventListener('resize', () => {
+    initMobileDropdowns();
 });
