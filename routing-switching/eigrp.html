@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIGRP - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .eigrp-diagram {
+            background: #dff0e8;
+            color: #1a3b32;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 1rem 0;
+            border-left: 4px solid #52b788;
+        }
+        .metric-calc {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .comparison-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⚡ EIGRP — Complete Guide</h1>
+        <p><strong>Enhanced Interior Gateway Routing Protocol (EIGRP)</strong> = Cisco's advanced distance-vector routing protocol. Combines the best of distance-vector and link-state protocols. Fast convergence, easy configuration, and Cisco proprietary.</p>
+    </div>
+
+    <!-- Why EIGRP Matters -->
+    <div class="card">
+        <h2>🎯 Why EIGRP Matters</h2>
+        <ul>
+            <li>✅ <strong>Very fast convergence</strong> — Often sub-second (faster than OSPF)</li>
+            <li>✅ <strong>Easy to configure</strong> — Simpler than OSPF (no areas, fewer commands)</li>
+            <li>✅ <strong>Efficient bandwidth usage</strong> — Only sends updates when topology changes</li>
+            <li>✅ <strong>Load balancing</strong> — Supports unequal-cost load balancing (unique to EIGRP!)</li>
+            <li>✅ <strong>Widely used</strong> — Still common in Cisco-only enterprise networks</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Many large enterprises run EIGRP internally because it's easier to manage and troubleshoot than OSPF — but only if they're 100% Cisco.
+        </div>
+        <div class="warning-box">
+            ⚠️ <strong>Important:</strong> EIGRP is Cisco proprietary. For multi-vendor networks (Cisco + Juniper + Arista), use OSPF.
+        </div>
+    </div>
+
+    <!-- EIGRP vs OSPF Comparison -->
+    <div class="card">
+        <h2>📊 EIGRP vs OSPF (Which One to Use?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Feature</th><th>EIGRP</th><th>OSPF</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Type</strong></td><td>Advanced Distance Vector</td><td>Link State</td></tr>
+                    <tr><td><strong>Vendor</strong></td><td>Cisco proprietary</td><td>Open standard (RFC 2328)</td></tr>
+                    <tr><td><strong>Metric</strong></td><td>Composite (Bandwidth + Delay)</td><td>Cost (Bandwidth)</td></tr>
+                    <tr><td><strong>Convergence</strong></td><td>Very fast (sub-second)</td><td>Fast (seconds)</td></tr>
+                    <tr><td><strong>Configuration complexity</strong></td><td>Simple</td><td>Moderate (areas, LSAs)</td></tr>
+                    <tr><td><strong>Load balancing</strong></td><td>Equal + Unequal (variance)</td><td>Equal-cost only</td></tr>
+                    <tr><td><strong>Loop prevention</strong></td><td>Feasibility condition (dual algorithm)</td><td>SPF tree (inherent)</td></tr>
+                    <tr><td><strong>Memory/CPU usage</strong></td><td>Low</td><td>Higher (maintains LSDB)</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box">
+            💡 <strong>Recommendation:</strong> Use EIGRP for Cisco-only networks. Use OSPF for multi-vendor or when you need open standards.
+        </div>
+    </div>
+
+    <!-- Core EIGRP Concepts -->
+    <div class="card">
+        <h2>📚 Core EIGRP Concepts (Must Know)</h2>
+        
+        <h3>1. Autonomous System (AS) Number</h3>
+        <p>EIGRP routers must share the <strong>same AS number</strong> to become neighbors.</p>
+        <div class="metric-calc">
+            <code>router eigrp 100</code> ← AS number (1-65535)
+        </div>
+        
+        <h3>2. Metric (Composite)</h3>
+        <p>EIGRP uses a <strong>composite metric</strong> — bandwidth and delay by default:</p>
+        <div class="metric-calc">
+            Metric = (Bandwidth + Delay) × 256
+        </div>
+        <ul>
+            <li><strong>Bandwidth:</strong> Slowest link path (in kilobits). Lower bandwidth = higher metric.</li>
+            <li><strong>Delay:</strong> Cumulative delay (in microseconds). Higher delay = higher metric.</li>
+            <li><strong>K values:</strong> You can also include load, reliability, MTU (but rarely used).</li>
+        </ul>
+        
+        <h3>3. Successor & Feasible Successor (Dual Algorithm)</h3>
+        <p>EIGRP's loop prevention mechanism.</p>
+        <ul>
+            <li><strong>Successor:</strong> The <strong>best route</strong> to a destination (installed in routing table).</li>
+            <li><strong>Feasible successor:</strong> A <strong>backup route</strong> (lower metric than successor's reported distance). Installed in topology table, ready to use if successor fails.</li>
+        </ul>
+        <div class="eigrp-diagram">
+    <strong>Example:</strong>
+    RouterA wants to reach 192.168.1.0/24.
+    
+    Path 1: RouterA → RouterB (metric 1000) ← SUCCESSOR
+    Path 2: RouterA → RouterC → RouterB (metric 1500) ← FEASIBLE SUCCESSOR (if 1500 &lt; 1000 × K?)
+    
+    If Path 1 fails, Path 2 takes over immediately (no recomputation needed)!
+        </div>
+        
+        <h3>4. Hello Protocol</h3>
+        <ul>
+            <li>Hello interval: <strong>5 seconds</strong> (LAN) / <strong>60 seconds</strong> (WAN)</li>
+            <li>Hold time: <strong>15 seconds</strong> (LAN) / <strong>180 seconds</strong> (WAN)</li>
+        </ul>
+    </div>
+
+    <!-- EIGRP Configuration -->
+    <div class="card">
+        <h2>⚙️ EIGRP Configuration (Cisco CLI)</h2>
+        
+        <h3>Basic EIGRP Configuration</h3>
+        <div class="cli-box">
+            Router(config)# router eigrp 100<br>
+            Router(config-router)# network 192.168.1.0<br>
+            Router(config-router)# network 10.0.0.0<br>
+            Router(config-router)# no auto-summary<br>
+            Router(config-router)# passive-interface gigabitEthernet 0/0<br>
+            Router(config-router)# end
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Why `no auto-summary`?</strong> EIGRP used to automatically summarize networks at classful boundaries (A/B/C). This is almost always undesirable. Always use <code>no auto-summary</code>!
+        </div>
+        
+        <h3>EIGRP Network Statement (Classless)</h3>
+        <p>Unlike OSPF, EIGRP uses <strong>classful network statements</strong> by default — but with wildcard masks, you can be precise.</p>
+        <div class="metric-calc">
+            <code>network 192.168.1.0 0.0.0.255</code> ← Enable EIGRP on 192.168.1.0/24<br>
+            <code>network 10.0.0.0</code> ← Enable EIGRP on ALL 10.x.x.x interfaces!
+        </div>
+        
+        <h3>Verification Commands</h3>
+        <div class="cli-box">
+            Router# show ip eigrp neighbors<br>
+            Router# show ip eigrp topology<br>
+            Router# show ip route eigrp<br>
+            Router# show ip protocols
+        </div>
+        
+        <h3>Configuration Example Output</h3>
+        <div class="cli-box">
+            Router# show ip eigrp neighbors<br>
+            EIGRP-IPv4 Neighbors for AS(100)<br>
+            H   Address         Interface  Hold Uptime   SRTT   RTO  Q  Seq<br>
+            0   10.0.0.2        Se0/0/0    13   00:15:23 120    200   0  5<br>
+            1   10.0.0.6        Se0/0/1    12   00:10:05 95     200   0  8
+        </div>
+    </div>
+
+    <!-- Unequal-Cost Load Balancing (Variance) -->
+    <div class="card">
+        <h2>⚖️ Unequal-Cost Load Balancing (The EIGRP Superpower)</h2>
+        <p>OSPF only load-balances across <strong>equal-cost paths</strong>. EIGRP can use <strong>unequal-cost paths</strong> with the <code>variance</code> command.</p>
+        
+        <div class="eigrp-diagram">
+    RouterA to 192.168.1.0/24:
+    
+    Path 1: Metric 1000 (Gigabit)  ← Successor
+    Path 2: Metric 1500 (FastEthernet) ← Feasible Successor
+    
+    variance 2 means: Install routes with metric ≤ 1000 × 2 = 2000.
+    Path 2 (1500 &lt; 2000) is installed! Traffic splits (70% / 30%).
+        </div>
+        
+        <div class="cli-box">
+            Router(config)# router eigrp 100<br>
+            Router(config-router)# variance 2<br>
+            Router(config-router)# end<br>
+            <br>
+            Router# show ip route<br>
+            D    192.168.2.0/24 [90/1000] via 10.0.0.2, 00:00:01, Serial0/0/0<br>
+                              [90/1500] via 10.0.0.6, 00:00:01, Serial0/0/1
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Use case:</strong> You have a 100 Mbps link (cost 10) and a 50 Mbps backup (cost 20). Variance 2 lets you use both for load balancing!
+        </div>
+    </div>
+
+    <!-- EIGRP Authentication -->
+    <div class="card">
+        <h2>🛡️ EIGRP Security (MD5 Authentication)</h2>
+        
+        <div class="cli-box">
+            Router(config)# key chain EIGRP-KEYS<br>
+            Router(config-keychain)# key 1<br>
+            Router(config-keychain-key)# key-string SecurePass123<br>
+            Router(config-keychain-key)# exit<br>
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# ip authentication mode eigrp 100 md5<br>
+            Router(config-if)# ip authentication key-chain eigrp 100 EIGRP-KEYS
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Always authenticate EIGRP!</strong> Without authentication, attackers can inject fake EIGRP routes and redirect traffic.
+        </div>
+    </div>
+
+    <!-- Topology Example -->
+    <div class="card">
+        <h2>🏗️ Real Topology: 3-Router EIGRP Network</h2>
+        
+        <div class="eigrp-diagram">
+    <pre style="margin: 0; font-family: monospace;">
+                    AS 100
+    ┌─────────────┐         ┌─────────────┐
+    │   Router1   │═════════│   Router2   │
+    │ 192.168.1.1 │         │ 192.168.2.1 │
+    │   10.0.0.1  │═════════│   10.0.0.2  │
+    └──────┬──────┘         └──────┬──────┘
+           │                       │
+           │ 10.0.0.4/30           │ 10.0.0.8/30
+           │ 10.0.0.5 ←→ 10.0.0.6  │ 10.0.0.9 ←→ 10.0.0.10
+           │                       │
+           ▼                       ▼
+    ┌─────────────┐         ┌─────────────┐
+    │   Router3   │═════════│   Router4   │
+    │ 192.168.3.1 │         │ 192.168.4.1 │
+    │   10.0.0.6  │═════════│   10.0.0.10 │
+    └─────────────┘         └─────────────┘
+    
+    <strong>LAN Networks:</strong>
+    • R1 LAN: 192.168.1.0/24
+    • R2 LAN: 192.168.2.0/24
+    • R3 LAN: 192.168.3.0/24
+    • R4 LAN: 192.168.4.0/24
+    </pre>
+        </div>
+        
+        <h4>Router1 Configuration:</h4>
+        <div class="cli-box">
+            router eigrp 100<br>
+            network 192.168.1.0<br>
+            network 10.0.0.0<br>
+            network 10.0.0.4<br>
+            no auto-summary
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card">
+        <h2>🔧 Troubleshooting EIGRP</h2>
+        
+        <details>
+            <summary><strong>❌ Neighbors not forming?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Same AS number on both routers?<br>
+                2. Same K values? (<code>show ip protocols</code>)<br>
+                3. No ACL blocking multicast 224.0.0.10?<br>
+                4. Authentication mismatch?
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Routes not in routing table?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Are routes in topology table? <code>show ip eigrp topology</code><br>
+                2. Is <code>no auto-summary</code> configured?<br>
+                3. Passive-interface preventing Hellos?
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Unequal-cost load balancing not working?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Is variance configured? <code>show ip eigrp topology</code><br>
+                2. Are feasible successors available?<br>
+                3. Try <code>variance 2</code>, then <code>variance 4</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions (CCNA-Style)</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command enables EIGRP with AS number 200?</summary>
+            <p><strong>Answer:</strong> <code>router eigrp 200</code> in global configuration mode.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the default Hello interval on an Ethernet (LAN) interface for EIGRP?</summary>
+            <p><strong>Answer:</strong> 5 seconds.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command allows EIGRP to perform unequal-cost load balancing?</summary>
+            <p><strong>Answer:</strong> <code>variance [multiplier]</code> within the EIGRP router configuration.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why is <code>no auto-summary</code> important in EIGRP?</summary>
+            <p><strong>Answer:</strong> It prevents EIGRP from automatically summarizing networks at classful boundaries (A/B/C), which can cause routing issues in modern VLSM networks.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the difference between a Successor and a Feasible Successor?</summary>
+            <p><strong>Answer:</strong> Successor = best route (installed in routing table). Feasible Successor = backup route (in topology table, ready to use if successor fails).</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Basic EIGRP Configuration (3 Routers)</h2>
+        
+        <div class="eigrp-diagram">
+            <pre>
+        R1 ────────────── R2 ────────────── R3
+         │                 │                 │
+       LAN1               LAN2               LAN3
+    192.168.1.0/24    192.168.2.0/24    192.168.3.0/24
+     
+     Point-to-point links: 10.0.12.0/30, 10.0.23.0/30
+     All routers in EIGRP AS 200
+            </pre>
+        </div>
+        
+        <h3>Step 1: Configure Interfaces on All Routers</h3>
+        <div class="cli-box">
+            <strong>R1:</strong><br>
+            int g0/0 → ip add 192.168.1.1 255.255.255.0 → no shut<br>
+            int s0/0/0 → ip add 10.0.12.1 255.255.255.252 → no shut
+        </div>
+        
+        <h3>Step 2: Enable EIGRP on All Routers</h3>
+        <div class="cli-box">
+            <strong>R1:</strong><br>
+            router eigrp 200<br>
+            network 192.168.1.0<br>
+            network 10.0.12.0<br>
+            no auto-summary<br>
+            passive-interface g0/0
+        </div>
+        
+        <h3>Step 3: Verify EIGRP</h3>
+        <div class="cli-box">
+            R1# show ip eigrp neighbors<br>
+            R1# show ip route eigrp<br>
+            R1# ping 192.168.3.1
+        </div>
+        
+        <h3>Step 4: Configure Unequal-Cost Load Balancing</h3>
+        <div class="cli-box">
+            R1(config)# router eigrp 200<br>
+            R1(config-router)# variance 2<br>
+            R1(config-router)# end<br>
+            R1# show ip route
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Change the bandwidth on one link to create unequal costs, then verify both paths appear with <code>variance 2</code>.
+        </div>
+    </div>
+
+    <!-- EIGRP vs OSPF Summary -->
+    <div class="card">
+        <h2>📝 EIGRP vs OSPF — Quick Decision Guide</h2>
+        <div class="metric-calc">
+            <strong>Choose EIGRP when:</strong><br>
+            • Your network is 100% Cisco<br>
+            • You need unequal-cost load balancing<br>
+            • You prefer simpler configuration (no areas)<br>
+            • You want very fast convergence (sub-second)<br>
+            <br>
+            <strong>Choose OSPF when:</strong><br>
+            • You have multiple vendors (Juniper, Arista, Huawei)<br>
+            • You need an open standard (RFC)<br>
+            • You have extremely large networks (thousands of routers)<br>
+            • You want to avoid vendor lock-in
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (EIGRP Mastery)</h3>
+            <ul>
+                <li>✅ <strong>EIGRP = Cisco proprietary</strong> — only works between Cisco devices</li>
+                <li>✅ <strong>AS number must match</strong> for routers to become neighbors</li>
+                <li>✅ <strong>DUAL algorithm</strong> = Successor (best) + Feasible Successor (backup)</li>
+                <li>✅ <strong>Metric = Bandwidth + Delay</strong> — lower is better</li>
+                <li>✅ <strong>Variance</strong> enables unequal-cost load balancing (unique to EIGRP)</li>
+                <li>✅ <strong>Always use `no auto-summary`</strong> — prevents classful summarization</li>
+                <li>✅ <strong>EIGRP converges faster</strong> than OSPF (sub-second vs seconds)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/16406-eigrp-toc.html" target="_blank">Cisco: EIGRP Documentation</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/13669-1.html" target="_blank">EIGRP vs OSPFP Comparison</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="ospf.html" class="nav-btn">◀ Previous: OSPF</a>
+        <a href="../firewalls/iptables.html" class="nav-btn">Next: iptables ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — EIGRP | Complete lesson with comparison, variance, lab, and practice | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

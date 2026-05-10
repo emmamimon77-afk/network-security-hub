@@ -21,15 +21,17 @@ function loadNavigation() {
                 <a href="../routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
                 <a href="../routing-switching/static-routing.html">🗺️ Static Routing</a>
                 <a href="../routing-switching/ospf.html">🔄 OSPF</a>
-                <a href="#">⚡ EIGRP (Coming Soon)</a>
+                <a href="../routing-switching/eigrp.html">⚡ EIGRP</a>
             </div>
         </div>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🔥 Firewalls ▾</a>
             <div class="nav-dropdown-content">
-                <a href="#">🛠️ iptables (Coming Soon)</a>
-                <a href="#">🧱 Zone-Based Firewall (Coming Soon)</a>
+                <a href="#" style="opacity: 0.6;">🛠️ iptables (Coming Soon)</a>
+                <a href="#" style="opacity: 0.6;">🧱 Zone-Based Firewall (Coming Soon)</a>
+                <!-- Adding spacing to match other dropdowns -->
+                <a href="#" style="opacity: 0.6; visibility: hidden;">placeholder</a>
             </div>
         </div>
         
