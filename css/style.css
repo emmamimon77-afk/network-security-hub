@@ -57,7 +57,8 @@ body {
     display: none;
     position: absolute;
     background: white;
-    min-width: 220px;
+    min-width: 250px;
+    width: max-content;     /* Auto-adjusts to content */
     border-radius: 0.75rem;
     top: 100%;
     left: 0;
@@ -267,6 +268,8 @@ code {
         box-shadow: none;
         margin-top: 0.5rem;
         border: 1px solid #cfe3dc;
+        min-width: auto;
+        width: 100%;         /* Full width on mobile */
     }
     .container {
         padding: 0 1rem;
