@@ -184,12 +184,22 @@
             <span class="cli-prompt">Router&gt;</span> <span class="cli-output">enable</span><br>
             <span class="cli-prompt">Router#</span> <span class="cli-output">configure terminal</span><br>
             <span class="cli-prompt">Router(config)#</span> <span class="cli-output">hostname BRANCH-ROUTER</span><br>
-            <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">banner motd ^C Unauthorized access prohibited ^C</span><br>
+            <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">banner motd ^C Unauthorized access prohibited ^C<br><span style="color: #5e8b74; font-size: 0.8rem;">↑ The ^C marks the start AND end of the banner message (delimiter)</span>
             <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">enable secret Cisco123</span><br>
             <span class="cli-prompt">BRANCH-ROUTER(config)#</span> <span class="cli-output">line console 0</span><br>
             <span class="cli-prompt">BRANCH-ROUTER(config-line)#</span> <span class="cli-output">password admin123</span><br>
             <span class="cli-prompt">BRANCH-ROUTER(config-line)#</span> <span class="cli-output">login</span>
         </div>
+
+        <div class="tip-box">
+            💡 <strong>Understanding `banner motd ^C ... ^C`:</strong><br>
+            The <code>^C</code> is a <strong>delimiter</strong> (like quotes) that marks the start and end of your banner message.
+            It prevents confusion if your banner contains spaces or special characters.
+            <br><br>
+            <strong>Alternative delimiters:</strong> <code>#</code>, <code>%</code>, <code>!</code>, or any character not in your message.
+            <br><br>
+            <strong>Example:</strong> <code>banner motd # Authorized Access Only #</code>
+        </div> 
         
         <h3>Interface Configuration (IP Address)</h3>
         <div class="cli-box">
