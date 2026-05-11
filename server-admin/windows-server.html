@@ -6,16 +6,19 @@
     <title>Windows Server Security | Network Security Hub</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .cmd-box {
-            background: #1e2a36;
-            color: #cbd5e6;
+        .cli-box {
+            background: #dff0e8;
+            color: #1a3b32;
             padding: 1rem;
             border-radius: 0.75rem;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', 'Fira Code', monospace;
             font-size: 0.8rem;
+            line-height: 1.4;
             overflow-x: auto;
+            white-space: pre;
             margin: 1rem 0;
             border-left: 4px solid #0078d4;
+            border: 1px solid #bdd9cf;
         }
         .security-baseline {
             background: #eef2ff;
@@ -99,7 +102,7 @@
         <h2>⚡ PowerShell for Security (The Modern Way)</h2>
         
         <h3>User & Group Management</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-LocalUser                          # List all local users<br>
             Get-LocalGroup                         # List all local groups<br>
             Get-LocalGroupMember -Name "Administrators"   # Who is admin?<br>
@@ -108,14 +111,14 @@
         </div>
         
         <h3>Network & Firewall</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-NetFirewallRule | Where-Object {$_.Enabled -eq "True"}  # List active rules<br>
             New-NetFirewallRule -DisplayName "Allow SSH" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow<br>
             Get-NetTCPConnection -State Listen                          # What's listening?
         </div>
         
         <h3>Logs & Auditing</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-EventLog -LogName Security -EntryType Error -Newest 20   # Last 20 security errors<br>
             Get-WinEvent -FilterHashTable @{LogName='Security'; ID=4625} -MaxEvents 10   # Failed logins<br>
             Get-Process | Sort-Object CPU -Descending | Select-Object -First 10   # Top 10 CPU processes
@@ -170,7 +173,7 @@
             </table>
         </div>
         
-        <div class="cmd-box">
+        <div class="cli-box">
             # Monitor failed logons in real-time<br>
             Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} -MaxEvents 50 | Format-List TimeCreated, Message
         </div>
@@ -230,7 +233,7 @@
         </div>
         
         <h3>Critical AD Security Commands</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             # List all domain admins<br>
             Get-ADGroupMember -Identity "Domain Admins"<br><br>
             # Find inactive user accounts (security risk!)<br>
@@ -253,7 +256,7 @@
         <h2>🔧 Essential Windows Security Tools</h2>
         
         <h3><code>Sysinternals Suite</code> (Microsoft's advanced toolkit)</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             # Process Explorer (better than Task Manager)<br>
             procexp.exe<br><br>
             # Autoruns (see everything that runs at startup)<br>
@@ -268,7 +271,7 @@
         </div>
         
         <h3><code>Windows Defender Offline Scan</code></h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             # Run offline scan (outside Windows — catches hidden malware)<br>
             DefenderOfflineScan.exe /boot /once
         </div>
@@ -278,7 +281,7 @@
     <div class="card">
         <h2>🚨 Incident Response Checklist (Windows Server)</h2>
         
-        <div class="cmd-box">
+        <div class="cli-box">
             # 1. Check active user sessions<br>
             quser<br>
             net session<br><br>
@@ -336,24 +339,24 @@
         <p>A Windows Server is suspected of compromise. Investigate using built-in tools.</p>
         
         <h3>Step 1: Examine active user sessions</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             quser<br>
             net session
         </div>
         
         <h3>Step 2: Check for unusual processes</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-Process | Sort-Object CPU -Descending | Select -First 10<br>
             tasklist /v /fi "STATUS eq RUNNING"
         </div>
         
         <h3>Step 3: Review security events (failed logins)</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} -MaxEvents 20 | Format-List TimeCreated, Message
         </div>
         
         <h3>Step 4: Check persistent mechanisms</h3>
-        <div class="cmd-box">
+        <div class="cli-box">
             Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"}<br>
             Get-Service | Where-Object {$_.StartType -eq "Automatic" -and $_.Status -eq "Running"}
         </div>
