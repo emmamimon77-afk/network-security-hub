@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone-Based Firewall - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .zone-diagram {
+            background: #dff0e8;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 1rem 0;
+            border-left: 4px solid #52b788;
+        }
+        .config-block {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .comparison-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🧱 Zone-Based Firewall (ZBF) — Complete Guide</h1>
+        <p><strong>Zone-Based Firewall (ZBF)</strong> = Cisco's modern firewall model. Instead of per-interface ACLs, you group interfaces into <strong>zones</strong> and define policies <strong>between zones</strong>. More logical, scalable, and stateful.</p>
+    </div>
+
+    <!-- Why ZBF Matters -->
+    <div class="card">
+        <h2>🎯 Why Zone-Based Firewall Matters</h2>
+        <ul>
+            <li>✅ <strong>Logical organization</strong> — Group interfaces by trust level (Inside, Outside, DMZ)</li>
+            <li>✅ <strong>Stateful inspection</strong> — Tracks connections like iptables (not just packet-by-packet)</li>
+            <li>✅ <strong>Simpler rules</strong> — One policy between zones instead of ACLs on every interface</li>
+            <li>✅ <strong>Scalable</strong> — Add new interfaces to a zone, policy applies automatically</li>
+            <li>✅ <strong>CCNP/CCIE required</strong> — Essential for advanced Cisco security exams</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Enterprise firewalls (Cisco ASA, FTD) use zone-based logic. ZBF brings this power to IOS routers.
+        </div>
+    </div>
+
+    <!-- ZBF vs Classic ACL -->
+    <div class="card">
+        <h2>📊 ZBF vs Classic ACL (The Evolution)</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Feature</th><th>Classic ACL</th><th>Zone-Based Firewall</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Direction</strong></td>
+                        <td>Inbound/outbound per interface</td>
+                        <td>Between zones (zone-pair)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Statefulness</strong></td>
+                        <td>Stateless (evaluates each packet) </td>
+                        <td>Stateful (tracks connections)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complexity</strong> </td>
+                        <td>High (many ACLs on many interfaces)</td>
+                        <td>Lower (one policy per zone-pair)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong> </td>
+                        <td>Poor (add interface = add ACLs)</td>
+                        <td>Excellent (add interface to zone)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Application awareness</strong> </td>
+                        <td>Layer 3/4 only</td>
+                        <td>Layer 7 (NBAR, can inspect HTTP, FTP, etc.)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ZBF Core Concepts -->
+    <div class="card">
+        <h2>📚 Core ZBF Concepts (The 3 Pillars)</h2>
+        
+        <h3>1. Zones</h3>
+        <p>A <strong>zone</strong> is a logical group of interfaces with the same security level.</p>
+        <div class="config-block">
+            zone security INSIDE<br>
+            zone security OUTSIDE<br>
+            zone security DMZ
+        </div>
+        
+        <h3>2. Zone-Pairs</h3>
+        <p>A <strong>zone-pair</strong> defines traffic <strong>direction</strong> between two zones (source → destination).</p>
+        <div class="config-block">
+            zone-pair security FROM-INSIDE-TO-OUTSIDE source INSIDE destination OUTSIDE
+        </div>
+        
+        <h3>3. Policies</h3>
+        <p>A <strong>policy</strong> defines WHAT traffic is allowed and HOW it's inspected. Attached to a zone-pair.</p>
+        <div class="config-block">
+            policy-map type inspect INSIDE-TO-OUTSIDE-POLICY<br>
+             class type inspect ALLOWED-TRAFFIC<br>
+              inspect<br>
+             class class-default<br>
+              drop
+        </div>
+        
+        <div class="zone-diagram">
+    <strong>Typical Zone Topology:</strong>
+    
+    ┌─────────────────────────────────────────────────────────────┐
+    │                        INTERNET                            │
+    │                      (OUTSIDE Zone)                        │
+    └───────────────────────┬─────────────────────────────────────┘
+                            │
+                            │ (Traffic Flow: OUTSIDE ←→ DMZ)
+                            │
+    ┌───────────────────────┼─────────────────────────────────────┐
+    │                       │        ZONE-PAIR POLICIES           │
+    │    ┌──────────────────┴──────────────────┐                  │
+    │    │             ROUTER/FIREWALL          │                  │
+    │    └──────────────────┬──────────────────┘                  │
+    │         (INSIDE)      │       (DMZ)                         │
+    │    ┌──────────────────┴──────────────────┐                  │
+    │    │                                      │                  │
+    │ ┌──┴──┐                              ┌───┴───┐              │
+    │ │LAN  │                              │Public │              │
+    │ │INSIDE│                             │Server │              │
+    │ │Zone │                              │(DMZ)  │              │
+    │ └─────┘                              └───────┘              │
+    └─────────────────────────────────────────────────────────────┘
+        </div>
+    </div>
+
+    <!-- ZBF Configuration (Step-by-Step) -->
+    <div class="card">
+        <h2>⚙️ ZBF Configuration (Step-by-Step)</h2>
+        
+        <h3>Step 1: Define Zones</h3>
+        <div class="cli-box">
+            zone security INSIDE<br>
+            zone security OUTSIDE<br>
+            zone security DMZ
+        </div>
+        
+        <h3>Step 2: Assign Interfaces to Zones</h3>
+        <div class="cli-box">
+            interface GigabitEthernet0/0<br>
+             zone-member security INSIDE<br>
+            !<br>
+            interface GigabitEthernet0/1<br>
+             zone-member security OUTSIDE<br>
+            !<br>
+            interface GigabitEthernet0/2<br>
+             zone-member security DMZ
+        </div>
+
+        <h3>Step 3: Define Traffic Classes (What to Match)</h3>
+        <div class="cli-box">
+            ! Allow HTTP, HTTPS, DNS, ICMP<br>
+            class-map type inspect match-any ALLOWED-TRAFFIC<br>
+             match protocol http<br>
+             match protocol https<br>
+             match protocol dns<br>
+             match protocol icmp<br>
+            !<br>
+            ! Allow SSH from INSIDE to DMZ<br>
+            class-map type inspect SSH-TO-DMZ<br>
+             match protocol ssh<br>
+             match access-group name SSH-SOURCE<br>
+            !<br>
+            ip access-list extended SSH-SOURCE<br>
+             permit ip 192.168.1.0 0.0.0.255 any
+        </div>
+        
+        <h3>Step 4: Create Policy-Map (What to Do)</h3>
+        <div class="cli-box">
+            policy-map type inspect INSIDE-TO-OUTSIDE-POLICY<br>
+             class type inspect ALLOWED-TRAFFIC<br>
+              inspect<br>
+             class class-default<br>
+              drop log
+        </div>
+        
+        <h3>Step 5: Create Zone-Pair and Apply Policy</h3>
+        <div class="cli-box">
+            zone-pair security FROM-INSIDE-TO-OUTSIDE source INSIDE destination OUTSIDE<br>
+             service-policy type inspect INSIDE-TO-OUTSIDE-POLICY
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Result:</strong> INSIDE zone can initiate HTTP, HTTPS, DNS to OUTSIDE. OUTSIDE cannot initiate anything to INSIDE (stateful).
+        </div>
+    </div>
+
+    <!-- DMZ Configuration Example -->
+    <div class="card">
+        <h2>🏗️ Real Example: Web Server DMZ</h2>
+        
+        <h3>Scenario:</h3>
+        <ul>
+            <li><strong>INSIDE zone:</strong> Corporate LAN (192.168.1.0/24) — employees</li>
+            <li><strong>DMZ zone:</strong> Public web server (10.0.0.5)</li>
+            <li><strong>OUTSIDE zone:</strong> Internet</li>
+        </ul>
+        
+        <h3>Requirements:</h3>
+        <ul>
+            <li>INSIDE → OUTSIDE: HTTP, HTTPS, DNS (allow)</li>
+            <li>OUTSIDE → DMZ: HTTP, HTTPS only (allow)</li>
+            <li>INSIDE → DMZ: SSH (management) only</li>
+        </ul>
+        
+        <h3>Configuration:</h3>
+        <div class="cli-box">
+            <strong>! Step 1: Zones</strong><br>
+            zone security INSIDE<br>
+            zone security OUTSIDE<br>
+            zone security DMZ<br>
+            <br>
+            <strong>! Step 2: Assign interfaces</strong><br>
+            int g0/0 — zone-member security INSIDE<br>
+            int g0/1 — zone-member security OUTSIDE<br>
+            int g0/2 — zone-member security DMZ<br>
+            <br>
+            <strong>! Step 3: Class-maps</strong><br>
+            class-map type inspect match-any WEB-TRAFFIC<br>
+             match protocol http<br>
+             match protocol https<br>
+            <br>
+            class-map type inspect SSH-ONLY<br>
+             match protocol ssh<br>
+            <br>
+            <strong>! Step 4: Policy-maps</strong><br>
+            policy-map type inspect INSIDE-TO-OUTSIDE<br>
+             class type inspect WEB-TRAFFIC<br>
+              inspect<br>
+             class class-default<br>
+              drop<br>
+            <br>
+            policy-map type inspect OUTSIDE-TO-DMZ<br>
+             class type inspect WEB-TRAFFIC<br>
+              inspect<br>
+             class class-default<br>
+              drop<br>
+            <br>
+            policy-map type inspect INSIDE-TO-DMZ<br>
+             class type inspect SSH-ONLY<br>
+              inspect<br>
+             class class-default<br>
+              drop<br>
+            <br>
+            <strong>! Step 5: Zone-pairs</strong><br>
+            zone-pair security I-TO-O source INSIDE destination OUTSIDE<br>
+             service-policy type inspect INSIDE-TO-OUTSIDE<br>
+            <br>
+            zone-pair security O-TO-DMZ source OUTSIDE destination DMZ<br>
+             service-policy type inspect OUTSIDE-TO-DMZ<br>
+            <br>
+            zone-pair security I-TO-DMZ source INSIDE destination DMZ<br>
+             service-policy type inspect INSIDE-TO-DMZ
+        </div>
+    </div>
+
+    <!-- ZBF Security Best Practices -->
+    <div class="card">
+        <h2>🛡️ ZBF Security Best Practices</h2>
+        <ul>
+            <li>✅ <strong>Self zone:</strong> The router itself is in the "self" zone. Control access to it with <code>zone-pair self</code></li>
+            <li>✅ <strong>Drop all by default:</strong> Always include <code>class class-default drop</code> in policies</li>
+            <li>✅ <strong>Log drops:</strong> Use <code>drop log</code> to see denied packets (<code>debug zone-pair security</code>)</li>
+            <li>✅ <strong>Use parametric class-maps:</strong> Match by protocol, not just port (HTTP not just port 80)</li>
+            <li>✅ <strong>Inspect, not pass:</strong> <code>inspect</code> is stateful, <code>pass</code> is stateless (avoid pass)</li>
+            <li>✅ <strong>Never put two interfaces in same zone if traffic must be filtered</strong> — same zone = no inspection</li>
+        </ul>
+        <div class="warning-box">
+            ⚠️ <strong>Critical:</strong> Interfaces in the <strong>same zone</strong> have <strong>no firewall policy between them</strong> — they route freely!
+        </div>
+    </div>
+
+    <!-- Troubleshooting ZBF -->
+    <div class="card">
+        <h2>🔧 Troubleshooting ZBF</h2>
+        
+        <details>
+            <summary><strong>❌ Traffic not passing as expected?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                1. Zone membership: <code>show zone-pair security</code><br>
+                2. Policy attached: <code>show policy-map type inspect zone-pair</code><br>
+                3. Hit counts: <code>show policy-map type inspect zone-pair sessions</code><br>
+                4. Debug drops: <code>debug zone-pair security drops</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Internet works, but can't SSH to DMZ server?</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Check:</strong><br>
+                - Is there a zone-pair from INSIDE to DMZ?<br>
+                - Does the policy allow SSH? (<code>class-map type inspect SSH-ONLY</code>)<br>
+                - Is the SSH policy inspecting or passing?
+            </div>
+        </details>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the difference between <code>inspect</code> and <code>pass</code> in a ZBF policy?</summary>
+            <p><strong>Answer:</strong> <code>inspect</code> is stateful (tracks connections, allows return traffic). <code>pass</code> is stateless (allows packet through without tracking). Always use <code>inspect</code>.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Two interfaces in the same zone. Is traffic inspected between them?</summary>
+            <p><strong>Answer:</strong> No. ZBF only inspects traffic between <strong>different zones</strong>. Same zone = no policy = routing only.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command creates a zone-pair for traffic from INSIDE to OUTSIDE with policy named MY-POLICY?</summary>
+            <p><strong>Answer:</strong> <code>zone-pair security MY-PAIR source INSIDE destination OUTSIDE</code><br>
+            Then: <code>service-policy type inspect MY-POLICY</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why is ZBF considered more scalable than traditional ACLs?</summary>
+            <p><strong>Answer:</strong> With ACLs, adding an interface requires editing ACLs on that interface. With ZBF, you just add the interface to a zone, and existing zone-pair policies apply automatically.</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Build a Basic ZBF</h2>
+        <p><strong>Goal:</strong> Configure zone-based firewall on a Cisco router with INSIDE, OUTSIDE, and DMZ zones.</p>
+        
+        <h3>Step 1: Define zones & assign interfaces</h3>
+        <div class="cli-box">
+            zone security INSIDE<br>
+            zone security OUTSIDE<br>
+            zone security DMZ<br>
+            int g0/0 — zone-member security INSIDE<br>
+            int g0/1 — zone-member security OUTSIDE<br>
+            int g0/2 — zone-member security DMZ
+        </div>
+        
+        <h3>Step 2: Create class-maps for allowed traffic</h3>
+        <div class="cli-box">
+            class-map type inspect match-any WEB<br>
+             match protocol http<br>
+             match protocol https<br>
+            !<br>
+            class-map type inspect match-all SSH-ONLY<br>
+             match protocol ssh
+        </div>
+        
+        <h3>Step 3: Create policies</h3>
+        <div class="cli-box">
+            policy-map type inspect INSIDE-TO-OUTSIDE<br>
+             class type inspect WEB<br>
+              inspect<br>
+             class class-default<br>
+              drop log<br>
+            !<br>
+            policy-map type inspect OUTSIDE-TO-DMZ<br>
+             class type inspect WEB<br>
+              inspect<br>
+             class class-default<br>
+              drop
+        </div>
+        
+        <h3>Step 4: Apply to zone-pairs</h3>
+        <div class="cli-box">
+            zone-pair security I-TO-O source INSIDE destination OUTSIDE<br>
+             service-policy type inspect INSIDE-TO-OUTSIDE<br>
+            !<br>
+            zone-pair security O-TO-DMZ source OUTSIDE destination DMZ<br>
+             service-policy type inspect OUTSIDE-TO-DMZ
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Add a policy allowing INSIDE to DMZ for SSH only (management). Then test with <code>telnet</code> (should fail) and <code>ssh</code> (should work).
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (ZBF Mastery)</h3>
+            <ul>
+                <li>✅ <strong>Zones group interfaces by trust level</strong> (INSIDE, OUTSIDE, DMZ)</li>
+                <li>✅ <strong>Zone-pairs define direction</strong> (source → destination)</li>
+                <li>✅ <strong>Policies define what's allowed</strong> and how to inspect it</li>
+                <li>✅ <strong>Always use <code>inspect</code> for stateful firewalling</strong> — never <code>pass</code></li>
+                <li>✅ <strong>Interfaces in the same zone are NOT inspected</strong> — they route freely</li>
+                <li>✅ <strong>ZBF is scalable and stateful</strong> — the modern way to firewall on Cisco IOS</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/212213-zone-based-policy-firewall-zbf-configurat.html" target="_blank">Cisco: ZBF Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/security/zbf/configuration/xe-16/zbf-xe-16-book.html" target="_blank">Cisco ZBF Official Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="iptables.html" class="nav-btn">◀ Previous: iptables</a>
+        <a href="../server-admin/linux-commands.html" class="nav-btn">Next: Linux Commands ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Zone-Based Firewall (ZBF) | Complete lesson with design, config, DMZ, and lab | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

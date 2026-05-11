@@ -29,7 +29,7 @@ function loadNavigation() {
             <a href="javascript:void(0)">🔥 Firewalls ▾</a>
             <div class="nav-dropdown-content">
                 <a href="../firewalls/iptables.html">🛠️ iptables</a> 
-                <a href="#" style="opacity: 0.6;">🧱 Zone-Based Firewall (Coming Soon)</a>
+                <a href="../firewalls/zone-based-firewall.html">🧱 Zone-Based Firewall</a>
                 <!-- Adding spacing to match other dropdowns -->
                 <a href="#" style="opacity: 0.6; visibility: hidden;">placeholder</a>
             </div>
