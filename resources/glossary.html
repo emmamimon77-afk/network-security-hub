@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glossary | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .glossary-search {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #cfe3dc;
+        }
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 2px solid #cfe3dc;
+            border-radius: 0.75rem;
+            background: #ffffff;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #52b788;
+        }
+        .glossary-letter {
+            background: #e9f0ed;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            display: inline-block;
+            margin: 0.25rem;
+            text-decoration: none;
+            color: #2d6a4f;
+            font-weight: 600;
+        }
+        .glossary-letter:hover {
+            background: #52b788;
+            color: white;
+        }
+        .term-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #cfe3dc;
+            transition: all 0.2s;
+        }
+        .term-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .term-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1b4332;
+            margin-bottom: 0.5rem;
+        }
+        .term-definition {
+            color: #2d6a4f;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        .term-example {
+            background: #e9f0ed;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .term-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #2c7da0;
+            text-decoration: none;
+        }
+        .term-link:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            background: #52b788;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #5e8b74;
+        }
+        @media (max-width: 768px) {
+            .term-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card" style="text-align: center;">
+        <h1>📖 Network Security Glossary</h1>
+        <p>Your complete reference for abbreviations, protocols, attacks, and security terms used throughout this hub.</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">🔍 Use the search bar below or click a letter to jump to terms</p>
+    </div>
+
+    <!-- Search & Navigation -->
+    <div class="glossary-search">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search for any term... (e.g., ACL, XSS, OSPF, port 443)">
+        
+        <div style="margin-top: 1rem; text-align: center;">
+            <span class="glossary-letter" onclick="filterByLetter('all')">All</span>
+            <span class="glossary-letter" onclick="filterByLetter('A')">A</span>
+            <span class="glossary-letter" onclick="filterByLetter('B')">B</span>
+            <span class="glossary-letter" onclick="filterByLetter('C')">C</span>
+            <span class="glossary-letter" onclick="filterByLetter('D')">D</span>
+            <span class="glossary-letter" onclick="filterByLetter('E')">E</span>
+            <span class="glossary-letter" onclick="filterByLetter('F')">F</span>
+            <span class="glossary-letter" onclick="filterByLetter('G')">G</span>
+            <span class="glossary-letter" onclick="filterByLetter('H')">H</span>
+            <span class="glossary-letter" onclick="filterByLetter('I')">I</span>
+            <span class="glossary-letter" onclick="filterByLetter('J')">J</span>
+            <span class="glossary-letter" onclick="filterByLetter('K')">K</span>
+            <span class="glossary-letter" onclick="filterByLetter('L')">L</span>
+            <span class="glossary-letter" onclick="filterByLetter('M')">M</span>
+            <span class="glossary-letter" onclick="filterByLetter('N')">N</span>
+            <span class="glossary-letter" onclick="filterByLetter('O')">O</span>
+            <span class="glossary-letter" onclick="filterByLetter('P')">P</span>
+            <span class="glossary-letter" onclick="filterByLetter('Q')">Q</span>
+            <span class="glossary-letter" onclick="filterByLetter('R')">R</span>
+            <span class="glossary-letter" onclick="filterByLetter('S')">S</span>
+            <span class="glossary-letter" onclick="filterByLetter('T')">T</span>
+            <span class="glossary-letter" onclick="filterByLetter('U')">U</span>
+            <span class="glossary-letter" onclick="filterByLetter('V')">V</span>
+            <span class="glossary-letter" onclick="filterByLetter('W')">W</span>
+            <span class="glossary-letter" onclick="filterByLetter('X')">X</span>
+            <span class="glossary-letter" onclick="filterByLetter('Y')">Y</span>
+            <span class="glossary-letter" onclick="filterByLetter('Z')">Z</span>
+        </div>
+    </div>
+
+    <!-- Glossary Terms Container -->
+    <div id="glossaryContainer">
+        <!-- Terms will be populated by JavaScript -->
+        <div style="text-align: center; padding: 2rem;">Loading glossary...</div>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Comprehensive Glossary | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+
+<script>
+// Complete Glossary Data
+const glossaryTerms = [
+    // A
+    { term: "ACL", definition: "Access Control List - A set of rules that filters network traffic based on IP addresses, ports, or protocols.", category: "security", lesson: "cisco-commands", letter: "A" },
+    { term: "AD (Active Directory)", definition: "Microsoft's directory service for managing users, computers, and permissions in Windows networks.", category: "windows", lesson: "windows-server", letter: "A" },
+    { term: "ARP", definition: "Address Resolution Protocol - Maps IP addresses to MAC addresses on a local network.", category: "networking", lesson: "osi-model", letter: "A" },
+    { term: "ARP Spoofing", definition: "Attack where attacker sends fake ARP replies to associate their MAC with a legitimate IP.", category: "attack", lesson: "osi-model", letter: "A" },
+    
+    // B
+    { term: "Broadcast Address", definition: "Special address (all host bits 1) used to send traffic to all devices on a subnet.", category: "networking", lesson: "subnetting", letter: "B" },
+    { term: "Buffer Overflow", definition: "Attack that writes data beyond memory buffer boundaries to crash or control a program.", category: "attack", lesson: "osi-model", letter: "B" },
+    
+    // C
+    { term: "CIDR", definition: "Classless Inter-Domain Routing - Notation (e.g., /24) that specifies number of network bits in an IP address.", category: "networking", lesson: "subnetting", letter: "C" },
+    { term: "CSRF", definition: "Cross-Site Request Forgery - Tricks authenticated users into performing unintended actions on a website.", category: "attack", lesson: "osi-model", letter: "C" },
+    { term: "Cost (OSPF)", definition: "OSPF metric calculated as reference bandwidth divided by interface bandwidth. Lower cost = better path.", category: "routing", lesson: "ospf", letter: "C" },
+    
+    // D
+    { term: "DAI", definition: "Dynamic ARP Inspection - Security feature that validates ARP packets to prevent ARP spoofing.", category: "security", lesson: "vlan-config", letter: "D" },
+    { term: "DDoS", definition: "Distributed Denial of Service - Overwhelms a target with traffic from multiple sources.", category: "attack", lesson: "osi-model", letter: "D" },
+    { term: "DMZ", definition: "Demilitarized Zone - Network segment containing public-facing servers (web, email) isolated from internal network.", category: "security", lesson: "zone-based-firewall", letter: "D" },
+    { term: "DNS", definition: "Domain Name System - Resolves domain names (google.com) to IP addresses (8.8.8.8).", category: "protocol", lesson: "tcp-ip-model", letter: "D" },
+    { term: "DUAL", definition: "Diffusing Update Algorithm - EIGRP's loop prevention and path calculation algorithm.", category: "routing", lesson: "eigrp", letter: "D" },
+    
+    // E
+    { term: "ECMP", definition: "Equal-Cost Multi-Path - Load balancing across multiple paths with equal metric.", category: "routing", lesson: "ospf", letter: "E" },
+    { term: "EIGRP", definition: "Enhanced Interior Gateway Routing Protocol - Cisco's advanced distance-vector routing protocol.", category: "routing", lesson: "eigrp", letter: "E" },
+    { term: "Event ID (Windows)", definition: "Numeric code identifying specific system events. Critical IDs: 4624 (logon), 4625 (failed), 4688 (process).", category: "windows", lesson: "windows-server", letter: "E" },
+    
+    // F
+    { term: "Floating Static Route", definition: "Backup route with higher administrative distance that activates when primary route fails.", category: "routing", lesson: "static-routing", letter: "F" },
+    { term: "FTP", definition: "File Transfer Protocol (port 21) - Transfers files between client and server (unencrypted).", category: "protocol", lesson: "tcp-ip-model", letter: "F" },
+    
+    // G
+    { term: "Gateway of Last Resort", definition: "Default route (0.0.0.0/0) used when no specific route matches a destination.", category: "routing", lesson: "static-routing", letter: "G" },
+    { term: "GRE", definition: "Generic Routing Encapsulation - Tunneling protocol that encapsulates any protocol inside IP.", category: "networking", lesson: "subnetting", letter: "G" },
+    
+    // H
+    { term: "HTTP", definition: "Hypertext Transfer Protocol (port 80) - Protocol for web traffic (unencrypted).", category: "protocol", lesson: "tcp-ip-model", letter: "H" },
+    { term: "HTTPS", definition: "HTTP Secure (port 443) - Encrypted web traffic using TLS/SSL.", category: "protocol", lesson: "tcp-ip-model", letter: "H" },
+    { term: "HSTS", definition: "HTTP Strict Transport Security - Tells browsers to always use HTTPS, preventing SSL stripping attacks.", category: "security", lesson: "osi-model", letter: "H" },
+    
+    // I
+    { term: "ICMP", definition: "Internet Control Message Protocol - Used for diagnostic tools like ping and traceroute.", category: "protocol", lesson: "tcp-ip-model", letter: "I" },
+    { term: "IP Spoofing", definition: "Attack that forges source IP address to hide identity or bypass filters.", category: "attack", lesson: "osi-model", letter: "I" },
+    { term: "iptables", definition: "Linux firewall that filters packets, performs NAT, and tracks connection states.", category: "security", lesson: "iptables", letter: "I" },
+    
+    // K
+    { term: "Kerberoasting", definition: "AD attack that extracts service account hashes for offline cracking.", category: "attack", lesson: "windows-server", letter: "K" },
+    
+    // L
+    { term: "LSA", definition: "Link State Advertisement - OSPF message containing routing information flooded within an area.", category: "routing", lesson: "ospf", letter: "L" },
+    { term: "LSDB", definition: "Link State Database - OSPF's complete network map maintained by every router in an area.", category: "routing", lesson: "ospf", letter: "L" },
+    
+    // M
+    { term: "MAC Address", definition: "Media Access Control - Unique hardware address burned into network interfaces (Layer 2).", category: "networking", lesson: "osi-model", letter: "M" },
+    { term: "MD5 Authentication (OSPF/EIGRP)", definition: "Hashed password authentication for routing protocols to prevent route injection.", category: "security", lesson: "ospf", letter: "M" },
+    
+    // N
+    { term: "NAT", definition: "Network Address Translation - Allows multiple private IPs to share a single public IP.", category: "networking", lesson: "iptables", letter: "N" },
+    { term: "NetBIOS", definition: "Network Basic Input/Output System - Legacy protocol for name resolution (security risk, should be disabled).", category: "protocol", lesson: "windows-server", letter: "N" },
+    { term: "NSSA", definition: "Not-So-Stubby Area - OSPF area type that allows limited external routes while maintaining stub characteristics.", category: "routing", lesson: "ospf", letter: "N" },
+    
+    // O
+    { term: "OSPF", definition: "Open Shortest Path First - Link-state routing protocol, open standard, widely used in enterprise networks.", category: "routing", lesson: "ospf", letter: "O" },
+    
+    // P
+    { term: "Pass-the-Hash", definition: "Attack using NTLM hash without cracking password to authenticate as user.", category: "attack", lesson: "windows-server", letter: "P" },
+    { term: "Port Security", definition: "Switch feature limiting which MAC addresses can connect to a port.", category: "security", lesson: "vlan-config", letter: "P" },
+    { term: "PowerShell", definition: "Microsoft's automation platform and scripting language - Essential for Windows administration and security.", category: "windows", lesson: "windows-server", letter: "P" },
+    { term: "PPTP", definition: "Point-to-Point Tunneling Protocol - Legacy VPN protocol (insecure, avoid).", category: "protocol", lesson: "osi-model", letter: "P" },
+    { term: "Private VLAN", definition: "PVLAN - Isolates devices within same VLAN (prevents host-to-host communication).", category: "security", lesson: "vlan-config", letter: "P" },
+    
+    // R
+    { term: "RIP", definition: "Routing Information Protocol - Distance-vector routing protocol limited to 15 hops (obsolete).", category: "routing", letter: "R" },
+    { term: "RPC", definition: "Remote Procedure Call - Allows programs to execute code on remote systems.", category: "protocol", lesson: "osi-model", letter: "R" },
+    { term: "Router-on-a-Stick", definition: "Single router interface serving multiple VLANs using 802.1Q sub-interfaces.", category: "routing", lesson: "cisco-commands", letter: "R" },
+    
+    // S
+    { term: "Session Hijacking", definition: "Attack that steals user's session cookie to impersonate them.", category: "attack", lesson: "osi-model", letter: "S" },
+    { term: "SIP", definition: "Session Initiation Protocol - Used for VoIP calls and video conferencing.", category: "protocol", lesson: "osi-model", letter: "S" },
+    { term: "SMB", definition: "Server Message Block - Windows file sharing protocol (port 445).", category: "protocol", lesson: "osi-model", letter: "S" },
+    { term: "SMTP", definition: "Simple Mail Transfer Protocol (port 25) - Sends emails between servers.", category: "protocol", lesson: "tcp-ip-model", letter: "S" },
+    { term: "SQL Injection", definition: "Attack inserting malicious SQL code into web forms to access or destroy database data.", category: "attack", lesson: "osi-model", letter: "S" },
+    { term: "SSH", definition: "Secure Shell (port 22) - Encrypted remote access protocol.", category: "protocol", lesson: "tcp-ip-model", letter: "S" },
+    { term: "SSL Stripping", definition: "Attack downgrading HTTPS to HTTP to read traffic in plaintext.", category: "attack", lesson: "osi-model", letter: "S" },
+    { term: "Stub Area", definition: "OSPF area that blocks Type 5 LSAs (external routes) to reduce routing table size.", category: "routing", lesson: "ospf", letter: "S" },
+    { term: "Successor", definition: "EIGRP's best route to a destination (installed in routing table).", category: "routing", lesson: "eigrp", letter: "S" },
+    { term: "SUID", definition: "Set User ID - Linux permission allowing program to run with owner's privileges (potential security risk).", category: "linux", lesson: "linux-commands", letter: "S" },
+    { term: "SYN Flood", definition: "DoS attack overwhelming server with incomplete TCP handshakes.", category: "attack", lesson: "osi-model", letter: "S" },
+    { term: "SVI", definition: "Switch Virtual Interface - Layer 3 interface on a switch for routing between VLANs.", category: "networking", lesson: "cisco-commands", letter: "S" },
+    
+    // T
+    { term: "TCP", definition: "Transmission Control Protocol - Reliable, connection-oriented transport protocol.", category: "protocol", lesson: "tcp-ip-model", letter: "T" },
+    { term: "TLS", definition: "Transport Layer Security - Encryption protocol for HTTPS (replaced SSL).", category: "security", lesson: "osi-model", letter: "T" },
+    { term: "Totally Stubby Area", definition: "OSPF area blocking Type 3 AND Type 5 LSAs (Cisco proprietary, maximum reduction).", category: "routing", lesson: "ospf", letter: "T" },
+    
+    // U
+    { term: "UDP", definition: "User Datagram Protocol - Fast, connectionless transport protocol (no reliability).", category: "protocol", lesson: "tcp-ip-model", letter: "U" },
+    { term: "uRPF", definition: "Unicast Reverse Path Forwarding - Verifies source IP is reachable via same interface (blocks IP spoofing).", category: "security", lesson: "subnetting", letter: "U" },
+    
+    // V
+    { term: "Variance (EIGRP)", definition: "Command enabling unequal-cost load balancing in EIGRP.", category: "routing", lesson: "eigrp", letter: "V" },
+    { term: "VLAN", definition: "Virtual LAN - Divides one physical switch into multiple isolated broadcast domains.", category: "networking", lesson: "vlan-config", letter: "V" },
+    { term: "VLAN Hopping", definition: "Attack that sends packets to other VLANs they shouldn't access.", category: "attack", lesson: "vlan-config", letter: "V" },
+    { term: "VLSM", definition: "Variable Length Subnet Mask - Using different subnet masks within the same network for efficiency.", category: "networking", lesson: "subnetting", letter: "V" },
+    { term: "VTP", definition: "VLAN Trunking Protocol - Synchronizes VLAN database across switches (use Transparent mode for security).", category: "networking", lesson: "vlan-config", letter: "V" },
+    { term: "VXLAN", definition: "Virtual Extensible LAN - Overlay network extending Layer 2 across Layer 3 (data centers).", category: "networking", lesson: "subnetting", letter: "V" },
+    
+    // W
+    { term: "WAF", definition: "Web Application Firewall - Filters malicious HTTP traffic before reaching web servers.", category: "security", lesson: "osi-model", letter: "W" },
+    { term: "Wildcard Mask", definition: "Inverse of subnet mask - Used in OSPF and EIGRP network statements (0.0.0.255 = /24).", category: "networking", lesson: "ospf", letter: "W" },
+    
+    // X
+    { term: "XSS", definition: "Cross-Site Scripting - Attack injecting malicious scripts into websites viewed by other users.", category: "attack", lesson: "osi-model", letter: "X" },
+    
+    // Z
+    { term: "ZBF", definition: "Zone-Based Firewall - Cisco's modern firewall model using zones and zone-pairs.", category: "security", lesson: "zone-based-firewall", letter: "Z" }
+];
+
+// Common Port Numbers (displayed separately)
+const commonPorts = [
+    { port: 20, protocol: "FTP Data", description: "File Transfer Protocol - Data channel" },
+    { port: 21, protocol: "FTP Control", description: "File Transfer Protocol - Command channel" },
+    { port: 22, protocol: "SSH", description: "Secure Shell - Encrypted remote access" },
+    { port: 23, protocol: "Telnet", description: "Unencrypted remote access (insecure, avoid)" },
+    { port: 25, protocol: "SMTP", description: "Simple Mail Transfer Protocol - Email sending" },
+    { port: 53, protocol: "DNS", description: "Domain Name System - Resolves domain names to IPs" },
+    { port: 67, protocol: "DHCP Server", description: "Dynamic Host Configuration Protocol - Server" },
+    { port: 68, protocol: "DHCP Client", description: "Dynamic Host Configuration Protocol - Client" },
+    { port: 80, protocol: "HTTP", description: "Hypertext Transfer Protocol - Web traffic (unencrypted)" },
+    { port: 110, protocol: "POP3", description: "Post Office Protocol - Email retrieval" },
+    { port: 123, protocol: "NTP", description: "Network Time Protocol - Time synchronization" },
+    { port: 143, protocol: "IMAP", description: "Internet Message Access Protocol - Email retrieval" },
+    { port: 161, protocol: "SNMP", description: "Simple Network Management Protocol - Network monitoring" },
+    { port: 443, protocol: "HTTPS", description: "HTTP Secure - Encrypted web traffic" },
+    { port: 445, protocol: "SMB", description: "Server Message Block - Windows file sharing" },
+    { port: 465, protocol: "SMTPS", description: "SMTP over SSL - Encrypted email sending" },
+    { port: 587, protocol: "SMTP", description: "SMTP with authentication - Modern email submission" },
+    { port: 993, protocol: "IMAPS", description: "IMAP over SSL - Encrypted email retrieval" },
+    { port: 995, protocol: "POP3S", description: "POP3 over SSL - Encrypted email retrieval" },
+    { port: 1433, protocol: "MSSQL", description: "Microsoft SQL Server database" },
+    { port: 3306, protocol: "MySQL", description: "MySQL database" },
+    { port: 3389, protocol: "RDP", description: "Remote Desktop Protocol - Windows remote access" },
+    { port: 5432, protocol: "PostgreSQL", description: "PostgreSQL database" },
+    { port: 8080, protocol: "HTTP Alternate", description: "Alternative HTTP port (web proxy, testing)" },
+    { port: 8443, protocol: "HTTPS Alternate", description: "Alternative HTTPS port" },
+    { port: 27017, protocol: "MongoDB", description: "MongoDB database" }
+];
+
+// Render glossary
+function renderGlossary(filterText = '', filterLetter = 'all') {
+    const container = document.getElementById('glossaryContainer');
+    
+    let filteredTerms = glossaryTerms.filter(term => {
+        let matches = true;
+        if (filterLetter !== 'all' && term.letter !== filterLetter) matches = false;
+        if (filterText && !term.term.toLowerCase().includes(filterText.toLowerCase()) && 
+            !term.definition.toLowerCase().includes(filterText.toLowerCase())) matches = false;
+        return matches;
+    });
+    
+    if (filteredTerms.length === 0) {
+        container.innerHTML = '<div class="no-results">🔍 No terms found. Try a different search or letter.</div>';
+        return;
+    }
+    
+    // Sort alphabetically
+    filteredTerms.sort((a, b) => a.term.localeCompare(b.term));
+    
+    let html = '';
+    let currentLetter = '';
+    
+    filteredTerms.forEach(term => {
+        const firstLetter = term.term.charAt(0).toUpperCase();
+        if (firstLetter !== currentLetter) {
+            currentLetter = firstLetter;
+            html += `<h2 style="margin: 1.5rem 0 0.5rem 0; border-left: 5px solid #52b788; padding-left: 1rem;">${currentLetter}</h2>`;
+        }
+        
+        const lessonLink = term.lesson ? `<a href="../${getLessonPath(term.lesson)}" class="term-link">📚 View in lesson →</a>` : '';
+        
+        html += `
+            <div class="term-card">
+                <div class="term-title">${term.term}</div>
+                <div class="term-definition">${term.definition}</div>
+                ${lessonLink}
+            </div>
+        `;
+    });
+    
+    // Add Common Ports section if showing all or searching
+    if (filterLetter === 'all' && !filterText) {
+        html += `<h2 style="margin: 2rem 0 1rem 0; border-left: 5px solid #52b788; padding-left: 1rem;">🔌 Common Port Numbers</h2>`;
+        html += `<div style="overflow-x: auto;">
+                    <table style="width: 100%;">
+                        <thead><tr><th>Port</th><th>Protocol</th><th>Description</th></tr></thead>
+                        <tbody>`;
+        commonPorts.forEach(port => {
+            html += `<tr><td><strong>${port.port}</strong></td><td>${port.protocol}</td><td>${port.description}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+    }
+    
+    container.innerHTML = html;
+}
+
+function getLessonPath(lesson) {
+    const paths = {
+        'cisco-commands': '../networking-basics/cisco-commands.html',
+        'eigrp': '../routing-switching/eigrp.html',
+        'linux-commands': '../server-admin/linux-commands.html',
+        'osi-model': '../networking-basics/osi-model.html',
+        'ospf': '../routing-switching/ospf.html',
+        'static-routing': '../routing-switching/static-routing.html',
+        'subnetting': '../networking-basics/subnetting.html',
+        'tcp-ip-model': '../networking-basics/tcp-ip-model.html',
+        'vlan-config': '../routing-switching/vlan-config.html',
+        'windows-server': '../server-admin/windows-server.html',
+        'iptables': '../firewalls/iptables.html',
+        'zone-based-firewall': '../firewalls/zone-based-firewall.html'
+    };
+    return paths[lesson] || '#';
+}
+
+let currentFilterLetter = 'all';
+let currentSearchText = '';
+
+function filterByLetter(letter) {
+    currentFilterLetter = letter;
+    currentSearchText = '';
+    document.getElementById('searchInput').value = '';
+    renderGlossary(currentSearchText, currentFilterLetter);
+}
+
+// Search handler
+document.addEventListener('DOMContentLoaded', function() {
+    renderGlossary('', 'all');
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            currentSearchText = e.target.value;
+            currentFilterLetter = 'all';
+            renderGlossary(currentSearchText, currentFilterLetter);
+        });
+    }
+});
+</script>
+
+</body>
+</html>

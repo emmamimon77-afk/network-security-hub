@@ -52,6 +52,7 @@ function loadNavigation() {
         </div>
         
         <a href="../labs/index.html">🧪 Lab Index</a>
+        <a href="../resources/glossary.html">📖 Glossary</a>
     `;
     
     document.querySelectorAll('.navbar').forEach(nav => {
