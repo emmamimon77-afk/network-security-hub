@@ -47,7 +47,7 @@ function loadNavigation() {
             <a href="javascript:void(0)">🐧 Server Admin ▾</a>
             <div class="nav-dropdown-content">
                 <a href="../server-admin/linux-commands.html">💻 Linux Commands for Security</a>
-                <a href="#">🪟 Windows Server (Coming Soon)</a>
+                <a href="../server-admin/windows-server.html">🪟 Windows Server</a>
             </div>
         </div>
         

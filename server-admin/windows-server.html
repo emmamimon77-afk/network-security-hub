@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Server Security | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .cmd-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #0078d4;
+        }
+        .security-baseline {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .table-win th {
+            background: #0078d4;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🪟 Windows Server Security — Complete Guide</h1>
+        <p><strong>Windows Server</strong> runs 70%+ of enterprise servers worldwide. Mastering its security tools is essential for any network professional.</p>
+    </div>
+
+    <!-- Why Windows Server Matters -->
+    <div class="card">
+        <h2>🎯 Why Windows Server Security Matters</h2>
+        <ul>
+            <li>✅ <strong>Dominant in enterprises</strong> — Active Directory, Exchange, file servers</li>
+            <li>✅ <strong>Frequent attack target</strong> — Ransomware, credential theft, lateral movement</li>
+            <li>✅ <strong>Powerful built-in tools</strong> — Event Viewer, PowerShell, Windows Defender</li>
+            <li>✅ <strong>Compliance requirements</strong> — PCI-DSS, HIPAA, SOX demand Windows security</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Most ransomware attacks target Windows Server because it holds the crown jewels (Active Directory, file shares).
+        </div>
+    </div>
+
+    <!-- Core Security Tools -->
+    <div class="card">
+        <h2>🛡️ Core Windows Server Security Tools</h2>
+        
+        <div style="overflow-x: auto;">
+            <table class="table-win">
+                <thead>
+                    <tr><th>Tool</th><th>Purpose</th><th>How to Access</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Event Viewer</strong> </td>
+                        <td>Central log of all system events (security, app, system)</td>
+                        <td>`eventvwr.msc` (Run as Admin)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Local Security Policy</strong></td>
+                        <td>Password policies, audit policies, user rights</td>
+                        <td>`secpol.msc`</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Windows Defender Firewall</strong></td>
+                        <td>Advanced firewall with inbound/outbound rules</td>
+                        <td>`wf.msc`</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PowerShell</strong></td>
+                        <td>Command-line automation and security scripting</td>
+                        <td>`powershell.exe` (Admin) </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Computer Management</strong></td>
+                        <td>Local users, groups, services, shared folders</td>
+                        <td>`compmgmt.msc`</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PowerShell Security Commands -->
+    <div class="card">
+        <h2>⚡ PowerShell for Security (The Modern Way)</h2>
+        
+        <h3>User & Group Management</h3>
+        <div class="cmd-box">
+            Get-LocalUser                          # List all local users<br>
+            Get-LocalGroup                         # List all local groups<br>
+            Get-LocalGroupMember -Name "Administrators"   # Who is admin?<br>
+            New-LocalUser -Name "secadmin" -Password (Read-Host -AsSecureString)<br>
+            Add-LocalGroupMember -Group "Administrators" -Member "secadmin"
+        </div>
+        
+        <h3>Network & Firewall</h3>
+        <div class="cmd-box">
+            Get-NetFirewallRule | Where-Object {$_.Enabled -eq "True"}  # List active rules<br>
+            New-NetFirewallRule -DisplayName "Allow SSH" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow<br>
+            Get-NetTCPConnection -State Listen                          # What's listening?
+        </div>
+        
+        <h3>Logs & Auditing</h3>
+        <div class="cmd-box">
+            Get-EventLog -LogName Security -EntryType Error -Newest 20   # Last 20 security errors<br>
+            Get-WinEvent -FilterHashTable @{LogName='Security'; ID=4625} -MaxEvents 10   # Failed logins<br>
+            Get-Process | Sort-Object CPU -Descending | Select-Object -First 10   # Top 10 CPU processes
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>PowerShell is essential</strong> — most security tasks are faster in PowerShell than in the GUI.
+        </div>
+    </div>
+
+    <!-- Event Log Analysis -->
+    <div class="card">
+        <h2>📜 Event Log Analysis (Critical Event IDs)</h2>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Event ID</th><th>What It Means</th><th>Why It Matters</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>4624</strong></td>
+                        <td>Successful logon</td>
+                        <td>Normal, but spikes at odd hours = suspicious</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4625</strong></td>
+                        <td>Failed logon</td>
+                        <td>Brute-force indicator — too many = attack</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4648</strong></td>
+                        <td>Logon using explicit credentials</td>
+                        <td>Possible lateral movement (pass-the-hash)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4672</strong></td>
+                        <td>Special privileges assigned to new logon</td>
+                        <td>Admin logon — monitor carefully</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4688</strong></td>
+                        <td>New process created</td>
+                        <td>Detect malware execution (with command-line logging enabled)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7045</strong></td>
+                        <td>New service installed</td>
+                        <td>Persistence mechanism — malware loves this</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="cmd-box">
+            # Monitor failed logons in real-time<br>
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} -MaxEvents 50 | Format-List TimeCreated, Message
+        </div>
+    </div>
+
+    <!-- Security Configuration & Hardening -->
+    <div class="card">
+        <h2>🛡️ Security Hardening Checklist (Critical First Steps)</h2>
+        
+        <div class="security-baseline">
+            <strong>✅ Account & Password Policies</strong>
+            <ul>
+                <li>Disable default Administrator account (rename it)</li>
+                <li>Enforce complex passwords (12+ chars, complexity enabled)</li>
+                <li>Set account lockout policy (5 attempts, lock 15 min)</li>
+                <li>Remove unnecessary local users and groups</li>
+            </ul>
+        </div>
+        
+        <div class="security-baseline">
+            <strong>✅ Network & Firewall</strong>
+            <ul>
+                <li>Enable Windows Defender Firewall (block inbound by default)</li>
+                <li>Disable insecure protocols: SMBv1, LLMNR, NetBIOS</li>
+                <li>Use RDP with Network Level Authentication (NLA)</li>
+                <li>Change RDP default port (3389 → custom)</li>
+            </ul>
+        </div>
+        
+        <div class="security-baseline">
+            <strong>✅ Logging & Monitoring</strong>
+            <ul>
+                <li>Enable PowerShell logging (script block + module)</li>
+                <li>Enable command-line auditing (see exactly what was run)</li>
+                <li>Forward logs to SIEM (Splunk, ELK, Sentinel)</li>
+                <li>Set log size limits (prevent overwrite)</li>
+            </ul>
+        </div>
+        
+        <div class="security-baseline">
+            <strong>✅ Application Control</strong>
+            <ul>
+                <li>Enable Windows Defender Antivirus (real-time protection)</li>
+                <li>Consider AppLocker or Windows Defender Application Control (WDAC)</li>
+                <li>Disable macros in Office (GPO)</li>
+                <li>Remove unnecessary software</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Active Directory Security Basics -->
+    <div class="card">
+        <h2>🏢 Active Directory Security (The Heart of Windows Enterprise)</h2>
+        
+        <div class="tip-box">
+            💡 Active Directory (AD) is the most attacked component in Windows networks. Compromise AD = compromise the entire organization.
+        </div>
+        
+        <h3>Critical AD Security Commands</h3>
+        <div class="cmd-box">
+            # List all domain admins<br>
+            Get-ADGroupMember -Identity "Domain Admins"<br><br>
+            # Find inactive user accounts (security risk!)<br>
+            Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00<br><br>
+            # Find accounts with passwords never expiring<br>
+            Get-ADUser -Filter {PasswordNeverExpires -eq $true}
+        </div>
+        
+        <h3>Common AD Attacks (What to Watch For)</h3>
+        <ul>
+            <li><strong>Kerberoasting:</strong> Extract service account hashes — monitor for event ID 4769 with unusual tickets</li>
+            <li><strong>Golden Ticket:</strong> Forged Kerberos tickets — protect KRBTGT account, monitor abnormal TGS requests</li>
+            <li><strong>Pass-the-Hash:</strong> Use NTLM hash without password — enable Kerberos only where possible</li>
+            <li><strong>DCShadow:</strong> Malicious AD replication — monitor for 4928, 4929 events</li>
+        </ul>
+    </div>
+
+    <!-- Windows Security Tools Deep Dive -->
+    <div class="card">
+        <h2>🔧 Essential Windows Security Tools</h2>
+        
+        <h3><code>Sysinternals Suite</code> (Microsoft's advanced toolkit)</h3>
+        <div class="cmd-box">
+            # Process Explorer (better than Task Manager)<br>
+            procexp.exe<br><br>
+            # Autoruns (see everything that runs at startup)<br>
+            autoruns.exe<br><br>
+            # TCPView (like netstat on steroids)<br>
+            tcpview.exe
+        </div>
+        
+        <h3><code>Process Monitor (ProcMon)</code></h3>
+        <div class="tip-box">
+            💡 ProcMon captures <strong>every</strong> registry access, file access, network connection, and process. Incredible for malware analysis and troubleshooting.
+        </div>
+        
+        <h3><code>Windows Defender Offline Scan</code></h3>
+        <div class="cmd-box">
+            # Run offline scan (outside Windows — catches hidden malware)<br>
+            DefenderOfflineScan.exe /boot /once
+        </div>
+    </div>
+
+    <!-- Incident Response on Windows -->
+    <div class="card">
+        <h2>🚨 Incident Response Checklist (Windows Server)</h2>
+        
+        <div class="cmd-box">
+            # 1. Check active user sessions<br>
+            quser<br>
+            net session<br><br>
+            # 2. List running processes<br>
+            Get-Process | Sort-Object CPU -Descending | Select -First 10<br>
+            tasklist /v<br><br>
+            # 3. Check network connections<br>
+            netstat -ano<br>
+            Get-NetTCPConnection -State Established<br><br>
+            # 4. Check scheduled tasks (persistence)<br>
+            schtasks /query /fo LIST /v<br>
+            Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"}<br><br>
+            # 5. Check services<br>
+            Get-Service | Where-Object {$_.Status -eq "Running"}<br><br>
+            # 6. Check recent logins<br>
+            Get-EventLog -LogName Security -InstanceId 4624 -Newest 20 | Format-List TimeGenerated, Message
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What PowerShell command lists all local users on a Windows Server?</summary>
+            <p><strong>Answer:</strong> <code>Get-LocalUser</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Which Event ID indicates a failed login attempt?</summary>
+            <p><strong>Answer:</strong> Event ID <strong>4625</strong> (failed logon).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What tool would you use to see all programs that run at Windows startup?</summary>
+            <p><strong>Answer:</strong> <code>Autoruns.exe</code> from Sysinternals Suite.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> How do you check the members of the local Administrators group via PowerShell?</summary>
+            <p><strong>Answer:</strong> <code>Get-LocalGroupMember -Name "Administrators"</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is a Golden Ticket attack in Active Directory?</summary>
+            <p><strong>Answer:</strong> A forged Kerberos ticket (TGT) that gives an attacker domain admin rights. Protect the KRBTGT account and rotate its password.</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Windows Server Security Investigation</h2>
+        
+        <h3>Scenario:</h3>
+        <p>A Windows Server is suspected of compromise. Investigate using built-in tools.</p>
+        
+        <h3>Step 1: Examine active user sessions</h3>
+        <div class="cmd-box">
+            quser<br>
+            net session
+        </div>
+        
+        <h3>Step 2: Check for unusual processes</h3>
+        <div class="cmd-box">
+            Get-Process | Sort-Object CPU -Descending | Select -First 10<br>
+            tasklist /v /fi "STATUS eq RUNNING"
+        </div>
+        
+        <h3>Step 3: Review security events (failed logins)</h3>
+        <div class="cmd-box">
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} -MaxEvents 20 | Format-List TimeCreated, Message
+        </div>
+        
+        <h3>Step 4: Check persistent mechanisms</h3>
+        <div class="cmd-box">
+            Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"}<br>
+            Get-Service | Where-Object {$_.StartType -eq "Automatic" -and $_.Status -eq "Running"}
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Use Event Viewer (eventvwr.msc) to create a custom view showing all failed logins (Event ID 4625) from the last 24 hours.
+        </div>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Windows Server Security)</h3>
+            <ul>
+                <li>✅ <strong>PowerShell is essential</strong> — learn `Get-*` commands for investigation</li>
+                <li>✅ <strong>Event IDs are critical</strong> — 4624 (logon), 4625 (failed), 4688 (process), 7045 (service)</li>
+                <li>✅ <strong>Enable command-line auditing</strong> — see exactly what attackers ran</li>
+                <li>✅ <strong>Rename default Administrator</strong> — basic but effective</li>
+                <li>✅ <strong>Sysinternals tools</strong> are lifesavers — ProcMon, Autoruns, TCPView</li>
+                <li>✅ <strong>Active Directory security</strong> is its own specialty — protect KRBTGT!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://learn.microsoft.com/en-us/windows-server/security/" target="_blank">Microsoft: Windows Server Security Docs</a></div>
+        <div class="external-link">📘 <a href="https://learn.microsoft.com/en-us/sysinternals/" target="_blank">Sysinternals Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisa.gov/cybersecurity-resource-library" target="_blank">CISA: Windows Security Resources</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-commands.html" class="nav-btn">◀ Previous: Linux Commands</a>
+        <a href="../resources/glossary.html" class="nav-btn">Next: Glossary ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Windows Server Security | Complete lesson with powershell, event logs, hardening, and lab | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
