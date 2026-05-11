@@ -1,32 +1,39 @@
 // Module Loader - Network Security Hub
-// Adds reusable modules to lessons (without duplicates)
+// Only adds the attack explainer module if the page has security tables
 
 function addAttackExplainerModule() {
-    // Check if module already exists (from HTML)
-    if (document.querySelector('.attack-explainer-module')) {
-        console.log('Module already exists, skipping');
-        return;
-    }
+    // Check if module already exists
+    if (document.querySelector('.attack-explainer-module')) return;
     
-    // Also check for the heading text as fallback
-    const existingHeadings = Array.from(document.querySelectorAll('h2')).filter(h2 => 
-        h2.textContent.includes('Understanding Security Terms')
-    );
-    if (existingHeadings.length > 0) {
-        console.log('Module heading found, skipping');
-        return;
-    }
+    // Check if the page has a security table (contains attack terms)
+    const tables = document.querySelectorAll('table');
+    let hasSecurityTable = false;
+    
+    const securityTerms = [
+        'SQL Injection', 'XSS', 'CSRF', 'Buffer Overflow',
+        'ARP Spoofing', 'SYN Flood', 'IP Spoofing', 'DDoS',
+        'Session Hijacking', 'VLAN Hopping', 'Wire Tapping'
+    ];
+    
+    tables.forEach(table => {
+        const tableText = table.innerText;
+        securityTerms.forEach(term => {
+            if (tableText.includes(term)) {
+                hasSecurityTable = true;
+            }
+        });
+    });
+    
+    // Only add module if a security table exists
+    if (!hasSecurityTable) return;
     
     const pageNav = document.querySelector('.page-nav');
-    if (!pageNav) {
-        console.log('No page-nav found, skipping module');
-        return;
-    }
+    if (!pageNav) return;
     
     const moduleHtml = `
         <div class="card attack-explainer-module">
             <h2>📖 Understanding Security Terms (Click any ⓘ in tables above)</h2>
-            <p>Throughout this lesson, you'll see <span style="border-bottom: 1px dashed #2c7da0;">terms with a small ⓘ icon</span>. Click any of them to see:</p>
+            <p>Throughout this lesson, you'll see <span style="border-bottom: 1px dashed #2d6a4f;">terms with a small ⓘ icon</span>. Click any of them to see:</p>
             <ul>
                 <li>✅ A plain-English definition</li>
                 <li>✅ A real-world analogy</li>
@@ -39,12 +46,10 @@ function addAttackExplainerModule() {
         </div>
     `;
     
-    // Insert before page navigation
     pageNav.insertAdjacentHTML('beforebegin', moduleHtml);
-    console.log('Attack explainer module added');
 }
 
-// Run when DOM is ready
+// Only run on pages with tables
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (document.querySelector('table')) {
