@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Commands for Security | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .command-table td {
+            font-family: monospace;
+        }
+        .output-example {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+        .distro-note {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🐧 Linux Commands for Security</h1>
+        <p><strong>Essential Linux commands every security professional must know.</strong> From monitoring network connections to analyzing logs and hardening systems.</p>
+    </div>
+
+    <!-- Why Linux Commands Matter -->
+    <div class="card">
+        <h2>🎯 Why Linux Commands Matter for Security</h2>
+        <ul>
+            <li>✅ <strong>80% of cloud servers run Linux</strong> — AWS, Azure, GCP</li>
+            <li>✅ <strong>Security tools are Linux-first</strong> — Kali, Wireshark, Metasploit, Nmap</li>
+            <li>✅ <strong>Incident response happens in the terminal</strong> — GUI is too slow</li>
+            <li>✅ <strong>CTF competitions & certifications</strong> — Linux is required (CEH, Security+, OSCP)</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> When a server is compromised, you have minutes to respond. The CLI is your only option.
+        </div>
+    </div>
+
+    <!-- Network Investigation Commands -->
+    <div class="card">
+        <h2>🌐 Network Investigation (Find Active Connections)</h2>
+        
+        <h3><code>ss</code> (Socket Statistics) — Modern replacement for netstat</h3>
+        <div class="cli-box">
+            ss -tulpn        # Show all listening ports with process names<br>
+            ss -tan          # Show all TCP connections (no names)<br>
+            ss -s            # Summary statistics<br>
+            ss -t state established 'dport = 443'  # Filter HTTPS connections
+        </div>
+        
+        <div class="output-example">
+            <strong>Example output of `ss -tulpn`:</strong><br>
+            Netid  State   Recv-Q  Send-Q  Local Address:Port   Peer Address:Port   Process<br>
+            tcp    LISTEN  0       128     0.0.0.0:22           0.0.0.0:*           users:(("sshd",pid=1234))<br>
+            tcp    LISTEN  0       128     0.0.0.0:443          0.0.0.0:*           users:(("nginx",pid=5678))
+        </div>
+        
+        <h3><code>lsof</code> (List Open Files)</h3>
+        <div class="cli-box">
+            lsof -i :80       # Which process is using port 80?<br>
+            lsof -i tcp       # All TCP connections<br>
+            lsof -p 1234      # Files opened by process 1234<br>
+            lsof -u root      # Files opened by root user
+        </div>
+        
+        <h3><code>netstat</code> (Legacy, still works on many systems)</h3>
+        <div class="cli-box">
+            netstat -tulpn     # Listening ports (use ss instead when available)<br>
+            netstat -rn        # Routing table<br>
+            netstat -i         # Interface statistics
+        </div>
+    </div>
+
+    <!-- Process Monitoring -->
+    <div class="card">
+        <h2>🔍 Process Monitoring (Find Malicious Processes)</h2>
+        
+        <h3><code>ps</code> (Process Snapshot)</h3>
+        <div class="cli-box">
+            ps aux | grep nginx        # Find nginx processes<br>
+            ps -ef --forest            # Tree view (see parent-child)<br>
+            ps aux --sort=-%cpu | head -10   # Top 10 CPU consumers
+        </div>
+        
+        <h3><code>top / htop</code> (Real-time process monitoring)</h3>
+        <div class="cli-box">
+            top                          # Real-time process viewer<br>
+            htop                         # Nicer version (install if missing)<br>
+            # Inside top: 'P' = sort by CPU, 'M' = sort by memory, 'q' = quit
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Security use case:</strong> A sudden unknown process using 100% CPU could be a cryptominer. Use `kill -9 [PID]` to stop it.
+        </div>
+    </div>
+
+    <!-- Log Analysis -->
+    <div class="card">
+        <h2>📜 Log Analysis (Where to Look When Something Breaks)</h2>
+        
+        <h3>System Logs (Most important)</h3>
+        <div class="cli-box">
+            journalctl -xe                     # Full system log (systemd)<br>
+            journalctl -u sshd --since today   # SSH logs from today only<br>
+            tail -f /var/log/syslog            # Follow syslog in real-time (Debian/Ubuntu)<br>
+            tail -f /var/log/messages          # Follow syslog (RHEL/CentOS)<br>
+            dmesg | tail -20                   # Kernel log (hardware issues)
+        </div>
+        
+        <h3>Authentication Logs (Failed logins, sudo)</h3>
+        <div class="cli-box">
+            cat /var/log/auth.log | grep Failed      # Failed login attempts (Debian)<br>
+            cat /var/log/secure | grep 'sshd.*Failed' # Failed SSH (RHEL)<br>
+            sudo cat /var/log/sudo.log               # Sudo commands history<br>
+            last -10                                 # Last 10 logins<br>
+            lastb -10                                # Last 10 failed logins
+        </div>
+        
+        <h3>Web Server Logs (If running Apache/nginx)</h3>
+        <div class="cli-box">
+            tail -f /var/log/nginx/access.log        # Live web traffic<br>
+            cat /var/log/nginx/error.log             # Web server errors<br>
+            awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -nr | head -10  # Top 10 IPs
+        </div>
+        
+        <div class="output-example">
+            <strong>Quick security scan:</strong><br>
+            <code>cat /var/log/auth.log | grep "Failed password" | awk '{print $9}' | sort | uniq -c | sort -nr</code><br>
+            This shows which IPs are brute-forcing SSH!
+        </div>
+    </div>
+
+    <!-- Firewall Commands -->
+    <div class="card">
+        <h2>🛡️ Firewall Commands (View & Manage Rules)</h2>
+        
+        <h3><code>iptables</code> (Legacy, still everywhere)</h3>
+        <div class="cli-box">
+            iptables -L -v -n        # List all rules (verbose, numeric)<br>
+            iptables -L INPUT        # List INPUT chain only<br>
+            iptables -S              # Show rules as commands
+        </div>
+        
+        <h3><code>ufw</code> (Uncomplicated Firewall) — Ubuntu/Debian</h3>
+        <div class="cli-box">
+            ufw status verbose        # Check if firewall is active<br>
+            ufw allow 22/tcp          # Allow SSH<br>
+            ufw deny 80/tcp           # Block HTTP<br>
+            ufw app list              # See application profiles
+        </div>
+        
+        <h3><code>firewalld</code> — RHEL/CentOS/Fedora</h3>
+        <div class="cli-box">
+            firewall-cmd --state                     # Is it running?<br>
+            firewall-cmd --list-all                  # Current configuration<br>
+            firewall-cmd --add-service=http --permanent  # Add HTTP<br>
+            firewall-cmd --reload                    # Apply changes
+        </div>
+    </div>
+
+    <!-- File Integrity & Permissions -->
+    <div class="card">
+        <h2>🔐 File Integrity & Permissions (Detect Tampering)</h2>
+        
+        <h3>Check for SUID/SGID binaries (privilege escalation risk)</h3>
+        <div class="cli-box">
+            find / -perm -4000 -type f 2>/dev/null   # SUID files<br>
+            find / -perm -2000 -type f 2>/dev/null   # SGID files
+        </div>
+        
+        <h3>Find world-writable files (security risk)</h3>
+        <div class="cli-box">
+            find / -perm -0002 -type f 2>/dev/null   # World-writable files
+        </div>
+        
+        <h3>Check file integrity with sha256sum</h3>
+        <div class="cli-box">
+            sha256sum important_config.conf           # Get hash<br>
+            # Compare against known good hash to detect changes
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Security use case:</strong> Run `find / -perm -4000` regularly. Unexpected SUID files are a common backdoor method.
+        </div>
+    </div>
+
+    <!-- System Hardening Commands -->
+    <div class="card">
+        <h2>🛡️ System Hardening (Quick Wins)</h2>
+        
+        <div class="cli-box">
+            # Disable root SSH login<br>
+            sudo sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config<br>
+            sudo systemctl restart sshd<br><br>
+            # Change default SSH port (security through obscurity)<br>
+            sudo sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config<br><br>
+            # Install and configure fail2ban (blocks brute force)<br>
+            sudo apt install fail2ban -y<br>
+            sudo systemctl enable fail2ban --now<br><br>
+            # Check for unnecessary services<br>
+            systemctl list-units --type=service --state=running | grep -v systemd
+        </div>
+    </div>
+
+    <!-- Package Management Security -->
+    <div class="card">
+        <h2>📦 Package Management (Keep Software Secure)</h2>
+        
+        <h3>Debian/Ubuntu (apt)</h3>
+        <div class="cli-box">
+            apt list --upgradable           # Check for security updates<br>
+            apt update && apt upgrade -y    # Apply all updates<br>
+            apt autoremove                  # Remove unused packages
+        </div>
+        
+        <h3>RHEL/CentOS (yum/dnf)</h3>
+        <div class="cli-box">
+            yum check-update                # Check for updates<br>
+            yum update -y                   # Apply updates<br>
+            yum list installed | grep -i vulnerable  # Check known vulnerabilities
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Critical:</strong> Always keep packages updated. Most breaches exploit unpatched software.
+        </div>
+    </div>
+
+    <!-- Real-World Incident Response -->
+    <div class="card">
+        <h2>🚨 Real-World Incident Response Checklist</h2>
+        
+        <div class="cli-box">
+            # 1. Check who is logged in<br>
+            who -a<br>
+            w<br><br>
+            # 2. Check last logins<br>
+            last -20<br>
+            lastb -10    # failed logins<br><br>
+            # 3. Check running processes<br>
+            ps aux --sort=-%cpu | head -10<br>
+            ss -tulpn<br><br>
+            # 4. Check for unusual network connections<br>
+            lsof -i -n | grep ESTABLISHED<br><br>
+            # 5. Check recent log entries<br>
+            journalctl --since "1 hour ago"<br><br>
+            # 6. Check for cron jobs (persistence)<br>
+            crontab -l<br>
+            cat /etc/crontab<br><br>
+            # 7. Check for modified system binaries<br>
+            find /bin /usr/bin -type f -mtime -1 2>/dev/null
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What command shows all listening ports with process names?</summary>
+            <p><strong>Answer:</strong> <code>ss -tulpn</code> or <code>netstat -tulpn</code>. The -p flag shows the process name and PID.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> How do you find which process is using port 443?</summary>
+            <p><strong>Answer:</strong> <code>lsof -i :443</code> or <code>ss -tulpn | grep :443</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> A server is slow. What command shows real-time CPU usage by process?</summary>
+            <p><strong>Answer:</strong> <code>top</code> or <code>htop</code>. Inside top, press 'P' to sort by CPU usage.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Where do you find failed SSH login attempts on a Debian/Ubuntu system?</summary>
+            <p><strong>Answer:</strong> <code>/var/log/auth.log</code>. Use <code>grep "Failed password" /var/log/auth.log</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What's the quickest way to block an IP that's brute-forcing SSH?</summary>
+            <p><strong>Answer:</strong> <code>iptables -A INPUT -s [IP] -j DROP</code> or install <code>fail2ban</code> for automatic blocking.</p>
+        </details>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Investigate a Suspicious Server</h2>
+        <p><strong>Goal:</strong> Use Linux commands to investigate a potentially compromised server.</p>
+        
+        <h3>Scenario:</h3>
+        <p>Your server is running slowly. Unknown connections spotted. Investigate!</p>
+        
+        <h3>Step 1: Check active connections</h3>
+        <div class="cli-box">
+            ss -tulpn<br>
+            lsof -i -n
+        </div>
+        
+        <h3>Step 2: Look for suspicious processes</h3>
+        <div class="cli-box">
+            ps aux --sort=-%cpu | head -10<br>
+            top
+        </div>
+        
+        <h3>Step 3: Check authentication logs</h3>
+        <div class="cli-box">
+            sudo cat /var/log/auth.log | grep "Failed password" | tail -20<br>
+            lastb -10
+        </div>
+        
+        <h3>Step 4: Review scheduled tasks (persistence)</h3>
+        <div class="cli-box">
+            crontab -l<br>
+            ls -la /etc/cron*
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Create a simple bash alias to run all these checks with one command: <code>alias security-check='ss -tulpn; ps aux --sort=-%cpu | head -10; lastb -5'</code>
+        </div>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Linux Security Commands)</h3>
+            <ul>
+                <li>✅ <strong>Network:</strong> <code>ss</code>, <code>lsof</code> — find listening ports and active connections</li>
+                <li>✅ <strong>Processes:</strong> <code>ps</code>, <code>top</code> — find suspicious processes, high CPU usage</li>
+                <li>✅ <strong>Logs:</strong> <code>journalctl</code>, <code>/var/log/auth.log</code> — track failed logins, system events</li>
+                <li>✅ <strong>File system:</strong> <code>find</code> with <code>-perm</code> — locate SUID files, world-writable files</li>
+                <li>✅ <strong>Firewall:</strong> <code>iptables</code> (legacy) / <code>ufw</code> / <code>firewalld</code> — block attackers</li>
+                <li>✅ <strong>Hardening:</strong> Disable root SSH, use fail2ban, keep packages updated</li>
+                <li>✅ <strong>Always verify!</strong> Trust but verify — use hashes to check file integrity</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://linux.die.net/man/8/ss" target="_blank">ss man page</a></div>
+        <div class="external-link">📘 <a href="https://www.digitalocean.com/community/tutorials/linux-commands" target="_blank">DigitalOcean: Essential Linux Commands</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisa.gov/" target="_blank">CISA: Linux Security Best Practices</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="../firewalls/zone-based-firewall.html" class="nav-btn">◀ Previous: Zone-Based Firewall</a>
+        <a href="windows-server.html" class="nav-btn">Next: Windows Server ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Commands for Security | Complete lesson with incident response, logs, hardening | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
