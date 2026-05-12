@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VirtualBox Setup - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .network-mode {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .step-box {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>📦 VirtualBox Setup — Complete Guide</h1>
+        <p><strong>Oracle VirtualBox</strong> is a free, open-source virtualization platform that lets you run multiple operating systems on a single machine. Essential for network labs, security testing, and learning without risking your main system.</p>
+    </div>
+
+    <!-- Why Virtualization Matters -->
+    <div class="card">
+        <h2>🎯 Why Virtualization Matters for Network Security</h2>
+        <ul>
+            <li>✅ <strong>Safe testing environment</strong> — Experiment with malware, firewall rules, and exploits without risk</li>
+            <li>✅ <strong>Multiple OS on one machine</strong> — Run Windows, Linux, and network appliances side by side</li>
+            <li>✅ <strong>Snapshots & rollback</strong> — Break something? Restore in seconds</li>
+            <li>✅ <strong>Build virtual networks</strong> — Simulate routers, firewalls, and entire enterprise networks</li>
+            <li>✅ <strong>Free & cross-platform</strong> — Works on Windows, macOS, Linux</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Security professionals use VirtualBox to create "lab environments" where they can safely reverse malware, test exploits, and practice penetration testing.
+        </div>
+    </div>
+
+    <!-- Virtualization Types -->
+    <div class="card">
+        <h2>📊 Virtualization Types: Type 1 vs Type 2 Hypervisors</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Type 1 (Bare Metal)</th><th>Type 2 (Hosted)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Runs directly on</strong></td>
+                        <td>Hardware (no host OS)</td>
+                        <td>Host operating system</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Excellent (near-native)</td>
+                        <td>Good (some overhead)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Examples</strong></td>
+                        <td>VMware ESXi, Microsoft Hyper-V, KVM</td>
+                        <td>VirtualBox, VMware Workstation, Parallels</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use case</strong></td>
+                        <td>Data centers, servers, cloud</td>
+                        <td>Personal labs, development, testing</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box">
+            💡 <strong>VirtualBox is Type 2</strong> — perfect for personal use, learning, and building labs on your existing computer.
+        </div>
+    </div>
+
+    <!-- Download & Install -->
+    <div class="card">
+        <h2>⬇️ Step 1: Download & Install VirtualBox</h2>
+        
+        <h3>Download VirtualBox</h3>
+        <div class="cli-box">
+            # Download from official site:<br>
+            https://www.virtualbox.org/wiki/Downloads
+        </div>
+        
+        <h3>Installation (Windows)</h3>
+        <div class="step-box">
+            <ol>
+                <li>Run the downloaded <code>VirtualBox-*.exe</code> file</li>
+                <li>Click "Next" through the setup wizard</li>
+                <li><strong>IMPORTANT:</strong> Accept the network interface installation prompt (this creates virtual networks)</li>
+                <li>Complete installation and launch VirtualBox</li>
+            </ol>
+        </div>
+        
+        <h3>Installation (macOS)</h3>
+        <div class="step-box">
+            <ol>
+                <li>Open the downloaded <code>.dmg</code> file</li>
+                <li>Double-click <code>VirtualBox.pkg</code></li>
+                <li>Follow installation prompts</li>
+                <li>If security blocks it, go to System Settings → Privacy & Security → Allow Oracle</li>
+            </ol>
+        </div>
+        
+        <h3>Installation (Linux - Ubuntu/Debian)</h3>
+        <div class="cli-box">
+            sudo apt update<br>
+            sudo apt install virtualbox -y<br>
+            # Or download .deb from official site
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Important:</strong> During Windows installation, when prompted about network interfaces, click "Install" — this enables host-only networking!
+        </div>
+    </div>
+
+    <!-- Extension Pack -->
+    <div class="card">
+        <h2>🔌 Step 2: Install VirtualBox Extension Pack</h2>
+        <p>The Extension Pack adds USB 2.0/3.0 support, RDP, disk encryption, and PXE boot.</p>
+        
+        <div class="cli-box">
+            # Download the same version as VirtualBox from:<br>
+            https://www.virtualbox.org/wiki/Downloads<br>
+            <br>
+            # Install: Double-click the .vbox-extpack file → Install
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Pro tip:</strong> Always match the Extension Pack version exactly to your VirtualBox version.
+        </div>
+    </div>
+
+    <!-- Creating Your First VM -->
+    <div class="card">
+        <h2>🖥️ Step 3: Create Your First Virtual Machine (Ubuntu Server)</h2>
+        
+        <h3>Download an OS ISO</h3>
+        <div class="cli-box">
+            # Ubuntu Server (free, lightweight):<br>
+            https://ubuntu.com/download/server<br>
+            <br>
+            # Alternative: Ubuntu Desktop<br>
+            https://ubuntu.com/download/desktop
+        </div>
+        
+        <h3>Create New VM</h3>
+        <div class="cli-box">
+            1. Click "New" in VirtualBox Manager<br>
+            2. Name: "Ubuntu-Lab-Server"<br>
+            3. Folder: Default location<br>
+            4. ISO Image: Click "Choose a disk file" → Select your downloaded Ubuntu ISO<br>
+            5. Skip unattended install (uncheck "Skip" for more control)<br>
+            6. Type: Linux<br>
+            7. Version: Ubuntu (64-bit)
+        </div>
+        
+        <h3>Allocate Resources</h3>
+        <div class="cli-box">
+            <strong>Memory (RAM):</strong> 2048 MB (2GB) — minimum for Ubuntu Server<br>
+            <strong>CPUs:</strong> 2 processor cores<br>
+            <strong>Storage (Disk):</strong> 25 GB (dynamic allocation — grows as used)
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Resource recommendations:</strong><br>
+            • Linux server: 1-2 GB RAM, 10-20 GB disk<br>
+            • Linux desktop: 4 GB RAM, 25-40 GB disk<br>
+            • Windows 10/11: 8 GB RAM, 64 GB disk<br>
+            • Windows Server: 4-8 GB RAM, 40-60 GB disk
+        </div>
+    </div>
+
+    <!-- Network Modes (Critical for Security Labs) -->
+    <div class="card">
+        <h2>🌐 Step 4: Understanding VirtualBox Network Modes</h2>
+        <p>This is the <strong>most important concept</strong> for building network security labs!</p>
+        
+        <div class="network-mode">
+            <strong>🟢 NAT (Default)</strong><br>
+            VM can access internet via host's IP. Host cannot initiate connection to VM. Best for: General internet access, downloading packages.
+        </div>
+        
+        <div class="network-mode">
+            <strong>🔵 Bridged Adapter</strong><br>
+            VM appears as separate device on your physical network. Gets its own IP from your router. Best for: Running services accessible to other devices, testing network tools.
+        </div>
+        
+        <div class="network-mode">
+            <strong>🟡 Host-Only Adapter</strong><br>
+            VM can communicate with Host and other Host-Only VMs. No internet. Best for: Isolated lab environments, malware analysis, internal network testing.
+        </div>
+        
+        <div class="network-mode">
+            <strong>⚪ Internal Network</strong><br>
+            VMs on same internal network can talk to each other. Host cannot access them. Best for: Simulating completely isolated networks.
+        </div>
+        
+        <div class="network-mode">
+            <strong>🔴 NAT Network</strong><br>
+            Multiple VMs share NAT and can talk to each other. Best for: Multi-VM labs with internet access (e.g., client + server).
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Security tip:</strong> For malware analysis, ALWAYS use Host-Only or Internal Network — disconnect from the internet to prevent accidental spread!
+        </div>
+    </div>
+
+    <!-- Guest Additions -->
+    <div class="card">
+        <h2>🔧 Step 5: Install Guest Additions</h2>
+        <p>Guest Additions improves VM performance, enables mouse integration, shared clipboard, drag & drop, and better video support.</p>
+        
+        <h3>After OS is installed:</h3>
+        <div class="cli-box">
+            # From VirtualBox menu:<br>
+            Devices → Insert Guest Additions CD image...<br>
+            <br>
+            # Inside VM (Ubuntu):<br>
+            sudo apt update<br>
+            sudo apt install build-essential dkms linux-headers-$(uname -r)<br>
+            sudo mount /dev/cdrom /mnt<br>
+            cd /mnt<br>
+            sudo ./VBoxLinuxAdditions.run<br>
+            sudo reboot
+        </div>
+    </div>
+
+    <!-- Snapshots -->
+    <div class="card">
+        <h2>📸 Step 6: Snapshots — Your Undo Button</h2>
+        <p>Snapshots save the current state of a VM. Perfect before testing risky configurations!</p>
+        
+        <div class="cli-box">
+            # Take a snapshot:<br>
+            Right-click VM → Snapshots → Take → Name it "Clean install"<br>
+            <br>
+            # Restore to snapshot:<br>
+            Right-click VM → Snapshots → Select snapshot → Restore
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Best practice:</strong> Take a snapshot immediately after fresh OS installation. Then another before any security experiment.
+        </div>
+    </div>
+
+    <!-- Cloning VMs -->
+    <div class="card">
+        <h2>📋 Step 7: Cloning VMs (Save Time)</h2>
+        <p>Clone an existing VM to create multiple machines for network labs.</p>
+        
+        <div class="cli-box">
+            Right-click VM → Clone →<br>
+            • Name: "Ubuntu-Client"<br>
+            • Clone type: "Full clone" or "Linked clone"<br>
+            • MAC address policy: "Generate new MAC addresses"<br>
+            • Click Clone
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Use case:</strong> Clone one "base" VM to create a client, server, and attacker machine for a complete lab!
+        </div>
+    </div>
+
+    <!-- Practical Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Build a 3-VM Isolated Lab</h2>
+        <p><strong>Goal:</strong> Create a completely isolated virtual network for security testing.</p>
+        
+        <h3>Step 1: Create Host-Only Network</h3>
+        <div class="cli-box">
+            VirtualBox Manager → File → Host Network Manager → Create<br>
+            Configure: IPv4 Address: 192.168.100.1, DHCP server: 192.168.100.100-200
+        </div>
+        
+        <h3>Step 2: Create 3 VMs (Clone from base)</h3>
+        <ul>
+            <li><strong>VM1 - Server:</strong> Ubuntu Server, IP 192.168.100.10</li>
+            <li><strong>VM2 - Client:</strong> Ubuntu Desktop, IP 192.168.100.20</li>
+            <li><strong>VM3 - Attacker:</strong> Kali Linux, IP 192.168.100.30</li>
+        </ul>
+        
+        <h3>Step 3: Set Host-Only Adapter on all VMs</h3>
+        <div class="cli-box">
+            VM Settings → Network → Adapter 1 → Host-Only Adapter → Name: VirtualBox Host-Only Ethernet Adapter
+        </div>
+        
+        <h3>Step 4: Test Connectivity</h3>
+        <div class="cli-box">
+            # From Client VM:<br>
+            ping 192.168.100.10  # Should reach Server<br>
+            ping 192.168.100.30  # Should reach Attacker<br>
+            ping 8.8.8.8         # Should FAIL (no internet — isolated!)
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Configure SSH on the Server VM, then SSH into it from the Client VM. Then from the Attacker VM, try to hack it!
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card">
+        <h2>🔧 Common VirtualBox Issues & Fixes</h2>
+        
+        <details>
+            <summary><strong>❌ "VT-x is not available" error</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Enable virtualization in BIOS/UEFI:<br>
+                1. Reboot → Enter BIOS (F2, F10, Del)<br>
+                2. Find "Intel VT-x" or "AMD SVM"<br>
+                3. Enable → Save & Exit
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ VM has no internet in guest</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Check network mode: Use NAT for internet. If still no internet, check if DHCP is working: <code>sudo dhclient</code> (Linux)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ Guest Additions won't install</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Ensure you have build tools installed: <code>sudo apt install build-essential dkms linux-headers-$(uname -r)</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the difference between Type 1 and Type 2 hypervisors?</summary>
+            <p><strong>Answer:</strong> Type 1 runs directly on hardware (VMware ESXi, Hyper-V). Type 2 runs on a host OS (VirtualBox, VMware Workstation).</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Which network mode should you use for malware analysis (no internet access)?</summary>
+            <p><strong>Answer:</strong> Host-Only Adapter or Internal Network — both isolate VMs from the internet.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What is a snapshot, and why is it useful?</summary>
+            <p><strong>Answer:</strong> A snapshot saves the exact state of a VM. Useful for rolling back before/after risky experiments, saving clean baseline states.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why would you use Bridged Adapter instead of NAT?</summary>
+            <p><strong>Answer:</strong> Bridged gives the VM its own IP on your local network, allowing other devices to connect directly to services running in the VM.</p>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (VirtualBox Mastery)</h3>
+            <ul>
+                <li>✅ <strong>VirtualBox = Type 2 hypervisor</strong> — runs on top of your existing OS</li>
+                <li>✅ <strong>NAT = internet</strong> — Host-Only = isolated</li>
+                <li>✅ <strong>Always install Extension Pack</strong> — adds USB 3.0, RDP, disk encryption</li>
+                <li>✅ <strong>Guest Additions improves performance</strong> — install after OS is ready</li>
+                <li>✅ <strong>Snapshots save time</strong> — take before any risky experiment</li>
+                <li>✅ <strong>Cloning = rapid lab building</strong> — create multiple VMs from one base</li>
+                <li>✅ <strong>Host-Only network = sandbox</strong> — perfect for security testing</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.virtualbox.org/manual/UserManual.html" target="_blank">VirtualBox Official User Manual</a></div>
+        <div class="external-link">📘 <a href="https://www.virtualbox.org/wiki/Technical_documentation" target="_blank">VirtualBox Technical Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://www.oracle.com/virtualization/" target="_blank">Oracle Virtualization Resources</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="vmware-setup.html" class="nav-btn">◀ Previous: VMware Setup</a>
+        <a href="../index.html" class="nav-btn">🏠 Back to Hub</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — VirtualBox Setup | Complete guide with installation, network modes, snapshots, cloning, and lab | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
