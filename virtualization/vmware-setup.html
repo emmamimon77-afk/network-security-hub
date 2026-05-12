@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMware Setup - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .product-compare {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .cli-step {
+            background: #eef2ff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⚡ VMware Setup — Complete Guide</h1>
+        <p><strong>VMware</strong> is the industry leader in virtualization — from free desktop players to enterprise data center hypervisors. This guide focuses on <strong>VMware Workstation Pro/Player</strong> for personal labs and security testing.</p>
+    </div>
+
+    <!-- Why VMware Matters -->
+    <div class="card">
+        <h2>🎯 Why VMware Matters for Network Security</h2>
+        <ul>
+            <li>✅ <strong>Industry standard</strong> — 90%+ of enterprises use VMware in production</li>
+            <li>✅ <strong>Enterprise features</strong> — Snapshots, cloning, teams, virtual networks</li>
+            <li>✅ <strong>Performance</strong> — Excellent hardware acceleration (near-native speed)</li>
+            <li>✅ <strong>Cross-platform</strong> — Windows, Linux, macOS (Workstation/Player)</li>
+            <li>✅ <strong>Free options</strong> — VMware Workstation Player (free for personal use)</li>
+        </ul>
+        <div class="tip-box">
+            💡 <strong>Real-world:</strong> Most corporate labs, CTF competitions, and malware analysis environments run on VMware.
+        </div>
+    </div>
+
+    <!-- VMware Product Comparison -->
+    <div class="card">
+        <h2>📊 VMware Product Comparison (Which One Do You Need?)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Product</th><th>Type</th><th>Cost</th><th>Best For</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>VMware Workstation Player</strong></td>
+                        <td>Type 2 (Hosted)</td>
+                        <td>Free for personal use</td>
+                        <td>Running single VMs, basic labs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VMware Workstation Pro</strong></td>
+                        <td>Type 2 (Hosted)</td>
+                        <td>Paid (trial available)</td>
+                        <td>Advanced labs, snapshots, cloning, teams</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VMware ESXi</strong></td>
+                        <td>Type 1 (Bare Metal)</td>
+                        <td>Free (limited) / Paid</td>
+                        <td>Data centers, servers, enterprise</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VMware Fusion</strong></td>
+                        <td>Type 2 (Hosted)</td>
+                        <td>Paid (Player free)</td>
+                        <td>macOS users</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box">
+            💡 <strong>Recommendation:</strong> Start with <strong>VMware Workstation Player</strong> (free). If you need snapshots/cloning, upgrade to Pro.
+        </div>
+    </div>
+
+    <!-- VirtualBox vs VMware Comparison -->
+    <div class="card">
+        <h2>📊 VirtualBox vs VMware Workstation (Which to Choose?)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>VirtualBox</th><th>VMware Workstation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>License</strong></td>
+                        <td>Open source (GPL)</td>
+                        <td>Proprietary (Player free)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Good</td>
+                        <td>Excellent (better 3D acceleration)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Snapshots</strong></td>
+                        <td>✅ Yes (full)</td>
+                        <td>✅ Yes (Pro only)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cloning</strong></td>
+                        <td>✅ Yes</td>
+                        <td>✅ Yes (Pro only)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VM encryption</strong></td>
+                        <td>❌ No</td>
+                        <td>✅ Yes (Pro)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best for</strong></td>
+                        <td>Open source, cross-platform</td>
+                        <td>Performance, enterprise labs</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Installation - Linux (Priority) -->
+    <div class="card">
+        <h2>⬇️ Step 1: Download & Install VMware (Linux First)</h2>
+        
+        <h3>Download VMware Workstation Player for Linux</h3>
+        <div class="cli-box">
+            # Download from official site:<br>
+            https://www.vmware.com/products/workstation-player.html<br>
+            <br>
+            # Direct download (Linux 64-bit .bundle file)<br>
+            wget https://download3.vmware.com/software/PLAYER-2024/VMware-Player-Full-17.5.2-23775571.x86_64.bundle
+        </div>
+        
+        <h3>Installation (Ubuntu/Debian - Linux)</h3>
+        <div class="cli-box">
+            # Make the bundle executable<br>
+            chmod +x VMware-Player-*.bundle<br>
+            <br>
+            # Install dependencies (required for kernel modules)<br>
+            sudo apt update<br>
+            sudo apt install build-essential gcc make linux-headers-$(uname -r) -y<br>
+            <br>
+            # Run the installer (as root)<br>
+            sudo ./VMware-Player-*.bundle<br>
+            <br>
+            # Follow GUI prompts → Accept license → Finish
+        </div>
+        
+        <h3>Alternative: Install via Ubuntu Repository (Older Version)</h3>
+        <div class="cli-box">
+            sudo apt install vmware-workstation-player -y
+        </div>
+        
+        <h3>Installation (Fedora/RHEL - Linux)</h3>
+        <div class="cli-box">
+            # Install dependencies<br>
+            sudo dnf install kernel-devel kernel-headers gcc make perl -y<br>
+            <br>
+            # Run the installer<br>
+            sudo ./VMware-Player-*.bundle
+        </div>
+        
+        <h3>Post-Installation: Build Kernel Modules</h3>
+        <div class="cli-box">
+            # After first launch, VMware will ask to compile kernel modules<br>
+            # If it fails, manually run:<br>
+            sudo vmware-modconfig --console --install-all<br>
+            <br>
+            # If you get "Unable to install all modules", try:<br>
+            sudo apt install linux-headers-$(uname -r) build-essential -y<br>
+            sudo reboot
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Linux tip:</strong> After kernel updates, you may need to recompile VMware modules: <code>sudo vmware-modconfig --console --install-all</code>
+        </div>
+    </div>
+
+    <!-- Installation - Windows -->
+    <div class="card">
+        <h3>🪟 Installation (Windows)</h3>
+        <div class="cli-box">
+            # Download VMware Workstation Player .exe from VMware website<br>
+            <br>
+            # Run the installer as Administrator<br>
+            # Follow wizard → Accept license → Choose installation location<br>
+            # Remove "Check for product updates" (optional)<br>
+            # Complete installation → Reboot if prompted
+        </div>
+        
+        <h3>🍎 Installation (macOS - VMware Fusion)</h3>
+        <div class="cli-box">
+            # Download VMware Fusion from:<br>
+            https://www.vmware.com/products/fusion.html<br>
+            <br>
+            # Open .dmg → Double-click VMware Fusion icon<br>
+            # Drag to Applications folder → Open from Applications<br>
+            # If security blocks, go to System Settings → Privacy & Security → Allow
+        </div>
+    </div>
+
+    <!-- Creating First VM -->
+    <div class="card">
+        <h2>🖥️ Step 2: Create Your First Virtual Machine (Ubuntu Server)</h2>
+        
+        <h3>Download Ubuntu Server ISO</h3>
+        <div class="cli-box">
+            https://ubuntu.com/download/server
+        </div>
+        
+        <h3>Create New VM (GUI Method)</h3>
+        <div class="cli-box">
+            1. Open VMware Workstation Player → "Create a New Virtual Machine"<br>
+            2. Select "Installer disc image file (iso)" → Browse to Ubuntu ISO<br>
+            3. Guest operating system: Linux → Ubuntu 64-bit<br>
+            4. Name: "Ubuntu-Lab-Server" → Location: ~/vmware/<br>
+            5. Disk size: 25GB → "Store virtual disk as single file"<br>
+            6. Customize Hardware →<br>
+               • Memory: 2048 MB<br>
+               • Processors: 2 cores<br>
+               • Network: NAT (for internet)<br>
+            7. Click "Finish"
+        </div>
+        
+        <h3>Create VM via Command Line (Linux Power Users)</h3>
+        <div class="cli-box">
+            # Create VM directory<br>
+            mkdir -p ~/vmware/Ubuntu-Lab-Server<br>
+            <br>
+            # Create VMX configuration file<br>
+            nano ~/vmware/Ubuntu-Lab-Server/Ubuntu-Lab-Server.vmx<br>
+            <br>
+            # Add content:<br>
+            .encoding = "UTF-8"<br>
+            config.version = "8"<br>
+            virtualHW.version = "19"<br>
+            displayName = "Ubuntu-Lab-Server"<br>
+            guestOS = "ubuntu-64"<br>
+            memSize = "2048"<br>
+            numvcpus = "2"<br>
+            <br>
+            # Create virtual disk<br>
+            vmware-vdiskmanager -c -s 25GB -a lsilogic -t 0 ~/vmware/Ubuntu-Lab-Server/Ubuntu-Lab-Server.vmdk<br>
+            <br>
+            # Register VM with VMware<br>
+            vmware -x ~/vmware/Ubuntu-Lab-Server/Ubuntu-Lab-Server.vmx
+        </div>
+        <div class="tip-box">
+            💡 <strong>CLI power:</strong> Automate VM creation with <code>vmrun</code>, <code>vmware-vdiskmanager</code>, and <code>vmware-cmd</code>!
+        </div>
+    </div>
+
+    <!-- VMware Network Modes -->
+    <div class="card">
+        <h2>🌐 Step 3: Understanding VMware Network Modes</h2>
+        
+        <div class="product-compare">
+            <strong>🟢 NAT (Default)</strong><br>
+            VM shares host's IP. Host → VM not possible unless port forwarding. Best for: Internet access, downloading packages.
+        </div>
+        
+        <div class="product-compare">
+            <strong>🔵 Bridged</strong><br>
+            VM appears as separate device on physical network. Gets own IP from router. Best for: Running services, testing network tools.
+        </div>
+        
+        <div class="product-compare">
+            <strong>🟡 Host-Only</strong><br>
+            VM can talk to host and other Host-Only VMs. No DHCP (manual IP config). Best for: Isolated labs, malware analysis.
+        </div>
+        
+        <div class="product-compare">
+            <strong>⚪ Custom (VMnet)</strong><br>
+            Configure virtual networks (VMnet0-19). Advanced: Multiple isolated networks, DHCP servers. Best for: Complex network simulations.
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Security tip:</strong> For malware analysis, use Host-Only mode. Disconnect VM from the internet completely!
+        </div>
+        
+        <h3>Configuring Networks via Command Line (Linux)</h3>
+        <div class="cli-box">
+            # List all running VMs<br>
+            vmrun list<br>
+            <br>
+            # Change network mode (requires VM to be powered off)<br>
+            vmware-cmd /path/to/VM.vmx setnetworkadapter virtulen name "HostOnly"<br>
+            <br>
+            # Edit VMX file directly to change network type<br>
+            echo "ethernet0.connectionType = 'bridged'" >> /path/to/VM.vmx<br>
+            echo "ethernet0.networkName = 'Bridged'" >> /path/to/VM.vmx
+        </div>
+    </div>
+
+    <!-- VMware Tools (Guest Additions Equivalent) -->
+    <div class="card">
+        <h2>🔧 Step 4: Install VMware Tools (Essential for Performance)</h2>
+        <p>VMware Tools provides better graphics, mouse integration, shared folders, and time synchronization.</p>
+        
+        <h3>Installing on Linux Guest</h3>
+        <div class="cli-box">
+            # From VM menu: VM → Install VMware Tools<br>
+            <br>
+            # Inside Linux guest:<br>
+            sudo apt update<br>
+            sudo apt install open-vm-tools -y<br>
+            <br>
+            # For desktop (better graphics)<br>
+            sudo apt install open-vm-tools-desktop -y<br>
+            <br>
+            # Alternative: Mount and install manually<br>
+            sudo mount /dev/cdrom /mnt<br>
+            cd /mnt<br>
+            tar xzf VMwareTools-*.tar.gz -C /tmp/<br>
+            cd /tmp/vmware-tools-distrib/<br>
+            sudo ./vmware-install.pl -d<br>
+            sudo reboot
+        </div>
+        
+        <h3>Installing on Windows Guest</h3>
+        <div class="cli-box">
+            # VM menu → Manage → Install VMware Tools<br>
+            # In Windows guest: Open DVD drive → Run setup64.exe<br>
+            # Follow wizard → Reboot when prompted
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Pro tip:</strong> On Linux, <code>open-vm-tools</code> is the open-source version (recommended). No need to install from ISO!
+        </div>
+    </div>
+
+    <!-- Snapshots (Pro Feature) -->
+    <div class="card">
+        <h2>📸 Step 5: Snapshots (Workstation Pro Only — Your Undo Button)</h2>
+        
+        <div class="cli-box">
+            # GUI Method (Workstation Pro):<br>
+            VM → Snapshot → Take Snapshot → Name it "Clean install"<br>
+            <br>
+            # Restore: VM → Snapshot → Snapshot Manager → Go To<br>
+            <br>
+            # CLI Method (vmrun):<br>
+            vmrun snapshot /path/to/VM.vmx "Clean install"<br>
+            vmrun listSnapshots /path/to/VM.vmx<br>
+            vmrun revertToSnapshot /path/to/VM.vmx "Clean install"
+        </div>
+        
+        <div class="warning-box">
+            ⚠️ <strong>Player limitation:</strong> VMware Workstation Player does NOT support snapshots. Use Workstation Pro or VirtualBox if snapshots are essential.
+        </div>
+    </div>
+
+    <!-- Cloning VMs -->
+    <div class="card">
+        <h2>📋 Step 6: Cloning VMs (Pro Only — Rapid Lab Building)</h2>
+        
+        <div class="cli-box">
+            # GUI Method (Workstation Pro):<br>
+            Right-click VM → Manage → Clone → Follow wizard<br>
+            <br>
+            # CLI Method (vmrun - Linux):<br>
+            vmrun clone /path/to/source.vmx /path/to/clone.vmx full<br>
+            <br>
+            # Example: Clone Ubuntu-Server to Ubuntu-Client<br>
+            vmrun clone ~/vmware/Ubuntu-Server/Ubuntu-Server.vmx ~/vmware/Ubuntu-Client/Ubuntu-Client.vmx full
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Clone types:</strong> Full clone (independent copy) vs Linked clone (shares disk, saves space).
+        </div>
+    </div>
+
+    <!-- Lab Exercise -->
+    <div class="card" id="lab">
+        <h2>🧪 Lab Exercise: Build a 3-VM Isolated Network (Linux Host)</h2>
+        <p><strong>Goal:</strong> Create an isolated virtual lab with Server, Client, and Attacker VMs using VMware's custom networking.</p>
+        
+        <h3>Step 1: Create Custom VMnet (Host-Only Network)</h3>
+        <div class="cli-box">
+            # Open Virtual Network Editor<br>
+            sudo vmware-netcfg<br>
+            <br>
+            # Or via command line:<br>
+            # Add VMnet2 as Host-Only network: 192.168.100.0/24<br>
+            # Enable DHCP: 192.168.100.100 - 192.168.100.200
+        </div>
+        
+        <h3>Step 2: Create Base VM (Ubuntu Server)</h3>
+        <div class="cli-box">
+            # Follow Step 2 to create Ubuntu Server VM<br>
+            # Use VMnet2 (Custom) instead of NAT
+        </div>
+        
+        <h3>Step 3: Clone to Create 3 VMs</h3>
+        <div class="cli-box">
+            vmrun clone ~/vmware/Ubuntu-Base/Ubuntu-Base.vmx ~/vmware/Ubuntu-Server/Ubuntu-Server.vmx full<br>
+            vmrun clone ~/vmware/Ubuntu-Base/Ubuntu-Base.vmx ~/vmware/Ubuntu-Client/Ubuntu-Client.vmx full<br>
+            vmrun clone ~/vmware/Ubuntu-Base/Ubuntu-Base.vmx ~/vmware/Kali-Attacker/Kali-Attacker.vmx full
+        </div>
+        
+        <h3>Step 4: Assign Static IPs Inside Each VM</h3>
+        <div class="cli-box">
+            <strong>Ubuntu Server (192.168.100.10):</strong><br>
+            sudo ip addr add 192.168.100.10/24 dev ens33<br>
+            sudo ip link set ens33 up<br>
+            <br>
+            <strong>Ubuntu Client (192.168.100.20):</strong><br>
+            sudo ip addr add 192.168.100.20/24 dev ens33<br>
+            sudo ip link set ens33 up<br>
+            <br>
+            <strong>Kali Attacker (192.168.100.30):</strong><br>
+            sudo ip addr add 192.168.100.30/24 dev eth0<br>
+            sudo ip link set eth0 up
+        </div>
+        
+        <h3>Step 5: Test Connectivity</h3>
+        <div class="cli-box">
+            # From Client VM:<br>
+            ping 192.168.100.10  # Should reach Server<br>
+            ping 192.168.100.30  # Should reach Attacker<br>
+            ping 8.8.8.8         # Should FAIL (isolated!)
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Challenge:</strong> Install SSH on the Server VM, then from the Attacker VM, use <code>nmap</code> to scan and <code>hydra</code> to brute-force!
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card">
+        <h2>🔧 Common VMware Issues & Fixes</h2>
+        
+        <details>
+            <summary><strong>❌ "Unable to build kernel module" on Linux</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong><br>
+                sudo apt install build-essential linux-headers-$(uname -r)<br>
+                sudo vmware-modconfig --console --install-all<br>
+                sudo reboot
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ VMware won't start after kernel update</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Recompile modules:<br>
+                sudo vmware-modconfig --console --install-all
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ VM has no internet (NAT mode)</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Check Virtual Network Editor: Edit → Virtual Network Editor → Restore Defaults. Then restart VM.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>❌ "This kernel requires an X86-64 CPU" error</strong></summary>
+            <div class="tip-box" style="margin-top: 0.5rem;">
+                <strong>Fix:</strong> Enable virtualization in BIOS: Reboot → Enter BIOS → Enable Intel VT-x or AMD SVM.
+            </div>
+        </details>
+    </div>
+
+    <!-- VMware CLI Reference -->
+    <div class="card">
+        <h2>⚡ VMware CLI Quick Reference (Linux Power Users)</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>vmrun list</code></td>
+                        <td>List running VMs</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmrun start /path/VM.vmx</code></td>
+                        <td>Start VM (nogui or gui)</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmrun stop /path/VM.vmx</code></td>
+                        <td>Stop VM (soft)</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmrun reset /path/VM.vmx</code></td>
+                        <td>Reset VM (hard)</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmrun snapshot /path/VM.vmx "Name"</code></td>
+                        <td>Take snapshot (Pro only)</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmrun revertToSnapshot /path/VM.vmx</code></td>
+                        <td>Revert to snapshot (Pro only)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the main difference between VMware Workstation Player and Pro?</summary>
+            <p><strong>Answer:</strong> Player is free but lacks snapshots, cloning, teams, and encryption. Pro adds these enterprise features.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Which network mode should you use for malware analysis (no internet access)?</summary>
+            <p><strong>Answer:</strong> Host-Only mode — isolates VMs from the physical network and internet.</p>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command rebuilds VMware kernel modules on Linux after a kernel update?</summary>
+            <p><strong>Answer:</strong> <code>sudo vmware-modconfig --console --install-all</code></p>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why would you choose VMware over VirtualBox?</summary>
+            <p><strong>Answer:</strong> Better performance (3D acceleration), enterprise features (encryption, teams), and industry standard for corporate labs.</p>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (VMware Mastery)</h3>
+            <ul>
+                <li>✅ <strong>VMware Workstation Player</strong> = Free for personal use (Basic)</li>
+                <li>✅ <strong>Workstation Pro</strong> = Paid (Snapshots, cloning, enterprise features)</li>
+                <li>✅ <strong>NAT = internet</strong> — Host-Only = isolated lab</li>
+                <li>✅ <strong>VMware Tools (open-vm-tools)</strong> essential for performance</li>
+                <li>✅ <strong>vmrun + vmware-cmd</strong> = CLI automation for labs</li>
+                <li>✅ <strong>Custom VMnet networks</strong> = Simulate complex topologies</li>
+                <li>✅ <strong>Always take snapshots before risky experiments</strong> (Pro only)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://docs.vmware.com/en/VMware-Workstation-Pro/index.html" target="_blank">VMware Workstation Pro Documentation</a></div>
+        <div class="external-link">📘 <a href="https://docs.vmware.com/en/VMware-Workstation-Player/index.html" target="_blank">VMware Workstation Player Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://www.vmware.com/training.html" target="_blank">VMware Training & Certification</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="virtualbox-setup.html" class="nav-btn">◀ Previous: VirtualBox Setup</a>
+        <a href="../index.html" class="nav-btn">🏠 Back to Hub</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — VMware Setup | Complete guide with Linux-first focus, CLI automation, and lab | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

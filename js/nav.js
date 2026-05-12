@@ -39,7 +39,7 @@ function loadNavigation() {
             <a href="javascript:void(0)">🖥️ Virtualization ▾</a>
             <div class="nav-dropdown-content">
                 <a href="../virtualization/virtualbox-setup.html">📦 VirtualBox Setup</a>
-                <a href="../virtualization/vmware-setup.html">⚡ VMware Setup (Coming Soon)</a>
+                <a href="../virtualization/vmware-setup.html">⚡ VMware Setup</a>
             </div>
         </div>
         
