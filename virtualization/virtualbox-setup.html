@@ -397,7 +397,7 @@
         </div>
     </div>
 
-    <h3>Step 1: Create Host-Only Network (Linux Host)</h3>
+    <h3>Alternative Step 1 (Linux CLI): Create Host-Only Network via Command Line</h3>
     <div class="cli-box">
             # Create host-only network via command line<br>
             VBoxManage hostonlyif create<br>
@@ -410,7 +410,7 @@
             VBoxManage list hostonlyifs
     </div>
         
-    <h3>Step 2: Clone Base VM via Command Line (Linux)</h3>
+    <h3>Alternative Step 2 (Linux CLI): Clone Base VM via Command Line</h3>
     <div class="cli-box">
             # Clone the base VM to create Server, Client, Attacker<br>
             VBoxManage clonevm "Ubuntu-Base" --name "Ubuntu-Server" --register<br>
@@ -418,7 +418,7 @@
             VBoxManage clonevm "Ubuntu-Base" --name "Kali-Attacker" --register
     </div>
         
-    <h3>Step 3: Assign Host-Only Adapter via CLI</h3>
+    <h3>Alternative Step 3 (Linux CLI): Assign Host-Only Adapter via CLI</h3>
     <div class="cli-box">
             # Set all 3 VMs to use vboxnet0 (Host-Only)<br>
             for vm in "Ubuntu-Server" "Ubuntu-Client" "Kali-Attacker"; do<br>
@@ -426,7 +426,7 @@
             done
     </div>
         
-    <h3>Step 4: Assign Static IPs Inside Each Linux VM</h3>
+    <h3>Alternative Step 4 (Linux CLI): Assign Static IPs Inside Each Linux VM</h3>
     <div class="cli-box">
             # Inside Ubuntu Server VM:<br>
             sudo ip addr add 192.168.100.10/24 dev enp0s3<br>
@@ -443,7 +443,7 @@
                   addresses: [192.168.100.10/24]
     </div>
         
-    <h3>Step 5: Test Connectivity</h3>
+    <h3>Alternative Step 5(Linux CLI): Test Connectivity</h3>
     <div class="cli-box">
             # From Client VM:<br>
             ping 192.168.100.10  # Should reach Server<br>
