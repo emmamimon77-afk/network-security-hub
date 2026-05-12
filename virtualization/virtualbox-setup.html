@@ -116,10 +116,40 @@
         
         <h3>Installation (Linux - Ubuntu/Debian)</h3>
         <div class="cli-box">
+            # Method 1: Install from official Ubuntu repository (older version)<br>
             sudo apt update<br>
             sudo apt install virtualbox -y<br>
-            # Or download .deb from official site
+            <br>
+            # Method 2: Install latest version from Oracle (RECOMMENDED)<br>
+            # Add Oracle repository key<br>
+            wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor | sudo tee /usr/share/keyrings/virtualbox.gpg<br>
+            <br>
+            # Add repository<br>
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list<br>
+            <br>
+            # Update and install<br>
+            sudo apt update<br>
+            sudo apt install virtualbox-7.0 -y<br>
+            <br>
+            # Method 3: Download .deb directly<br>
+            wget https://download.virtualbox.org/virtualbox/7.0.14/virtualbox-7.0_7.0.14-161895~Ubuntu~jammy_amd64.deb<br>
+            sudo dpkg -i virtualbox-7.0*.deb<br>
+            sudo apt install -f -y   # Fix missing dependencies
         </div>
+        
+        <h3>Installation (Fedora/RHEL/CentOS)</h3>
+        <div class="cli-box">
+            # Install dependencies<br>
+            sudo dnf install kernel-devel kernel-headers gcc make perl wget -y<br>
+            <br>
+            # Add Oracle repository<br>
+            cd /etc/yum.repos.d/<br>
+            sudo wget https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo<br>
+            <br>
+            # Install VirtualBox<br>
+            sudo dnf install VirtualBox-7.0 -y
+        </div>
+
         
         <div class="warning-box">
             ⚠️ <strong>Important:</strong> During Windows installation, when prompted about network interfaces, click "Install" — this enables host-only networking!
@@ -141,6 +171,18 @@
         <div class="tip-box">
             💡 <strong>Pro tip:</strong> Always match the Extension Pack version exactly to your VirtualBox version.
         </div>
+    </div>
+
+    <h3>Installing Extension Pack (Linux)</h3>
+    <div class="cli-box">
+            # Download matching version (same as VirtualBox)<br>
+            wget https://download.virtualbox.org/virtualbox/7.0.14/Oracle_VM_VirtualBox_Extension_Pack-7.0.14.vbox-extpack<br>
+            <br>
+            # Install via command line<br>
+            sudo VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-7.0.14.vbox-extpack<br>
+            <br>
+            # Verify installation<br>
+            VBoxManage list extpacks
     </div>
 
     <!-- Creating Your First VM -->
@@ -165,6 +207,32 @@
             5. Skip unattended install (uncheck "Skip" for more control)<br>
             6. Type: Linux<br>
             7. Version: Ubuntu (64-bit)
+        </div>
+
+        <h3>Creating VM via Command Line (Linux Power Users)</h3>
+        <div class="cli-box">
+            # Create VM<br>
+            VBoxManage createvm --name "Ubuntu-Lab" --ostype Ubuntu_64 --register<br>
+            <br>
+            # Set memory and CPU<br>
+            VBoxManage modifyvm "Ubuntu-Lab" --memory 2048 --cpus 2<br>
+            <br>
+            # Create disk<br>
+            VBoxManage createhd --filename ~/VirtualBox\ VMs/Ubuntu-Lab/Ubuntu-Lab.vdi --size 25600<br>
+            <br>
+            # Attach SATA controller and disk<br>
+            VBoxManage storagectl "Ubuntu-Lab" --name "SATA" --add sata --controller IntelAhci<br>
+            VBoxManage storageattach "Ubuntu-Lab" --storagectl "SATA" --port 0 --device 0 --type hdd --medium ~/VirtualBox\ VMs/Ubuntu-Lab/Ubuntu-Lab.vdi<br>
+            <br>
+            # Attach ISO<br>
+            VBoxManage storagectl "Ubuntu-Lab" --name "IDE" --add ide<br>
+            VBoxManage storageattach "Ubuntu-Lab" --storagectl "IDE" --port 0 --device 0 --type dvddrive --medium /path/to/ubuntu.iso<br>
+            <br>
+            # Start VM<br>
+            VBoxManage startvm "Ubuntu-Lab" --type gui
+        </div>
+        <div class="tip-box">
+            💡 <strong>Why CLI?</strong> Automating VM creation with scripts can save hours when building multiple lab machines!
         </div>
         
         <h3>Allocate Resources</h3>
@@ -218,25 +286,44 @@
         </div>
     </div>
 
-    <!-- Guest Additions -->
-    <div class="card">
-        <h2>🔧 Step 5: Install Guest Additions</h2>
-        <p>Guest Additions improves VM performance, enables mouse integration, shared clipboard, drag & drop, and better video support.</p>
-        
-        <h3>After OS is installed:</h3>
-        <div class="cli-box">
-            # From VirtualBox menu:<br>
-            Devices → Insert Guest Additions CD image...<br>
+    <h3>Configuring Network from Command Line (Linux)</h3>
+    <div class="cli-box">
+            # List all VMs<br>
+            VBoxManage list vms<br>
             <br>
-            # Inside VM (Ubuntu):<br>
-            sudo apt update<br>
+            # Change network mode to Bridged<br>
+            VBoxManage modifyvm "Ubuntu-Lab" --nic1 bridged --bridgeadapter1 eth0<br>
+            <br>
+            # Change to Host-Only<br>
+            VBoxManage modifyvm "Ubuntu-Lab" --nic1 hostonly --hostonlyadapter1 vboxnet0<br>
+            <br>
+            # Add second network interface (NAT + Host-Only)<br>
+            VBoxManage modifyvm "Ubuntu-Lab" --nic2 nat<br>
+            <br>
+            # Create Host-Only network (for isolated labs)<br>
+            VBoxManage hostonlyif create<br>
+            VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.100.1 --netmask 255.255.255.0
+    </div>
+
+    <h3>Installing Guest Additions (Linux Host, Windows Guest)</h3>
+    <div class="cli-box">
+            # Install prerequisites on Linux HOST<br>
             sudo apt install build-essential dkms linux-headers-$(uname -r)<br>
+            <br>
+            # In the VM: Devices → Insert Guest Additions CD image<br>
+            <br>
+            # For Linux GUEST:<br>
+            sudo apt update<br>
+            sudo apt install build-essential dkms linux-headers-$(uname -r) -y<br>
             sudo mount /dev/cdrom /mnt<br>
             cd /mnt<br>
             sudo ./VBoxLinuxAdditions.run<br>
-            sudo reboot
-        </div>
+            sudo reboot<br>
+            <br>
+            # For Windows GUEST:<br>
+            # Open File Explorer → CD Drive → Run VBoxWindowsAdditions.exe
     </div>
+
 
     <!-- Snapshots -->
     <div class="card">
@@ -308,6 +395,60 @@
         <div class="tip-box">
             💡 <strong>Challenge:</strong> Configure SSH on the Server VM, then SSH into it from the Client VM. Then from the Attacker VM, try to hack it!
         </div>
+    </div>
+
+    <h3>Step 1: Create Host-Only Network (Linux Host)</h3>
+    <div class="cli-box">
+            # Create host-only network via command line<br>
+            VBoxManage hostonlyif create<br>
+            VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.100.1 --netmask 255.255.255.0<br>
+            <br>
+            # Enable DHCP on host-only network<br>
+            VBoxManage dhcpserver add --ifname vboxnet0 --ip 192.168.100.100 --netmask 255.255.255.0 --lowerip 192.168.100.101 --upperip 192.168.100.200 --enable<br>
+            <br>
+            # Verify configuration<br>
+            VBoxManage list hostonlyifs
+    </div>
+        
+    <h3>Step 2: Clone Base VM via Command Line (Linux)</h3>
+    <div class="cli-box">
+            # Clone the base VM to create Server, Client, Attacker<br>
+            VBoxManage clonevm "Ubuntu-Base" --name "Ubuntu-Server" --register<br>
+            VBoxManage clonevm "Ubuntu-Base" --name "Ubuntu-Client" --register<br>
+            VBoxManage clonevm "Ubuntu-Base" --name "Kali-Attacker" --register
+    </div>
+        
+    <h3>Step 3: Assign Host-Only Adapter via CLI</h3>
+    <div class="cli-box">
+            # Set all 3 VMs to use vboxnet0 (Host-Only)<br>
+            for vm in "Ubuntu-Server" "Ubuntu-Client" "Kali-Attacker"; do<br>
+              VBoxManage modifyvm "$vm" --nic1 hostonly --hostonlyadapter1 vboxnet0<br>
+            done
+    </div>
+        
+    <h3>Step 4: Assign Static IPs Inside Each Linux VM</h3>
+    <div class="cli-box">
+            # Inside Ubuntu Server VM:<br>
+            sudo ip addr add 192.168.100.10/24 dev enp0s3<br>
+            sudo ip link set enp0s3 up<br>
+            <br>
+            # Make it permanent (Ubuntu Server with netplan)<br>
+            sudo nano /etc/netplan/00-installer-config.yaml<br>
+            <br>
+            # Add:<br>
+            network:<br>
+              version: 2<br>
+              ethernets:<br>
+                enp0s3:<br>
+                  addresses: [192.168.100.10/24]
+    </div>
+        
+    <h3>Step 5: Test Connectivity</h3>
+    <div class="cli-box">
+            # From Client VM:<br>
+            ping 192.168.100.10  # Should reach Server<br>
+            ping 192.168.100.30  # Should reach Attacker<br>
+            ping 8.8.8.8         # Should FAIL (isolated!)
     </div>
 
     <!-- Troubleshooting -->
