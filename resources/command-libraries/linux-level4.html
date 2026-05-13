@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Level 4 - Text Processing | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .command-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .pipeline-box {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .power-tip {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+        .regex-note {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>📝 Linux Level 4: Text Processing & Log Analysis</h1>
+        <p><strong>Master the art of manipulating text, extracting data, and analyzing logs.</strong> These commands are essential for security analysts, DevOps engineers, and anyone working with large amounts of data.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Linux Levels 1-3 (basics, security, hardening). These commands are often combined using pipes (`|`) for powerful data processing.
+        </div>
+    </div>
+
+    <!-- Section 1: grep - Advanced Pattern Search -->
+    <div class="card">
+        <h2>🔍 grep — Advanced Pattern Searching</h2>
+        <p><code>grep</code> (Global Regular Expression Print) finds lines matching a pattern. It's the Swiss Army knife of log analysis.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>grep</code> (basic)</code></td>
+                        <td><code>grep "error" logfile</code></code></td>
+                        <td>Find lines containing "error"</code></code></td>
+                        <td>
+                            <code>grep "Failed password" /var/log/auth.log</code><br>
+                            → Finds all failed login attempts in the authentication log.<br>
+                            <strong>Translation:</strong> "Show me every line that contains 'Failed password'."
+                          </code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><code>grep -i</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>grep -i "warning" logfile</code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Case-insensitive search</code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>grep -i "error" /var/log/syslog</code><br>
+                            → <strong>-i</strong> ignores case, so it matches "error", "Error", "ERROR", etc.<br>
+                            <strong>Use case:</strong> When you're not sure if the log uses uppercase or lowercase.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pipeline-box">
+            <strong>🔧 grep with pipes — Counting occurrences:</strong><br>
+            <code>cat /var/log/auth.log | grep "Failed password" | wc -l</code><br>
+            → <strong>cat</strong> outputs the file, <strong>grep</strong> filters lines, <strong>wc -l</strong> counts them.<br>
+            <strong>Result:</strong> Total number of failed login attempts.
+        </div>
+
+        <div class="regex-note">
+            <strong>📖 Regular Expression (Regex) Quick Reference for grep:</strong><br>
+            • <code>^</code> Start of line: <code>grep "^2024" logfile</code> (lines starting with "2024")<br>
+            • <code>$</code> End of line: <code>grep "error$" logfile</code> (lines ending with "error")<br>
+            • <code>.</code> Any single character: <code>grep "c.t" logfile</code> (cat, cut, cot, etc.)<br>
+            • <code>*</code> Zero or more of previous: <code>grep "fe*d" logfile</code> (fd, fed, feed, feeed)<br>
+            • <code>[ ]</code> Character class: <code>grep "[0-9]" logfile</code> (lines with any digit)<br>
+            • <code>\|</code> Alternation (OR): <code>grep "error\|warning\|critical" logfile</code>
+        </div>
+    </div>
+
+    <!-- Section 2: sed - Stream Editor (Find & Replace) -->
+    <div class="card">
+        <h2>✂️ sed — Stream Editor (Find & Replace)</h2>
+        <p><code>sed</code> performs text transformations on a stream of data. Perfect for editing files or command output without opening an editor.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sed s///</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sed 's/old/new/' file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Substitute/replace first occurrence per line</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo "hello world" | sed 's/world/universe/'</code><br>
+                            → Output: "hello universe"<br>
+                            <strong>Translation:</strong> "Replace the word 'world' with 'universe'."
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>sed 's///g'</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sed 's/old/new/g' file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Replace ALL occurrences (global) per line</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo "one two three two" | sed 's/two/2/g'</code><br>
+                            → Output: "one 2 three 2"<br>
+                            <strong>Why `g`?</strong> Without `g`, only the first "two" would be replaced.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>sed -i</code> (in-place) </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sed -i 's/old/new/g' file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Edit file directly (no output to terminal)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>sed -i 's/old-password/new-password/g' config.ini</code><br>
+                            → Directly modifies <strong>config.ini</strong> file.<br>
+                            <strong>⚠️ Warning:</strong> Always test with `sed 's/...'` (no `-i`) first to see what will change!
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="power-tip">
+            <strong>💪 Real-world sed example — Log anonymization:</strong><br>
+            <code>sed 's/\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}/REDACTED/g' access.log</code><br>
+            → Replace all IP addresses with "REDACTED". Perfect for sharing logs publicly!
+        </div>
+    </div>
+
+    <!-- Section 3: awk - Text Processing Powerhouse -->
+    <div class="card">
+        <h2>🔢 awk — Text Processing Powerhouse</h2>
+        <p><code>awk</code> is a complete programming language for text processing. It splits lines into fields and performs actions on them.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>awk</code> (print field)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>awk '{print $1}' file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Print first field (column) of each line</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo "192.168.1.1 user root" | awk '{print $1}'</code><br>
+                            → Output: "192.168.1.1"<br>
+                            <strong>What's happening:</strong> awk splits the line into fields separated by whitespace. <code>$1</code> = first field, <code>$2</code> = second, <code>$NF</code> = last field.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>awk</code> (filter + print)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>awk '/pattern/ {print $2}' file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Find lines matching pattern, then print second field</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>grep "Failed password" /var/log/auth.log | awk '{print $9}'</code><br>
+                            → From lines about failed passwords, extract the 9th field (the source IP address).<br>
+                            <strong>Use case:</strong> Extract attacker IPs from authentication logs.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pipeline-box">
+            <strong>🔧 Building an attacker IP list with awk and sort:</strong><br>
+            <code>sudo grep "Failed password" /var/log/auth.log | awk '{print $9}' | sort | uniq -c | sort -nr | head -10</code><br>
+            This pipeline does: filter → extract IP → sort → count duplicates → sort by highest count → show top 10.<br>
+            <strong>Result:</strong> The most active brute-forcers targeting your server!
+        </div>
+
+        <div class="power-tip">
+            <strong>💪 Advanced awk — Custom delimiters and arithmetic:</strong><br>
+            <code>awk -F',' '{sum += $3} END {print sum}' data.csv</code><br>
+            → <strong>-F','</strong> sets comma as field separator, <strong>sum += $3</strong> adds the third column, <strong>END {print sum}</strong> prints total after all lines.<br>
+            <strong>Use case:</strong> Calculate total bytes transferred from a CSV log.
+        </div>
+    </div>
+
+    <!-- Section 4: cut, sort, uniq, wc -->
+    <div class="card">
+        <h2>✂️ cut, sort, uniq, wc — Data Organizers</h2>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>cut</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>cut -d',' -f1,3 data.csv</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Extract specific columns/fields</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo "2024-01-15,192.168.1.1,GET /index.html" | cut -d',' -f2</code><br>
+                            → Output: "192.168.1.1"<br>
+                            <strong>-d','</strong> sets comma as delimiter, <strong>-f2</strong> selects the second field.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>sort</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sort -nr file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Sort lines (numeric, reverse order)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo -e "5\n1\n9\n3" | sort -nr</code><br>
+                            → Output: 9, 5, 3, 1<br>
+                            <strong>-n</strong> (numeric sort), <strong>-r</strong> (reverse order, highest first).
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>uniq</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>uniq -c file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Report or filter out repeated lines</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>echo -e "apple\nbanana\napple" | sort | uniq -c</code><br>
+                            → Output: "2 apple", "1 banana"<br>
+                            <strong>Note:</strong> Input must be <strong>sorted</strong> before `uniq`, or it won't detect duplicates correctly!
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>wc</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>wc -l file</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Count lines, words, or characters</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>wc -l /var/log/auth.log</code><br>
+                            → Output: "2047 /var/log/auth.log" (total lines in log)<br>
+                            <strong>-l</strong> (lines), <strong>-w</strong> (words), <strong>-c</strong> (characters).
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 5: Real-World Pipeline Examples -->
+    <div class="card">
+        <h2>🔗 Real-World Pipeline Examples (Putting It All Together)</h2>
+        
+        <div class="power-tip">
+            <strong>📊 Example 1: Top 10 IP addresses accessing your web server</strong><br>
+            <code>cat /var/log/nginx/access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head -10</code><br>
+            → <strong>cat</strong> outputs log, <strong>awk</strong> extracts first field (IP), <strong>sort</strong> organizes, <strong>uniq -c</strong> counts, <strong>sort -nr</strong> orders by highest count, <strong>head -10</strong> shows top 10.
+        </div>
+
+        <div class="power-tip">
+            <strong>📊 Example 2: Find the most common HTTP status codes</strong><br>
+            <code>cat /var/log/nginx/access.log | awk '{print $9}' | sort | uniq -c | sort -nr</code><br>
+            → $9 is typically the HTTP status code (200, 404, 500, etc.). Reveals error patterns.
+        </div>
+
+        <div class="power-tip">
+            <strong>📊 Example 3: Extract and analyze SSH brute-force attempts by IP</strong><br>
+            <code>sudo grep "Failed password" /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | head -20</code><br>
+            → <strong>$(NF-3)</strong> means "the 4th field from the end" (source IP address). Shows you which IPs are attacking you most.
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Extract all email addresses from a text file</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution using grep:</strong><br>
+                <code>grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b" file.txt</code><br>
+                <strong>-E</strong> (extended regex), <strong>-o</strong> (only matching part, not whole line)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Count how many unique IPs visited your website today</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>grep "$(date '+%d/%b/%Y')" /var/log/nginx/access.log | awk '{print $1}' | sort | uniq | wc -l</code><br>
+                → Filters today's date, extracts IPs, sorts, removes duplicates, counts.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Replace all occurrences of "http://" with "https://" in a configuration file</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution using sed:</strong><br>
+                <code>sed -i 's|http://|https://|g' config.conf</code><br>
+                → Uses <code>|</code> as delimiter (instead of <code>/</code>) to avoid escaping slashes.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Find the top 5 users who made the most sudo attempts</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo journalctl _COMM=sudo | grep -oP 'COMMAND=\K[^ ]+' | sort | uniq -c | sort -nr | head -5</code><br>
+                → This extracts usernames from sudo logs and counts their commands.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Text Processing Mastery)</h3>
+            <ul>
+                <li>✅ <strong>grep</strong> → Search for patterns (use `-i` for case-insensitive, `-v` for invert, `-r` for recursive)</li>
+                <li>✅ <strong>sed</strong> → Find and replace (test with `sed 's/.../'` before using `sed -i`)</li>
+                <li>✅ <strong>awk</strong> → Extract fields ( `$1` = first, `$NF` = last, `$(NF-1)` = second to last)</li>
+                <li>✅ <strong>cut</strong> → Simple column extraction (best for CSV/delimited data)</li>
+                <li>✅ <strong>sort</strong> → Organize data (use `-n` for numbers, `-r` for reverse)</li>
+                <li>✅ <strong>uniq -c</strong> → Count duplicates (requires `sort` first!)</li>
+                <li>✅ <strong>Pipes (`|`)</strong> → Connect commands to build powerful data processing pipelines</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-level3.html" class="nav-btn">◀ Previous: Level 3 (Hardening)</a>
+        <a href="linux-level5.html" class="nav-btn">Next: Level 5 (Advanced) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Level 4: Text Processing & Log Analysis | grep, sed, awk, cut, sort, uniq, wc, and real-world pipelines
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
