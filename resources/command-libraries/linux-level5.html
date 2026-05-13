@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Level 5 - Advanced & Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .command-table th {
+            background: #1b4332;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .advanced-tip {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .danger-warning {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .kernel-note {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔬 Linux Level 5: Advanced & Deep Dive</h1>
+        <p><strong>For security researchers, malware analysts, and kernel developers.</strong> These commands peer into the deepest layers of Linux — system calls, kernel events, and process internals.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Linux Levels 1-4. These commands require deep understanding of Linux internals. Test in a safe VM first!
+        </div>
+    </div>
+
+    <!-- Section 1: strace - System Call Tracing -->
+    <div class="card">
+        <h2>🔍 strace — See Every System Call a Program Makes</h2>
+        <p><code>strace</code> intercepts and records system calls — the interface between a program and the Linux kernel. Essential for debugging, reverse engineering, and understanding malware behavior.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>strace</code> (trace program)</code></td>
+                        <td><code>strace /path/to/program</code></code></td>
+                        <td>Run a program and trace all its system calls</code></code></td>
+                        <td>
+                            <code>strace ls</code><br>
+                            → Shows every system call `ls` makes: opening directories, reading files, writing output.<br>
+                            <strong>Sample output snippet:</strong><br>
+                            <code>openat(AT_FDCWD, ".", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3</code><br>
+                            <strong>Translation:</strong> "ls opened the current directory (file descriptor 3) to read its contents."
+                          </code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><code>strace -p</code> (attach to running process)</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sudo strace -p [PID]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Attach to an already running process</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>sudo strace -p 1234</code><br>
+                            → Attaches to process with PID 1234 and shows its system calls in real-time.<br>
+                            <strong>Use case:</strong> Investigate a running suspicious process without restarting it.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔧 Malware Analysis with strace:</strong><br>
+            <code>strace -f -e trace=file,network ./suspicious_binary</code><br>
+            → <strong>-f</strong> (follow child processes/forks), <strong>-e trace=file,network</strong> (only show file and network operations)<br>
+            <strong>Result:</strong> See exactly which files the malware touches and what network connections it makes — without running it in a debugger!
+        </div>
+
+        <div class="kernel-note">
+            <strong>📖 Understanding System Calls (Common ones you'll see):</strong><br>
+            • <code>open() / openat()</code> → Opening a file<br>
+            • <code>read() / write()</code> → Reading from or writing to a file/socket<br>
+            • <code>socket() / connect()</code> → Creating network connections<br>
+            • <code>fork() / clone()</code> → Creating a new process<br>
+            • <code>execve()</code> → Replacing the current process with a new program<br>
+            • <code>kill()</code> → Sending a signal to another process
+        </div>
+    </div>
+
+    <!-- Section 2: perf - Performance Analysis -->
+    <div class="card">
+        <h2>⚡ perf — Linux Profiler (Performance Analysis)</h2>
+        <p><code>perf</code> is the official Linux performance monitoring tool. It can sample CPU usage, count hardware events (cache misses, branch predictions), and profile kernel activity.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>perf top</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sudo perf top</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Real-time performance monitoring (similar to `top`, but for CPU functions)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>sudo perf top</code><br>
+                            → Shows which functions are using the most CPU, including kernel functions.<br>
+                            <strong>Use case:</strong> Find out what's slowing down your server when regular `top` only shows process-level usage.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔧 Record and analyze system-wide performance:</strong><br>
+            <code>sudo perf record -a -g -- sleep 30</code><br>
+            → Records performance data for 30 seconds across the entire system (<strong>-a</strong> = all CPUs, <strong>-g</strong> = capture call graphs).<br>
+            <code>sudo perf report</code><br>
+            → Generates an interactive report showing where CPU time was spent.<br>
+            <strong>Use case:</strong> Profiling a production server to find bottlenecks.
+        </div>
+    </div>
+
+    <!-- Section 3: bpftrace / eBPF - Kernel-Level Tracing -->
+    <div class="card">
+        <h2>🪄 bpftrace / eBPF — Program the Kernel</h2>
+        <p><strong>eBPF (Extended Berkeley Packet Filter)</strong> allows you to run sandboxed programs inside the Linux kernel without changing kernel code. <code>bpftrace</code> is the front-end for writing one-liners and scripts.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>bpftrace</code> (trace syscalls)</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sudo bpftrace -e 'kprobe:do_nanosleep { printf("sleep\n"); }'</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Trace when any program calls the `nanosleep` syscall</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>sudo bpftrace -e 'kprobe:do_nanosleep { printf("sleep called by PID %d\n", pid); }'</code><br>
+                            → Prints a message every time any program calls `sleep()`.<br>
+                            <strong>Use case:</strong> Detect if a hidden process is using timers to evade detection.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="kernel-note">
+            <strong>📖 eBPF — The Future of Linux Observability:</strong><br>
+            eBPF powers modern tools like Cilium (networking), Falco (security monitoring), and Pixie (Kubernetes debugging). It's safe because programs are verified before loading into the kernel.<br>
+            <strong>Installation:</strong> `sudo apt install bpftrace -y` (Ubuntu/Debian)
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Warning:</strong> eBPF requires kernel 4.1+ (preferred 5.4+). Check with `uname -r`. Some cloud providers restrict eBPF features in their VMs.
+        </div>
+    </div>
+
+    <!-- Section 4: gdb - GNU Debugger (Reverse Engineering) -->
+    <div class="card">
+        <h2>🐛 gdb — The GNU Debugger</h2>
+        <p><code>gdb</code> allows you to see what's happening inside a program while it runs — set breakpoints, inspect memory, change variables, and analyze crashes. Essential for reverse engineering and debugging complex bugs.</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>gdb</code> (run program)</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>gdb ./program</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Start debugging a program</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>gdb ./program</code><br>
+                            → Enters gdb interactive mode. Then type <code>run</code> to start the program.<br>
+                            <strong>Inside gdb:</strong> `break main` (set breakpoint), `run` (start), `next` (step over), `info registers` (view CPU registers)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔧 Analyzing a core dump (program crash):</strong><br>
+            <code>gdb ./program core</code><br>
+            → Loads the crashed program and the core dump. Type <code>bt</code> (backtrace) to see the function call stack at the moment of crash.<br>
+            <strong>Use case:</strong> Understanding why a program crashed without reproducing the issue.
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Note:</strong> Core dumps are often disabled by default. Enable with <code>ulimit -c unlimited</code> before running the program.
+        </div>
+    </div>
+
+    <!-- Section 5: Memory Forensics Tools Overview -->
+    <div class="card">
+        <h2>🧠 Memory Forensics (Volatility Framework)</h2>
+        <p><strong>Volatility</strong> is the industry standard for memory forensics — analyzing RAM dumps to find hidden processes, network connections, and malware artifacts.</p>
+        
+        <div class="kernel-note">
+            <strong>📖 How to capture memory on Linux:</strong><br>
+            <code>sudo dd if=/dev/mem of=memory.dump bs=1M</code> (requires kernel support)<br>
+            Or use <code>avml</code> (recommended): <code>sudo ./avml memory.dump</code><br><br>
+            
+            <strong>Then analyze with Volatility 3:</strong><br>
+            <code>vol3 -f memory.dump windows.pslist</code> (list processes)<br>
+            <code>vol3 -f memory.dump windows.netscan</code> (network connections)<br>
+            <code>vol3 -f memory.dump windows.malfind</code> (detect injected code)<br><br>
+            
+            <strong>Installation:</strong><br>
+            <code>git clone https://github.com/volatilityfoundation/volatility3.git</code><br>
+            <code>cd volatility3 && sudo python3 setup.py install</code>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Why memory forensics?</strong> Malware running in memory might never touch the hard drive. Traditional disk forensics can miss it entirely. Memory is where the truth lives.
+        </div>
+    </div>
+
+    <!-- Advanced Diagnostics One-Liners -->
+    <div class="card">
+        <h2>⚡ Advanced Diagnostic One-Liners (Copy-Paste Ready)</h2>
+        
+        <div class="advanced-tip">
+            <strong>🔍 Find all processes that are listening on network ports (including hidden ones):</strong><br>
+            <code>sudo netstat -tulpn | grep LISTEN</code><br>
+            <code>sudo ss -tulpn</code> (modern replacement)
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔍 Trace all new processes spawned on the system:</strong><br>
+            <code>sudo bpftrace -e 'tracepoint:syscalls:sys_enter_execve { printf("%s -> %s\n", comm, str(args->filename)); }'</code><br>
+            → Shows every time any program executes another program.
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔍 Check for processes hiding from `ps`:</strong><br>
+            <code>sudo cat /proc/*/cmdline | tr '\0' '\n' | grep -v "^$"</code><br>
+            → Directly reads the /proc filesystem. If a process hides from `ps` but appears here, you've found a rootkit.
+        </div>
+
+        <div class="advanced-tip">
+            <strong>🔍 Monitor file system changes in real-time (like `auditd`):</strong><br>
+            <code>sudo bpftrace -e 'kprobe:security_file_open { printf("File opened: %s by PID %d\n", str(args->path->dentry->d_name.name), pid); }'</code><br>
+            → Shows every file being opened on the system.
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises (Advanced)</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Trace all system calls made by the `ls` command, but only show file-related operations</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>strace -e trace=file ls</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Find out which function in `nginx` is consuming the most CPU (requires perf)</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo perf top -p $(pgrep nginx | head -1)</code><br>
+                → Profiles the first nginx process in real-time.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Write a bpftrace one-liner that prints the PID and command name every time any program executes `cat`</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo bpftrace -e 'tracepoint:syscalls:sys_enter_execve /strcmp(args->filename, "/bin/cat") == 0/ { printf("PID %d executed cat\n", pid); }'</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Generate a core dump from a running process and analyze it (requires installing `gdb` and enabling core dumps)</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>ulimit -c unlimited</code><br>
+                <code>sudo gcore [PID]</code><br>
+                <code>gdb /proc/[PID]/exe core.[PID]</code><br>
+                → Inside gdb: <code>bt</code> (backtrace), <code>info registers</code>, <code>thread apply all bt</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Level 5 - Advanced Mastery)</h3>
+            <ul>
+                <li>✅ <strong>strace</strong> → See every system call. Essential for malware analysis and debugging.</li>
+                <li>✅ <strong>perf</strong> → Find CPU bottlenecks at the function level, not just process level.</li>
+                <li>✅ <strong>bpftrace / eBPF</strong> → Program the kernel safely. The future of Linux observability.</li>
+                <li>✅ <strong>gdb</strong> → Debug crashes and reverse engineer binaries.</li>
+                <li>✅ <strong>Volatility</strong> → Memory forensics — find malware that never touches disk.</li>
+                <li>✅ <strong>Always test advanced tools in a VM first</strong> — they can impact system stability.</li>
+                <li>✅ <strong>The /proc filesystem is your friend</strong> — when tools lie, read directly from /proc.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-level4.html" class="nav-btn">◀ Previous: Level 4 (Text Processing)</a>
+        <a href="linux-index.html" class="nav-btn">🏠 Back to Library Index</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Level 5: Advanced & Deep Dive | strace, perf, bpftrace/eBPF, gdb, Volatility memory forensics
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
