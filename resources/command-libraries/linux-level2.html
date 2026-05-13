@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Level 2 - Security & Incident Response | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .command-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .real-world {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .danger-warning {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .incident-box {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🛡️ Linux Level 2: Security & Incident Response</h1>
+        <p><strong>Essential commands for security analysts, SOC teams, and incident responders.</strong> Learn to investigate network connections, analyze logs, detect anomalies, and respond to compromises.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Linux Level 1 (navigation, files, processes). If you're new, start there first!
+        </div>
+    </div>
+
+    <!-- Section 1: Network Investigation -->
+    <div class="card">
+        <h2>🌐 Network Investigation (Find Active Connections)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ss</code> (Socket Statistics)</td>
+                        <td><code>ss [options]</code></td>
+                        <td>Modern replacement for netstat — shows network connections, listening ports, and sockets</td>
+                        <td>
+                            <code>ss -tulpn</code><br>
+                            → <strong>-t</strong> (TCP), <strong>-u</strong> (UDP), <strong>-l</strong> (listening), <strong>-p</strong> (process name), <strong>-n</strong> (numeric ports)<br>
+                            <strong>What you see:</strong> Every open port and which program owns it.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>lsof</code> (List Open Files)</td>
+                        <td><code>lsof [options]</code></td>
+                        <td>Lists all open files — including network connections, regular files, and devices</td>
+                        <td>
+                            <code>lsof -i :80</code><br>
+                            → Shows which process is using port 80 (web server)<br>
+                            <code>lsof -p 1234</code><br>
+                            → Shows all files opened by process with PID 1234<br>
+                            <strong>Use case:</strong> Find what's listening on a suspicious port.
+                         </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="real-world">
+            <strong>🌐 Real-world incident:</strong> A server is slow. You suspect a backdoor.<br>
+            <code>ss -tulpn | grep ESTABLISHED</code> → See active connections to suspicious IPs.<br>
+            <code>lsof -i @203.0.113.5</code> → Find which process is talking to that IP.
+        </div>
+    </div>
+
+    <!-- Section 2: Log Analysis -->
+    <div class="card">
+        <h2>📜 Log Analysis (Track Failures & Attacks)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>journalctl</code></td>
+                        <td><code>journalctl [options]</code></td>
+                        <td>View system logs from systemd's journal (modern Linux)</td>
+                        <td>
+                            <code>journalctl -xe</code><br>
+                            → <strong>-x</strong> (show explanations), <strong>-e</strong> (jump to end)<br>
+                            <code>journalctl -u sshd --since "1 hour ago"</code><br>
+                            → Shows SSH logs from the last hour only.<br>
+                            <strong>Use case:</strong> See why a service failed to start.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>grep</code></td>
+                        <td><code>grep [pattern] [file]</code></td>
+                        <td>Search for text patterns in files or command output</td>
+                        <td>
+                            <code>grep "Failed password" /var/log/auth.log</code><br>
+                            → Finds all failed SSH login attempts.<br>
+                            <code>grep -r "error" /var/log/</code><br>
+                            → Recursively searches ALL logs for "error".<br>
+                            <strong>Use case:</strong> Find brute-force attempts in auth logs.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>tail -f</code></td>
+                        <td><code>tail -f [file]</code></td>
+                        <td>Follow a log file in real-time (live monitoring)</td>
+                        <td>
+                            <code>sudo tail -f /var/log/auth.log</code><br>
+                            → Shows new log entries as they appear. Press Ctrl+C to stop.<br>
+                            <strong>Use case:</strong> Watch live attack attempts as they happen.
+                         </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="real-world">
+            <strong>📋 Real-world incident:</strong> You suspect brute-force attack.<br>
+            <code>sudo grep "Failed password" /var/log/auth.log | awk '{print $9}' | sort | uniq -c | sort -nr | head -10</code><br>
+            → Shows top 10 IPs trying to break in, sorted by attempt count!
+        </div>
+    </div>
+
+    <!-- Section 3: Process Forensics -->
+    <div class="card">
+        <h2>🔍 Process Forensics (Find Malicious Processes)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ps</code> (advanced)</td>
+                        <td><code>ps auxf</code></td>
+                        <td>Show all processes with tree view (parent-child relationships)</td>
+                        <td>
+                            <code>ps aux --sort=-%cpu | head -10</code><br>
+                            → Top 10 CPU-consuming processes.<br>
+                            <code>ps aux | grep -E "nc|ncat|netcat"</code><br>
+                            → Look for netcat (common backdoor).<br>
+                            <strong>Use case:</strong> Detect cryptominers using 100% CPU.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>pstree</code></td>
+                        <td><code>pstree -p [PID]</code></td>
+                        <td>Show process tree with PIDs (visualize parent/child)</td>
+                        <td>
+                            <code>pstree -p 1234</code><br>
+                            → Shows process 1234 and all its children.<br>
+                            <strong>Use case:</strong> Find what spawned a suspicious child process.
+                         </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Red flag processes to investigate:</strong><br>
+            • <code>nc</code>, <code>netcat</code>, <code>ncat</code> → Reverse shells / backdoors<br>
+            • <code>minerd</code>, <code>xmrig</code> → Cryptominers<br>
+            • <code>/tmp/</code> processes → Often malware (legit processes rarely run from /tmp)<br>
+            • Processes with random names (e.g., <code>asdfgh</code>) → Suspicious
+        </div>
+    </div>
+
+    <!-- Section 4: File Integrity & Hashing -->
+    <div class="card">
+        <h2>🔐 File Integrity & Hashing (Detect Tampering)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sha256sum</code></td>
+                        <td><code>sha256sum [file]</code></td>
+                        <td>Generate SHA-256 hash of a file (fingerprint)</td>
+                        <td>
+                            <code>sha256sum /bin/ls</code><br>
+                            → Returns a unique hash like <code>a1b2c3d4...</code><br>
+                            <strong>Use case:</strong> Compare against known good hash to detect if binary was replaced by rootkit.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>find</code> (with -perm)</td>
+                        <td><code>find / -perm -4000 -type f</code></td>
+                        <td>Find SUID files (potential privilege escalation)</td>
+                        <td>
+                            <code>find / -perm -4000 -type f 2>/dev/null</code><br>
+                            → Lists all SUID files (run as file owner, not user).<br>
+                            <strong>Use case:</strong> Unexpected SUID files are common backdoors.
+                         </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 5: Incident Response Checklist -->
+    <div class="card">
+        <h2>🚨 Incident Response Quick Checklist (Copy-Paste Ready)</h2>
+        
+        <div class="incident-box">
+            <strong>Step 1 — See who's logged in:</strong><br>
+            <code>who -a</code> | <code>w</code> | <code>last -20</code> | <code>lastb -10</code><br><br>
+            
+            <strong>Step 2 — Check for unusual processes:</strong><br>
+            <code>ps aux --sort=-%cpu | head -10</code><br>
+            <code>ss -tulpn</code><br>
+            <code>lsof -i</code><br><br>
+            
+            <strong>Step 3 — Examine recent logs:</strong><br>
+            <code>journalctl --since "1 hour ago"</code><br>
+            <code>grep "Failed password" /var/log/auth.log | tail -20</code><br><br>
+            
+            <strong>Step 4 — Check for persistence (cron jobs):</strong><br>
+            <code>crontab -l</code><br>
+            <code>ls -la /etc/cron*</code><br><br>
+            
+            <strong>Step 5 — Find recently modified files:</strong><br>
+            <code>find /etc /bin /usr/bin -mtime -1 -type f 2>/dev/null</code><br>
+            (Files modified in last 24 hours)
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises (Test Your IR Skills)</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Find all listening ports and the processes that own them</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>ss -tulpn</code><br>
+                <strong>What to look for:</strong> Unexpected ports (e.g., 4444, 1337) or processes running from <code>/tmp</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Find all failed SSH login attempts in the last 24 hours</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo grep "Failed password" /var/log/auth.log | grep "$(date --date='1 day ago' '+%b %e')"</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Find the top 10 IPs that failed to authenticate</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo grep "Failed password" /var/log/auth.log | awk '{print $9}' | sort | uniq -c | sort -nr | head -10</code><br>
+                <strong>Explanation:</strong> awk extracts the IP field, sort/uniq counts duplicates, sort -nr orders by highest count.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Monitor authentication logs in real-time for live attacks</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo tail -f /var/log/auth.log | grep --color=always "Failed\|Accepted"</code><br>
+                → Press Ctrl+C to stop.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Security & IR Mastery)</h3>
+            <ul>
+                <li>✅ <strong>ss -tulpn</strong> → See all listening ports and their processes</li>
+                <li>✅ <strong>lsof -i :port</strong> → Find what's using a specific port</li>
+                <li>✅ <strong>grep "Failed" /var/log/auth.log</strong> → Track brute-force attempts</li>
+                <li>✅ <strong>tail -f</strong> → Live log monitoring (press Ctrl+C to stop)</li>
+                <li>✅ <strong>ps aux --sort=-%cpu</strong> → Detect cryptominers and resource hogs</li>
+                <li>✅ <strong>sha256sum</strong> → Verify file integrity (detect backdoors)</li>
+                <li>✅ <strong>Always check /var/log/auth.log</strong> — first stop for intrusion signs</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-level1.html" class="nav-btn">◀ Previous: Level 1 (Essential)</a>
+        <a href="linux-level3.html" class="nav-btn">Next: Level 3 (Hardening) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Level 2: Security & Incident Response | Network forensics, log analysis, process investigation, IR checklist
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
