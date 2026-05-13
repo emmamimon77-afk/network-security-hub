@@ -94,6 +94,25 @@
         </div>
     </div>
 
+    <div class="incident-box" style="margin-top: 1rem;">
+            <strong>🔧 Understanding Pipes (`|`) — How This Command Works:</strong><br>
+            The pipe symbol `|` sends output from one command to the next. Order matters!
+            <br><br>
+            <code>grep "Failed password" /var/log/auth.log</code><br>
+            &nbsp;&nbsp;→ Extracts all failed login lines<br><br>
+            <code>| awk '{print $9}'</code><br>
+            &nbsp;&nbsp;→ Keeps only the 9th field (IP address)<br><br>
+            <code>| sort</code><br>
+            &nbsp;&nbsp;→ Sorts IPs alphabetically (required for `uniq` to work)<br><br>
+            <code>| uniq -c</code><br>
+            &nbsp;&nbsp;→ Counts consecutive duplicates<br><br>
+            <code>| sort -nr</code><br>
+            &nbsp;&nbsp;→ Sorts by number, highest first (reverse order)<br><br>
+            <code>| head -10</code><br>
+            &nbsp;&nbsp;→ Shows only top 10 results<br><br>
+            <strong>🔴 If you change the order, the command breaks:</strong> For example, `uniq -c` must receive <strong>sorted input</strong>, so `sort` MUST come before `uniq`!
+    </div>
+
     <!-- Section 2: Log Analysis -->
     <div class="card">
         <h2>📜 Log Analysis (Track Failures & Attacks)</h2>
