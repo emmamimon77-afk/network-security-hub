@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Command Library | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .level-card {
+            transition: transform 0.2s;
+        }
+        .level-card:hover {
+            transform: translateY(-4px);
+        }
+        .level-badge {
+            display: inline-block;
+            background: #0078d4;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .command-preview {
+            font-family: monospace;
+            background: #e9f0ed;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+            color: #1b4332;
+        }
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: #5e8b74;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card" style="text-align: center;">
+        <h1>⚡ PowerShell Command Library</h1>
+        <p><strong>PowerShell is the Windows security professional's best friend.</strong> From Active Directory to event logs to system hardening — everything is faster in PowerShell.</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">🖥️ Works on Windows, Linux, macOS (PowerShell Core 7+)</p>
+    </div>
+
+    <!-- Syntax Guide Link -->
+    <div class="card level-card" style="background: #eef2ff;">
+        <span class="level-badge" style="background: #3b82f6;">📖 Essential Reading</span>
+        <h2>Understanding Command Syntax</h2>
+        <p><strong>New to PowerShell syntax?</strong> Cmdlets follow a Verb-Noun pattern (e.g., `Get-Process`, `Set-Location`). Learn the basics before diving in.</p>
+        <div class="command-preview">
+            📋 PowerShell pattern: <code>Verb-Noun -Parameter value</code> (e.g., <code>Get-Process -Name "explorer"</code>)
+        </div>
+        <a href="../syntax-guide.html" class="nav-btn" style="display: inline-block; margin-top: 1rem; background: #3b82f6; color: white;">Read Syntax Guide →</a>
+    </div>
+
+    <!-- Level 1: Essential -->
+    <div class="card level-card">
+        <span class="level-badge">⭐ Level 1 | Essential</span>
+        <h2>📂 Essential PowerShell Cmdlets</h2>
+        <p><strong>Who should learn:</strong> Everyone starting with PowerShell — IT support, help desk, beginners.</p>
+        <p><strong>Topics:</strong> Navigation (`Get-Location`, `Set-Location`), file operations (`Get-ChildItem`, `Copy-Item`), getting help (`Get-Command`, `Get-Help`).</p>
+        <div class="command-preview">
+            📋 Preview: <code>Get-ChildItem -Recurse</code> · <code>Copy-Item .\file.txt C:\backup\</code> · <code>Get-Help Get-Process -Examples</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ cmdlets</span>
+            <span>⏱️ 20 min read</span>
+        </div>
+        <a href="powershell-level1.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 2: Security & IR -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐ Level 2 | Security & IR</span>
+        <h2>🛡️ Security & Incident Response Cmdlets</h2>
+        <p><strong>Who should learn:</strong> Security analysts, SOC teams, incident responders.</p>
+        <p><strong>Topics:</strong> Process investigation (`Get-Process`), event logs (`Get-WinEvent`), network connections (`Get-NetTCPConnection`), file hashing (`Get-FileHash`).</p>
+        <div class="command-preview">
+            📋 Preview: <code>Get-Process | Sort-Object CPU -Descending</code> · <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625}</code> · <code>Get-FileHash .\malware.exe -Algorithm SHA256</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ cmdlets</span>
+            <span>⏱️ 25 min read</span>
+        </div>
+        <a href="powershell-level2.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 3: Hardening & Admin -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐ Level 3 | Hardening & Admin</span>
+        <h2>🔧 Hardening & System Administration</h2>
+        <p><strong>Who should learn:</strong> Sysadmins, security engineers, Windows administrators.</p>
+        <p><strong>Topics:</strong> User management (`Get-LocalUser`, `Add-LocalGroupMember`), firewall rules (`Get-NetFirewallRule`, `New-NetFirewallRule`), service management (`Get-Service`, `Set-Service`).</p>
+        <div class="command-preview">
+            📋 Preview: <code>Get-LocalGroupMember -Name "Administrators"</code> · <code>New-NetFirewallRule -DisplayName "Allow SSH" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ cmdlets</span>
+            <span>⏱️ 25 min read</span>
+        </div>
+        <a href="powershell-level3.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 4: Active Directory -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐⭐ Level 4 | Active Directory</span>
+        <h2>🏢 Active Directory & Enterprise</h2>
+        <p><strong>Who should learn:</strong> AD administrators, enterprise security teams.</p>
+        <p><strong>Topics:</strong> User/group management (`Get-ADUser`, `Get-ADGroupMember`), computer management (`Get-ADComputer`), domain health, security auditing.</p>
+        <div class="command-preview">
+            📋 Preview: <code>Get-ADUser -Filter {Enabled -eq $true} -Properties LastLogonDate</code> · <code>Get-ADGroupMember -Identity "Domain Admins"</code> · <code>Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ cmdlets</span>
+            <span>⏱️ 30 min read</span>
+        </div>
+        <a href="powershell-level4.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 5: Scripting & Automation -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐⭐⭐ Level 5 | Scripting & Automation</span>
+        <h2>🤖 Scripting & Automation</h2>
+        <p><strong>Who should learn:</strong> DevSecOps, automation engineers, power users.</p>
+        <p><strong>Topics:</strong> Variables, loops (`ForEach-Object`), conditionals (`Where-Object`), functions, modules, error handling, remoting (`Invoke-Command`).</p>
+        <div class="command-preview">
+            📋 Preview: <code>Get-Process | Where-Object {$_.CPU -gt 100}</code> · <code>Invoke-Command -ComputerName "Server01" -ScriptBlock {Get-Service}</code> · <code>ForEach-Object { $_ }</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ concepts</span>
+            <span>⏱️ 35 min read</span>
+        </div>
+        <a href="powershell-level5.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 PowerShell Verb-Noun Pattern (The Key to Everything)</h3>
+            <ul>
+                <li>✅ <strong>Get-*</strong> → Retrieve information (Read-only, safe)</li>
+                <li>✅ <strong>Set-*</strong> → Modify existing values</li>
+                <li>✅ <strong>New-*</strong> → Create new objects</li>
+                <li>✅ <strong>Remove-*</strong> → Delete objects (⚠️ dangerous)</li>
+                <li>✅ <strong>Invoke-*</strong> → Execute actions</li>
+                <li>✅ <strong>Export-* / Import-*</strong> → Save/load data from files</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — PowerShell Command Library | Level 1-5 organized by skill and security relevance | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
