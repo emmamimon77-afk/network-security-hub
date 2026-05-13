@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Level 3 - Hardening & Administration | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .command-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .hardening-tip {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .danger-warning {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .step-by-step {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔧 Linux Level 3: Hardening & System Administration</h1>
+        <p><strong>Secure your Linux systems like a pro.</strong> Learn firewall management, user security, permission hardening, SSH protection, and automated defense with fail2ban.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Linux Levels 1 & 2 (basics + incident response). These commands change system configuration — test in a VM first!
+        </div>
+    </div>
+
+    <!-- Section 1: Firewall Management -->
+    <div class="card">
+        <h2>🔥 Firewall Management (Block the Bad Guys)</h2>
+        
+        <h3>Option A: iptables (Legacy, Still Everywhere)</h3>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>iptables -L</code></td>
+                        <td><code>iptables -L -v -n</code></td>
+                        <td>List all firewall rules (verbose, numeric)</td>
+                        <td>
+                            <code>sudo iptables -L -v -n</code><br>
+                            → <strong>-L</strong> (list rules), <strong>-v</strong> (verbose, shows packet counts), <strong>-n</strong> (numeric IPs/ports)<br>
+                            <strong>What you see:</strong> Current firewall rules with packet/byte counters.
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>iptables -A</code></td>
+                        <td><code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code></td>
+                        <td>Append a rule to a chain (add at end)</td>
+                        <td>
+                            <code>sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code><br>
+                            → <strong>-A INPUT</strong> (add to INPUT chain), <strong>-p tcp</strong> (protocol), <strong>--dport 22</strong> (destination port), <strong>-j ACCEPT</strong> (target action)<br>
+                            <strong>Translation:</strong> "Let SSH traffic in."
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>iptables -P</code></td>
+                        <td><code>iptables -P INPUT DROP</code></td>
+                        <td>Set default policy for a chain (what to do with unmatched packets)</td>
+                        <td>
+                            <code>sudo iptables -P INPUT DROP</code><br>
+                            → <strong>-P INPUT</strong> (set policy for INPUT chain), <strong>DROP</strong> (silently discard)<br>
+                            <strong>Translation:</strong> "Block everything unless a rule explicitly allows it."
+                         </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="step-by-step">
+            <strong>🔧 Building a Basic Firewall (Step by Step):</strong><br><br>
+            <code>sudo iptables -P INPUT DROP</code><br>
+            &nbsp;&nbsp;→ Step 1: Block everything by default<br><br>
+            <code>sudo iptables -A INPUT -i lo -j ACCEPT</code><br>
+            &nbsp;&nbsp;→ Step 2: Allow loopback (localhost communication)<br><br>
+            <code>sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</code><br>
+            &nbsp;&nbsp;→ Step 3: Allow responses to traffic you initiated (e.g., browsing web)<br><br>
+            <code>sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code><br>
+            &nbsp;&nbsp;→ Step 4: Allow SSH (so you don't lock yourself out!)<br><br>
+            <code>sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code><br>
+            &nbsp;&nbsp;→ Step 5: Allow web traffic (if running a web server)
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Warning:</strong> If you set <code>iptables -P INPUT DROP</code> without allowing SSH first, you will lock yourself out of the server! Always add the SSH rule BEFORE setting the default DROP policy.
+        </div>
+
+        <h3>Option B: ufw (Uncomplicated Firewall) — Easier for Beginners</h3>
+        <div class="example-box">
+            <code>sudo ufw default deny incoming</code> → Block all incoming traffic by default<br>
+            <code>sudo ufw default allow outgoing</code> → Allow all outgoing traffic<br>
+            <code>sudo ufw allow 22/tcp</code> → Allow SSH<br>
+            <code>sudo ufw allow 80/tcp</code> → Allow HTTP<br>
+            <code>sudo ufw allow 443/tcp</code> → Allow HTTPS<br>
+            <code>sudo ufw enable</code> → Activate the firewall<br>
+            <code>sudo ufw status verbose</code> → Check your rules
+        </div>
+    </div>
+
+    <!-- Section 2: User Management -->
+    <div class="card">
+        <h2>👤 User Management (Who Has Access?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>useradd</code></td>
+                        <td><code>sudo useradd [options] [username]</code></td>
+                        <td>Create a new user account (low-level)</td>
+                        <td>
+                            <code>sudo useradd -m -s /bin/bash john</code><br>
+                            → <strong>-m</strong> (create home directory /home/john), <strong>-s /bin/bash</strong> (set default shell)<br>
+                            <strong>Translation:</strong> "Create user john with a home folder and bash shell."
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>passwd</code></td>
+                        <td><code>sudo passwd [username]</code></td>
+                        <td>Set or change user password</code></td>
+                        <td>
+                            <code>sudo passwd john</code><br>
+                            → Prompts you to enter and confirm a password for user john.<br>
+                            <strong>Security note:</strong> Always set strong passwords (12+ chars, mix of cases, numbers, symbols).
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>usermod</code></td>
+                        <td><code>sudo usermod [options] [username]</code></td>
+                        <td>Modify existing user account (add to groups, change shell)</code></td>
+                        <td>
+                            <code>sudo usermod -aG sudo john</code><br>
+                            → <strong>-aG</strong> (append to group), <strong>sudo</strong> (the group name)<br>
+                            <strong>Translation:</strong> "Add john to the sudo group so he can run admin commands."
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><code>userdel</code></td>
+                        <td><code>sudo userdel -r [username]</code></td>
+                        <td>Delete user account (and optionally home directory)</code></code></td>
+                        <td>
+                            <code>sudo userdel -r john</code><br>
+                            → <strong>-r</strong> removes home directory and mail spool<br>
+                            <strong>Translation:</strong> "Delete user john and all their files."
+                          </code></code></code></code></code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hardening-tip">
+            <strong>🔐 Security Best Practices:</strong><br>
+            • Never use root directly — use `sudo` with your own account<br>
+            • Only add users to `sudo` group if absolutely necessary<br>
+            • Regularly audit user accounts: `cat /etc/passwd`<br>
+            • Remove accounts of former employees immediately: `sudo userdel -r [username]`
+        </div>
+    </div>
+
+    <!-- Section 3: Permission Hardening -->
+    <div class="card">
+        <h2>🔒 Permission Hardening (Protect Files & Directories)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>chmod</code> (numeric mode)</td>
+                        <td><code>chmod 755 script.sh</code></td>
+                        <td>Set file permissions using octal numbers</code></code></td>
+                        <td>
+                            <code>chmod 700 secret.txt</code><br>
+                            → <strong>7</strong> (owner: read+write+execute), <strong>0</strong> (group: none), <strong>0</strong> (others: none)<br>
+                            <strong>Translation:</strong> "Only the owner can access this file."<br><br>
+                            <strong>Permission numbers:</strong> 4=read, 2=write, 1=execute. Add them up.<br>
+                            • 7 = 4+2+1 (read, write, execute)<br>
+                            • 6 = 4+2 (read, write)<br>
+                            • 5 = 4+1 (read, execute)<br>
+                            • 0 = no permissions
+                          </code></code></code></code></td>
+                    </tr>
+                    <tr>
+                        <td><code>chmod</code> (symbolic mode)</code></td>
+                        <td><code>chmod u+x script.sh</code></code></td>
+                        <td>Add or remove permissions using letters</code></code></td>
+                        <td>
+                            <code>chmod u+x script.sh</code><br>
+                            → <strong>u</strong> (user/owner), <strong>+x</strong> (add execute permission)<br>
+                            <strong>Translation:</strong> "Make this script executable by its owner."<br><br>
+                            <code>chmod go-rwx secret.txt</code><br>
+                            → <strong>go</strong> (group and others), <strong>-rwx</strong> (remove read, write, execute)<br>
+                            <strong>Translation:</strong> "Lock down this file from everyone except me."
+                          </code></code></code></code> </code></td>
+                    </tr>
+                    <tr>
+                        <td><code>chown</code></code> </code></td>
+                        <td><code>sudo chown [user]:[group] [file]</code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Change file owner and group</code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>sudo chown www-data:www-data /var/www/index.html</code><br>
+                            → Changes owner to <strong>www-data</strong> (web server user)<br>
+                            <strong>Translation:</strong> "Give the web server ownership of this file."
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Critical Security Rule:</strong> Never set `chmod 777` on any file (gives everyone read/write/execute). This is a massive security hole. Use `700`, `750`, or `755` instead.
+        </div>
+    </div>
+
+    <!-- Section 4: SSH Hardening -->
+    <div class="card">
+        <h2>🛡️ SSH Hardening (Protect Remote Access)</h2>
+        
+        <div class="step-by-step">
+            <strong>Step 1: Edit SSH configuration file:</strong><br>
+            <code>sudo nano /etc/ssh/sshd_config</code><br><br>
+            
+            <strong>Step 2: Make these critical changes:</strong><br>
+            <code>PermitRootLogin no</code> → Disable root login (attackers target root!)<br>
+            <code>PasswordAuthentication no</code> → Disable password login, force SSH keys only<br>
+            <code>Port 2222</code> → Change default port 22 to something else (reduces bots)<br>
+            <code>AllowUsers alice bob</code> → Only allow specific users to SSH in<br>
+            <code>MaxAuthTries 3</code> → Limit failed attempts to 3 (stops brute force)<br><br>
+            
+            <strong>Step 3: Restart SSH service:</strong><br>
+            <code>sudo systemctl restart sshd</code><br>
+            <strong>⚠️ Warning:</strong> Keep an open SSH session while testing changes, so you don't lock yourself out!
+        </div>
+
+        <div class="hardening-tip">
+            <strong>🔑 Setting up SSH keys (more secure than passwords):</strong><br>
+            On your client machine: <code>ssh-keygen -t ed25519</code><br>
+            Copy to server: <code>ssh-copy-id user@server</code><br>
+            Now test: <code>ssh user@server</code> (should work without password)
+        </div>
+    </div>
+
+    <!-- Section 5: fail2ban (Automatic Brute-Force Protection) -->
+    <div class="card">
+        <h2>🤖 fail2ban — Automatic Brute-Force Protection</h2>
+        <p>fail2ban monitors logs and automatically bans IPs that fail login too many times.</p>
+
+        <div class="step-by-step">
+            <strong>Step 1: Install fail2ban:</strong><br>
+            <code>sudo apt install fail2ban -y</code><br><br>
+            
+            <strong>Step 2: Create local configuration:</strong><br>
+            <code>sudo nano /etc/fail2ban/jail.local</code><br><br>
+            
+            <strong>Step 3: Add SSH protection:</strong><br>
+            <code>[sshd]<br>
+            enabled = true<br>
+            port = ssh<br>
+            maxretry = 3<br>
+            bantime = 3600<br>
+            findtime = 600</code><br>
+            → <strong>maxretry 3</strong> (ban after 3 failures), <strong>bantime 3600</strong> (ban for 1 hour), <strong>findtime 600</strong> (failures must be within 10 minutes)<br><br>
+            
+            <strong>Step 4: Start and enable:</strong><br>
+            <code>sudo systemctl enable fail2ban --now</code><br><br>
+            
+            <strong>Step 5: Check banned IPs:</strong><br>
+            <code>sudo fail2ban-client status sshd</code>
+        </div>
+
+        <div class="real-world">
+            🌐 <strong>Real-world impact:</strong> After enabling fail2ban on a public server, you'll see thousands of banned IPs within a week. It stops 99% of automated attacks before they reach your authentication system.
+        </div>
+    </div>
+
+    <!-- System Hardening Checklist -->
+    <div class="card">
+        <h2>📋 System Hardening Checklist (Quick Reference)</h2>
+        
+        <div class="incident-box">
+            <strong>✅ After installing a new server, do these in order:</strong><br><br>
+            
+            1️⃣ <strong>Update everything:</strong> <code>sudo apt update && sudo apt upgrade -y</code><br><br>
+            
+            2️⃣ <strong>Create user & disable root SSH:</strong><br>
+            <code>sudo useradd -m -s /bin/bash myuser</code><br>
+            <code>sudo passwd myuser</code><br>
+            <code>sudo usermod -aG sudo myuser</code><br>
+            <code>sudo nano /etc/ssh/sshd_config</code> → set <code>PermitRootLogin no</code><br>
+            <code>sudo systemctl restart sshd</code><br><br>
+            
+            3️⃣ <strong>Set up firewall:</strong> <code>sudo ufw allow 22/tcp && sudo ufw enable</code><br><br>
+            
+            4️⃣ <strong>Install fail2ban:</strong> <code>sudo apt install fail2ban -y && sudo systemctl enable fail2ban --now</code><br><br>
+            
+            5️⃣ <strong>Enable automatic security updates:</strong><br>
+            <code>sudo apt install unattended-upgrades -y</code><br>
+            <code>sudo dpkg-reconfigure --priority=low unattended-upgrades</code>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Create a new user, set a password, and add them to the sudo group</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo useradd -m -s /bin/bash student</code><br>
+                <code>sudo passwd student</code><br>
+                <code>sudo usermod -aG sudo student</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Set up a basic firewall that allows SSH, HTTP, and HTTPS, but blocks everything else</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution (ufw):</strong><br>
+                <code>sudo ufw default deny incoming</code><br>
+                <code>sudo ufw allow 22/tcp</code><br>
+                <code>sudo ufw allow 80/tcp</code><br>
+                <code>sudo ufw allow 443/tcp</code><br>
+                <code>sudo ufw enable</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Make a script executable by its owner only, and give ownership to another user</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>chmod 700 my_script.sh</code><br>
+                <code>sudo chown student:student my_script.sh</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Hardening & Administration)</h3>
+            <ul>
+                <li>✅ <strong>Default deny + allow specific</strong> is the firewall golden rule</li>
+                <li>✅ <strong>Never disable SSH before you've tested</strong> — keep a backup connection open</li>
+                <li>✅ <strong>Use `ufw` for simplicity, `iptables` for granular control</strong></li>
+                <li>✅ <strong>Never `chmod 777`</strong> — use `700`, `750`, or `755` instead</li>
+                <li>✅ <strong>Disable root SSH and use `sudo`</strong> — basic but effective</li>
+                <li>✅ <strong>fail2ban blocks 99% of automated attacks</strong> — always install it</li>
+                <li>✅ <strong>Test hardening changes in a VM first</strong> before production</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-level2.html" class="nav-btn">◀ Previous: Level 2 (Security & IR)</a>
+        <a href="linux-level4.html" class="nav-btn">Next: Level 4 (Text Processing) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Level 3: Hardening & Administration | Firewalls, user management, permissions, SSH security, fail2ban, hardening checklist
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
