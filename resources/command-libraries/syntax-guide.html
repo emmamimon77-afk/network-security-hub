@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Syntax Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .syntax-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-good {
+            background: #e9f0ed;
+            border-left: 4px solid #52b788;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .example-bad {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .formula-box {
+            background: #eef2ff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>📖 Understanding Command Syntax</h1>
+        <p><strong>The key to reading any Linux documentation.</strong> Once you understand syntax patterns, you can learn any command without memorizing every flag.</p>
+    </div>
+
+    <!-- The Big Picture -->
+    <div class="card">
+        <h2>🎯 Command vs Syntax — The Core Concept</h2>
+        
+        <div class="formula-box">
+            <strong>COMMAND = WHAT you want to do (the action)</strong><br>
+            <strong>SYNTAX = HOW to write it correctly (the grammar)</strong>
+        </div>
+
+        <div class="example-good">
+            <strong>Example: `ls -la /home/user`</strong><br>
+            • <code>ls</code> = <strong>command</strong> (list directory contents)<br>
+            • <code>-la</code> = <strong>options/flags</strong> (show all files + detailed format)<br>
+            • <code>/home/user</code> = <strong>argument</strong> (which directory to list)
+        </div>
+    </div>
+
+    <!-- Syntax Notation Symbols -->
+    <div class="card">
+        <h2>📐 Syntax Notation Symbols (The Secret Language of Man Pages)</h2>
+        
+        <div style="overflow-x: auto;">
+            <table class="syntax-table">
+                <thead>
+                    <tr><th>Symbol</th><th>Meaning</th><th>Example</th><th>What It Means</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>[ ]</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Optional (you can include it or leave it out)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ls [-l]</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>You can type <code>ls</code> OR <code>ls -l</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>< ></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Required (you MUST replace with an actual value)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>grep <pattern> <file></code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>You MUST provide a pattern AND a file: <code>grep "error" log.txt</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>\|</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>OR (choose one of the options)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>command -a \| -b</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>You can use <code>-a</code> OR <code>-b</code>, but not both</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>...</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Repeatable (you can list multiple items)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>cp file1 file2 ... destination</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>You can copy one file OR many files: <code>cp file1 file2 file3 dest/</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Anatomy of a Command -->
+    <div class="card">
+        <h2>🔧 Anatomy of a Command</h2>
+        
+        <div class="formula-box">
+            <code>command [options] [arguments]</code>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table class="syntax-table">
+                <thead>
+                    <tr><th>Part</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Command</strong> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>The program or built-in instruction you want to run</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>grep</code>, <code>ls</code>, <code>chmod</code>, <code>systemctl</code></code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Options (Flags)</strong></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Modify how the command behaves (usually start with <code>-</code> or <code>--</code>)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>-l</code> (long format), <code>-a</code> (all files), <code>--help</code></code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Arguments</strong></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>The targets the command acts on (files, directories, text patterns)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>/var/log/syslog</code>, <code>"error"</code>, <code>file.txt</code></code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Common Patterns -->
+    <div class="card">
+        <h2>📋 Common Syntax Patterns You'll See Everywhere</h2>
+        
+        <div class="example-good">
+            <strong>Pattern 1: Basic — No options</strong><br>
+            <code>command <required_argument></code><br>
+            Example: <code>cat file.txt</code>
+        </div>
+        
+        <div class="example-good">
+            <strong>Pattern 2: Short options (single dash)</strong><br>
+            <code>command -a -b -c</code> OR <code>command -abc</code><br>
+            Example: <code>ls -la</code> (same as <code>ls -l -a</code>)
+        </div>
+        
+        <div class="example-good">
+            <strong>Pattern 3: Long options (double dash)</strong><br>
+            <code>command --option <value></code><br>
+            Example: <code>grep --color=auto "error" log.txt</code>
+        </div>
+        
+        <div class="example-good">
+            <strong>Pattern 4: Combining options and arguments</strong><br>
+            <code>command [options] <required_1> [optional_2]</code><br>
+            Example: <code>cp -r source/ destination/</code>
+        </div>
+    </div>
+
+    <!-- Common Mistakes -->
+    <div class="card">
+        <h2>⚠️ Common Syntax Mistakes (And How to Fix Them)</h2>
+        
+        <div class="example-bad">
+            <strong>❌ Wrong:</strong> <code>ls -l -a /home/user</code> (works but redundant)<br>
+            <strong>✅ Right:</strong> <code>ls -la /home/user</code> (combine short flags)
+        </div>
+        
+        <div class="example-bad">
+            <strong>❌ Wrong:</strong> <code>grep error file.txt</code> (if "error" is a variable, fine; if literal, works; but convention uses quotes)<br>
+            <strong>✅ Right:</strong> <code>grep "error" file.txt</code> (quotes are safer for multi-word patterns)
+        </div>
+        
+        <div class="example-bad">
+            <strong>❌ Wrong:</strong> <code>rm -rf / home/user</code> (space after / — deletes root! This is dangerous!)<br>
+            <strong>✅ Right:</strong> <code>rm -rf /home/user</code> (no space)
+        </div>
+        
+        <div class="example-bad">
+            <strong>❌ Wrong:</strong> <code>cp file.txt /destination without slash</code> (if destination doesn't exist, it creates a file named "destination without slash")<br>
+            <strong>✅ Right:</strong> <code>cp file.txt /destination/</code> (trailing slash clarifies it's a directory)
+        </div>
+    </div>
+
+    <!-- Why Syntax Matters -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Why Understanding Syntax Changes Everything</h3>
+            <ul>
+                <li>✅ <strong>You stop memorizing commands</strong> — you understand the pattern</li>
+                <li>✅ <strong>You can read any man page</strong> — the notation is universal</li>
+                <li>✅ <strong>You'll make fewer dangerous mistakes</strong> — spaces and arguments matter!</li>
+                <li>✅ <strong>You can learn new tools faster</strong> — all Unix commands follow similar syntax rules</li>
+                <li>✅ <strong>You'll write better scripts</strong> — clean, predictable command structures</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="card">
+        <h2>📋 Quick Reference Card</h2>
+        
+        <div class="formula-box" style="font-size: 0.9rem;">
+            <code>command [--long-option] [-s] [--option=value] <required> [optional] ...</code>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem;">
+            <div class="example-good" style="margin: 0;">[ ] = Optional</div>
+            <div class="example-good" style="margin: 0;">< > = Required</div>
+            <div class="example-good" style="margin: 0;">\| = OR</div>
+            <div class="example-good" style="margin: 0;">... = Repeatable</div>
+            <div class="example-good" style="margin: 0;">- = Short option</div>
+            <div class="example-good" style="margin: 0;">-- = Long option</div>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-index.html" class="nav-btn">◀ Back to Linux Command Library</a>
+        <a href="linux-level1.html" class="nav-btn">Start Level 1 →</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Command Syntax Guide | Essential reference for reading man pages and writing correct commands
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
