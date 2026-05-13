@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Level 1 - Essential Commands | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .command-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-warning {
+            background: #fff5e6;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🐧 Linux Level 1: Essential Commands</h1>
+        <p><strong>Master the fundamentals.</strong> These are the commands every Linux user must know — navigation, file operations, viewing files, and basic process management.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> None — this is your starting point!
+        </div>
+    </div>
+
+    <!-- Section 1: Navigation -->
+    <div class="card">
+        <h2>📂 Navigation Commands (Moving Around)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>pwd</code></td>
+                        <td><code>pwd</code></td>
+                        <td>Print Working Directory — shows your current location</td>
+                        <td><code>pwd</code> → <code>/home/student</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>ls</code></td>
+                        <td><code>ls [options] [path]</code></td>
+                        <td>List files and directories</td>
+                        <td><code>ls -la</code> (list all, including hidden, with details)</td>
+                    </tr>
+                    <tr>
+                        <td><code>cd</code></td>
+                        <td><code>cd [path]</code></td>
+                        <td>Change Directory — move to another folder</td>
+                        <td><code>cd /var/log</code> → <code>cd ..</code> (up one level) → <code>cd ~</code> (home)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="example-box">
+            <strong>📋 Real-world example:</strong><br>
+            student@linux:~$ pwd<br>
+            /home/student<br>
+            student@linux:~$ ls -la<br>
+            total 36<br>
+            drwxr-x--- 5 student student 4096 May 13 10:30 .<br>
+            drwxr-xr-x 3 root root 4096 May 13 10:28 ..<br>
+            -rw-r--r-- 1 student student 220 May 13 10:28 .bashrc<br>
+            student@linux:~$ cd /etc<br>
+            student@linux:/etc$ pwd<br>
+            /etc
+        </div>
+    </div>
+
+    <!-- Section 2: File Operations -->
+    <div class="card">
+        <h2>📝 File Operations (Create, Copy, Move, Delete)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>touch</code></td>
+                        <td><code>touch [filename]</code></td>
+                        <td>Create an empty file or update timestamp</td>
+                        <td><code>touch notes.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>cp</code></td>
+                        <td><code>cp [source] [destination]</code></td>
+                        <td>Copy files or directories</td>
+                        <td><code>cp notes.txt notes_backup.txt</code> → <code>cp -r folder1 folder2</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>mv</code></td>
+                        <td><code>mv [source] [destination]</code></td>
+                        <td>Move or rename files/directories</td>
+                        <td><code>mv notes.txt documents/</code> → <code>mv oldname.txt newname.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>rm</code></td>
+                        <td><code>rm [options] [file]</code></td>
+                        <td>Remove (delete) files — <span class="warning-text">⚠️ IRREVERSIBLE!</span></td>
+                        <td><code>rm notes.txt</code> → <code>rm -rf directory/</code> (⚠️ dangerous!)</td>
+                    </tr>
+                    <tr>
+                        <td><code>mkdir</code></td>
+                        <td><code>mkdir [directory]</code></td>
+                        <td>Make Directory — create a new folder</td>
+                        <td><code>mkdir projects</code> → <code>mkdir -p projects/2024/logs</code> (create parent directories)</td>
+                    </tr>
+                    <tr>
+                        <td><code>rmdir</code></td>
+                        <td><code>rmdir [directory]</code></td>
+                        <td>Remove empty directory</td>
+                        <td><code>rmdir empty_folder</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-warning">
+            ⚠️ <strong>Warning:</strong> <code>rm -rf</code> deletes everything instantly with NO confirmation. Always double-check your path before running!
+        </div>
+    </div>
+
+    <!-- Section 3: Viewing Files -->
+    <div class="card">
+        <h2>👁️ Viewing Files (Read, Not Edit)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>cat</code></td>
+                        <td><code>cat [file]</code></td>
+                        <td>Concatenate and display entire file (good for small files)</td>
+                        <td><code>cat /etc/hostname</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>less</code></td>
+                        <td><code>less [file]</code></td>
+                        <td>View file page by page (scroll with arrows, press 'q' to quit)</td>
+                        <td><code>less /var/log/syslog</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>head</code></td>
+                        <td><code>head -n [file]</code></td>
+                        <td>Show first N lines (default 10)</td>
+                        <td><code>head -20 /var/log/auth.log</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>tail</code></td>
+                        <td><code>tail -n [file]</code></td>
+                        <td>Show last N lines (default 10)</td>
+                        <td><code>tail -f /var/log/syslog</code> (follow live updates)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="example-box">
+            <strong>📋 Live log monitoring (critical for security!):</strong><br>
+            sudo tail -f /var/log/auth.log<br>
+            # Watch failed SSH login attempts in real-time
+        </div>
+    </div>
+
+    <!-- Section 4: Process Management -->
+    <div class="card">
+        <h2>⚙️ Process Management (What's Running?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ps</code></td>
+                        <td><code>ps [options]</code></td>
+                        <td>Show running processes (snapshot)</td>
+                        <td><code>ps aux</code> (all users, detailed) → <code>ps aux | grep nginx</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>top</code></td>
+                        <td><code>top</code></td>
+                        <td>Real-time process viewer (press 'q' to quit)</td>
+                        <td><code>top</code> → then 'P' (sort by CPU), 'M' (sort by memory)</td>
+                    </tr>
+                    <tr>
+                        <td><code>kill</code></td>
+                        <td><code>kill [signal] [PID]</code></td>
+                        <td>Send signal to process (default 15 = TERM)</td>
+                        <td><code>kill 1234</code> → <code>kill -9 1234</code> (force kill)</td>
+                    </tr>
+                    <tr>
+                        <td><code>pkill</code></td>
+                        <td><code>pkill [process-name]</code></td>
+                        <td>Kill by process name</td>
+                        <td><code>pkill firefox</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tip-box">
+            💡 <strong>Finding a PID:</strong> <code>pgrep -u root bash</code> (find all bash processes running as root)
+        </div>
+    </div>
+
+    <!-- Section 5: Getting Help -->
+    <div class="card">
+        <h2>📚 Getting Help (When You're Stuck)</h2>
+        <div style="overflow-x: auto;">
+            <table class="command-table">
+                <thead>
+                    <tr><th>Command</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>man</code></td>
+                        <td><code>man [command]</code></td>
+                        <td>Manual page (detailed documentation)</td>
+                        <td><code>man ls</code> → press 'q' to quit</td>
+                    </tr>
+                    <tr>
+                        <td><code>--help</code></td>
+                        <td><code>[command] --help</code></td>
+                        <td>Quick summary of options</td>
+                        <td><code>grep --help</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>whatis</code></td>
+                        <td><code>whatis [command]</code></td>
+                        向前One-line description of command</td>
+                        <td><code>whatis systemctl</code> → <code>systemctl (1) - Control the systemd system and service manager</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises (Try These!)</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Navigate to /var/log, list all files, then view auth.log with less</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                cd /var/log<br>
+                ls -la<br>
+                less auth.log<br>
+                # Press 'q' to exit less
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Create a directory called "practice", create a file "test.txt", copy it to "test_backup.txt"</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                mkdir practice<br>
+                cd practice<br>
+                touch test.txt<br>
+                cp test.txt test_backup.txt<br>
+                ls -la  # Verify both files exist
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Find the PID of a running process (e.g., systemd) and check its details with ps</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                pgrep systemd<br>
+                ps aux | grep systemd<br>
+                # Or: ps -p [PID] -f
+            </div>
+        </details>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Level 1 Essentials)</h3>
+            <ul>
+                <li>✅ <strong>pwd</strong> → Where am I?</li>
+                <li>✅ <strong>ls</strong> → What's here?</li>
+                <li>✅ <strong>cd</strong> → Move there</li>
+                <li>✅ <strong>cp, mv, rm</strong> → Copy, move, delete (⚠️ <code>rm</code> is irreversible!)</li>
+                <li>✅ <strong>cat, less, head, tail</strong> → View files safely</li>
+                <li>✅ <strong>ps, top, kill</strong> → Manage processes</li>
+                <li>✅ <strong>man, --help</strong> → Your best friends when stuck</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-index.html" class="nav-btn">◀ Back to Library Index</a>
+        <a href="linux-level2.html" class="nav-btn">Next: Level 2 (Security) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Level 1: Essential Commands | Navigation, files, processes, and help
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
