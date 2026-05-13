@@ -53,6 +53,15 @@ function loadNavigation() {
         
         <a href="../labs/index.html">🧪 Lab Index</a>
         <a href="../resources/glossary.html">📖 Glossary</a>
+
+        <div class="nav-dropdown">
+            <a href="javascript:void(0)">📚 Advanced ▾</a>
+            <div class="nav-dropdown-content">
+                <a href="../resources/command-libraries/linux-index.html">🐧 Linux Command Library</a>
+                <a href="#">📊 PowerShell Library (Coming Soon)</a>
+                <a href="#">🔬 Deep Dives (Coming Soon)</a>
+            </div>
+        </div> 
     `;
     
     document.querySelectorAll('.navbar').forEach(nav => {

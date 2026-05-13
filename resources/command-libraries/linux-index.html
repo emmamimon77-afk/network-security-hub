@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Command Library | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .level-card {
+            transition: transform 0.2s;
+        }
+        .level-card:hover {
+            transform: translateY(-4px);
+        }
+        .level-badge {
+            display: inline-block;
+            background: #52b788;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .command-preview {
+            font-family: monospace;
+            background: #e9f0ed;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+            color: #1b4332;
+        }
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: #5e8b74;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card" style="text-align: center;">
+        <h1>🐧 Linux Command Library</h1>
+        <p>Your complete reference for Linux commands — categorized by skill level and security relevance.</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">🖥️ Every command includes real-world examples and use cases</p>
+    </div>
+
+    <!-- Level 1: Essential -->
+    <div class="card level-card">
+        <span class="level-badge">⭐ Level 1 | Essential</span>
+        <h2>📂 Essential Commands</h2>
+        <p><strong>Who should learn:</strong> Everyone starting with Linux — students, beginners, non-technical users.</p>
+        <p><strong>Topics:</strong> Navigation (<code>ls</code>, <code>cd</code>, <code>pwd</code>), file operations (<code>cp</code>, <code>mv</code>, <code>rm</code>), viewing files (<code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code>), processes (<code>ps</code>, <code>kill</code>).</p>
+        <div class="command-preview">
+            📋 Preview: <code>ls -la</code> · <code>cd /var/log</code> · <code>cat /etc/passwd</code> · <code>ps aux</code> · <code>kill -9 1234</code>
+        </div>
+        <div class="stats">
+            <span>📚 20+ commands</span>
+            <span>⏱️ 20 min read</span>
+        </div>
+        <a href="linux-level1.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 2: Security & Incident Response -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐ Level 2 | Security & IR</span>
+        <h2>🛡️ Security & Incident Response Commands</h2>
+        <p><strong>Who should learn:</strong> Security analysts, SOC teams, penetration testers.</p>
+        <p><strong>Topics:</strong> Network investigation (<code>ss</code>, <code>lsof</code>, <code>netstat</code>), log analysis (<code>journalctl</code>, <code>grep</code>), process forensics (<code>ps</code>, <code>top</code>), file integrity (<code>sha256sum</code>).</p>
+        <div class="command-preview">
+            📋 Preview: <code>ss -tulpn</code> · <code>lsof -i :80</code> · <code>journalctl -xe</code> · <code>grep "Failed" /var/log/auth.log</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ commands</span>
+            <span>⏱️ 25 min read</span>
+        </div>
+        <a href="linux-level2.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 3: Hardening & Administration -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐ Level 3 | Hardening & Admin</span>
+        <h2>🔧 Hardening & System Administration</h2>
+        <p><strong>Who should learn:</strong> Sysadmins, DevOps engineers, security engineers.</p>
+        <p><strong>Topics:</strong> Firewall management (<code>iptables</code>, <code>ufw</code>), user management (<code>useradd</code>, <code>usermod</code>), permissions (<code>chmod</code>, <code>chown</code>), system hardening (<code>fail2ban</code>, <code>ssh</code> config).</p>
+        <div class="command-preview">
+            📋 Preview: <code>iptables -L -v -n</code> · <code>useradd -m secuser</code> · <code>chmod 600 /etc/ssh/sshd_config</code> · <code>sudo systemctl enable fail2ban</code>
+        </div>
+        <div class="stats">
+            <span>📚 15+ commands</span>
+            <span>⏱️ 25 min read</span>
+        </div>
+        <a href="linux-level3.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 4: Text Processing -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐⭐ Level 4 | Text Processing</span>
+        <h2>📝 Text Processing & Log Analysis</h2>
+        <p><strong>Who should learn:</strong> Power users, analysts, anyone working with logs or data.</p>
+        <p><strong>Topics:</strong> Search (<code>grep</code>), stream editing (<code>sed</code>), text processing (<code>awk</code>), cutting/selecting (<code>cut</code>), sorting (<code>sort</code>, <code>uniq</code>).</p>
+        <div class="command-preview">
+            📋 Preview: <code>grep -r "error" /var/log/</code> · <code>sed 's/old/new/g' file.txt</code> · <code>awk '{print $1}' access.log</code> · <code>sort | uniq -c</code>
+        </div>
+        <div class="stats">
+            <span>📚 12+ commands</span>
+            <span>⏱️ 30 min read</span>
+        </div>
+        <a href="linux-level4.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Level 5: Advanced -->
+    <div class="card level-card">
+        <span class="level-badge">⭐⭐⭐⭐⭐ Level 5 | Advanced / Deep Dive</span>
+        <h2>🔬 Advanced & Forensic Commands</h2>
+        <p><strong>Who should learn:</strong> Security researchers, malware analysts, kernel developers.</p>
+        <p><strong>Topics:</strong> System call tracing (<code>strace</code>), performance analysis (<code>perf</code>, <code>bpftrace</code>), kernel debugging (<code>systemtap</code>), memory forensics.</p>
+        <div class="command-preview">
+            📋 Preview: <code>strace -p 1234</code> · <code>perf top</code> · <code>bpftrace -e 'kprobe:do_nanosleep { printf("sleep\n"); }'</code>
+        </div>
+        <div class="stats">
+            <span>📚 10+ commands</span>
+            <span>⏱️ 35 min read</span>
+        </div>
+        <a href="linux-level5.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Learning →</a>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 How to Use This Library</h3>
+            <ul>
+                <li>✅ <strong>Start at Level 1</strong> — master the basics before moving up</li>
+                <li>✅ <strong>Practice each command</strong> in a safe VM or container</li>
+                <li>✅ <strong>Use the search bar</strong> on each level page to find specific commands</li>
+                <li>✅ <strong>Bookmark your favorite commands</strong> for quick reference</li>
+                <li>✅ <strong>Return often</strong> — repetition builds muscle memory</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Command Library | Level 1-5 organized by skill and security relevance | Last updated: May 2026
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
