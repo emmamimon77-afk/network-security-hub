@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <!-- Section 2: File Operations -->
+    <!-- Section 2: File Operations (Enhanced) -->
     <div class="card">
         <h2>📝 File Operations (Create, Copy, Move, Delete)</h2>
         <div style="overflow-x: auto;">
@@ -98,45 +98,93 @@
                         <td><code>touch</code></td>
                         <td><code>touch [filename]</code></td>
                         <td>Create an empty file or update timestamp</td>
-                        <td><code>touch notes.txt</code></td>
+                        <td><code>touch notes.txt</code> → Creates empty file "notes.txt"</td>
                     </tr>
                     <tr>
                         <td><code>cp</code></td>
                         <td><code>cp [source] [destination]</code></td>
                         <td>Copy files or directories</td>
-                        <td><code>cp notes.txt notes_backup.txt</code> → <code>cp -r folder1 folder2</code></td>
+                        <td>
+                            <code>cp notes.txt notes_backup.txt</code> → <strong>Copies</strong> "notes.txt" to a new file "notes_backup.txt" (original unchanged)<br>
+                            <code>cp -r folder1 folder2</code> → <strong>Copies entire folder1</strong> (including all contents) into folder2. If folder2 doesn't exist, it's created. If it exists, folder1 goes inside folder2.
+                        </td>
                     </tr>
                     <tr>
                         <td><code>mv</code></td>
                         <td><code>mv [source] [destination]</code></td>
                         <td>Move or rename files/directories</td>
-                        <td><code>mv notes.txt documents/</code> → <code>mv oldname.txt newname.txt</code></td>
+                        <td>
+                            <code>mv notes.txt documents/</code> → <strong>Moves</strong> "notes.txt" into the "documents" folder (original no longer in current location)<br>
+                            <code>mv oldname.txt newname.txt</code> → <strong>Renames</strong> the file within the same directory
+                        </td>
                     </tr>
                     <tr>
                         <td><code>rm</code></td>
                         <td><code>rm [options] [file]</code></td>
                         <td>Remove (delete) files — <span class="warning-text">⚠️ IRREVERSIBLE!</span></td>
-                        <td><code>rm notes.txt</code> → <code>rm -rf directory/</code> (⚠️ dangerous!)</td>
+                        <td>
+                            <code>rm notes.txt</code> → Deletes "notes.txt" permanently<br>
+                            <code>rm -rf directory/</code> → Deletes entire directory and ALL contents (⚠️ extremely dangerous!)
+                        </td>
                     </tr>
                     <tr>
                         <td><code>mkdir</code></td>
                         <td><code>mkdir [directory]</code></td>
                         <td>Make Directory — create a new folder</td>
-                        <td><code>mkdir projects</code> → <code>mkdir -p projects/2024/logs</code> (create parent directories)</td>
+                        <td>
+                            <code>mkdir projects</code> → Creates folder named "projects" in current location<br>
+                            <code>mkdir -p projects/2024/logs</code> → Creates parent directories "projects" and "2024" if they don't exist, then "logs" inside
+                        </td>
                     </tr>
                     <tr>
                         <td><code>rmdir</code></td>
                         <td><code>rmdir [directory]</code></td>
                         <td>Remove empty directory</td>
-                        <td><code>rmdir empty_folder</code></td>
+                        <td>
+                            <code>rmdir empty_folder</code> → Deletes ONLY if folder is completely empty<br>
+                            <code>rm -rf non_empty_folder</code> → Use this for non-empty folders (dangerous!)
+                        </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-        
-        <div class="tip-warning">
-            ⚠️ <strong>Warning:</strong> <code>rm -rf</code> deletes everything instantly with NO confirmation. Always double-check your path before running!
-        </div>
+    </div>
+
+    <div class="card" style="background: #eef2ff; margin-top: 1rem;">
+            <h3>📖 Understanding cp, mv, and rm (Detailed Examples)</h3>
+            
+            <div class="example-box">
+                <strong>🔍 cp (copy) - Original stays, new copy created:</strong><br>
+                <code>cp file.txt backup.txt</code><br>
+                → Creates "backup.txt" that is identical to "file.txt"<br>
+                → "file.txt" still exists. You now have TWO files.<br><br>
+                
+                <code>cp -r folder1 folder2</code><br>
+                → If "folder2" does NOT exist: Creates "folder2" and copies ALL contents of "folder1" into it.<br>
+                → If "folder2" already exists: Copies "folder1" INSIDE "folder2" (result: folder2/folder1/...)<br>
+                <strong>Use case:</strong> Backing up a project before making changes.
+            </div>
+            
+            <div class="example-box">
+                <strong>🔍 mv (move/rename) - Original moves, no copy:</strong><br>
+                <code>mv file.txt backup.txt</code><br>
+                → Renames "file.txt" to "backup.txt". Same file, new name. Still ONE file.<br><br>
+                
+                <code>mv file.txt documents/</code><br>
+                → Moves "file.txt" INTO the "documents" folder.<br>
+                → The file is no longer in the original location.<br><br>
+                
+                <code>mv documents/ /home/student/backup/</code><br>
+                → Moves the ENTIRE "documents" folder to a new location.<br>
+                <strong>Use case:</strong> Organizing files, renaming directories.
+            </div>
+            
+            <div class="tip-warning">
+                <strong>⚠️ rm (remove) - FOREVER DELETE (no undo, no recycle bin!):</strong><br>
+                <code>rm file.txt</code> → Deletes "file.txt" permanently.<br>
+                <code>rm -r folder/</code> → Deletes the folder and EVERYTHING inside it.<br>
+                <code>rm -rf folder/</code> → Force delete (ignores warnings, even if write-protected).<br>
+                <strong>🔴 CRITICAL:</strong> There is NO UNDO. Always double-check before hitting Enter!
+            </div>
     </div>
 
     <!-- Section 3: Viewing Files -->
