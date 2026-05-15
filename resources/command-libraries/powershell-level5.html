@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Level 5 - Scripting & Automation | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .cmdlet-table th {
+            background: #0078d4;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .comparison-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .automation-box {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .script-box {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🤖 PowerShell Level 5: Scripting & Automation</h1>
+        <p><strong>The final level — turn commands into powerful automation tools.</strong> Learn variables, loops, conditionals, error handling, functions, and remote management. This is what separates beginners from automation engineers.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> PowerShell Levels 1-4. This level builds on everything you've learned.
+        </div>
+    </div>
+
+    <!-- PowerShell vs Linux Comparison -->
+    <div class="card">
+        <h2>📊 PowerShell vs Linux: Automation Concepts Comparison</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Concept</th><th>PowerShell</th><th>Linux Equivalent</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Variables</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$var = "value"</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>var="value"</code> (bash)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Store data in memory for later use</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Arrays</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>@(1,2,3)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>(1 2 3)</code> (bash)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List/collection of items</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>ForEach Loop</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ForEach-Object { }</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>for item in list; do done</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Iterate through each item and process it</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Conditional</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>if (condition) { }</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>if [ condition ]; then fi</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Make decisions in code</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Error Handling</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>try { } catch { }</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>trap { }</code> or <code>set -e</code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Gracefully handle errors without crashing</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Remote Execution</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Invoke-Command -ComputerName</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ssh user@host 'command'</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Run commands on remote computers</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="automation-box">
+            💡 <strong>Note:</strong> Both PowerShell and Linux have powerful automation capabilities. PowerShell excels at Windows management (AD, Registry, WMI). Linux (bash/ansible) excels at server automation. Many professionals learn both!
+        </div>
+    </div>
+
+    <!-- Section 1: Variables -->
+    <div class="card">
+        <h2>📦 Variables (Storing Data)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Concept</th><th>Syntax</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>String variable</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$name = "value"</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Store text</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$server = "SRV-FILE-01"</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><strong>Number variable</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$num = 42</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Store numbers</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$count = (Get-Process).Count</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><strong>Array variable</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$list = @(item1, item2)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Store a list of items</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>$servers = @("SRV-01", "SRV-02", "SRV-03")</code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="example-box">
+            <strong>📋 Using variables in commands:</strong><br>
+            <code>$computers = Get-ADComputer -Filter * | Select-Object -ExpandProperty Name</code><br>
+            <code>foreach ($computer in $computers) { Write-Host "Checking $computer" }</code>
+        </div>
+    </div>
+
+    <!-- Section 2: Loops (ForEach-Object) -->
+    <div class="card">
+        <h2>🔄 Loops — ForEach-Object (Process Each Item)</h2>
+        <div class="example-box">
+            <strong>Syntax 1: Pipeline (most common)</strong><br>
+            <code>Get-Process | ForEach-Object { $_.CPU }</code>
+        </div>
+        <div class="example-box">
+            <strong>Syntax 2: ForEach statement (clearer for complex scripts)</strong><br>
+            <code>foreach ($process in Get-Process) { Write-Host $process.Name }</code>
+        </div>
+        <div class="example-box">
+            <strong>Real-world: Check multiple servers via Invoke-Command</strong><br>
+            <code>$servers = @("SRV-01", "SRV-02", "SRV-03")</code><br>
+            <code>foreach ($server in $servers) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Invoke-Command -ComputerName $server -ScriptBlock { Get-Service "Spooler" }</code><br>
+            <code>}</code>
+        </div>
+        <div class="automation-box">
+            💡 <strong>$_ (dollar underscore)</strong> represents the current object in the pipeline. Think of it as "this item" or "each item".
+        </div>
+    </div>
+
+    <!-- Section 3: Filtering with Where-Object -->
+    <div class="card">
+        <h2>🔍 Where-Object — Filtering Data</h2>
+        <div class="example-box">
+            <strong>Syntax 1: Script block (traditional)</strong><br>
+            <code>Get-Process | Where-Object { $_.CPU -gt 100 }</code>
+        </div>
+        <div class="example-box">
+            <strong>Syntax 2: Comparison statement (PowerShell 7+, cleaner)</strong><br>
+            <code>Get-Process | Where-Object CPU -gt 100</code>
+        </div>
+        <div class="example-box">
+            <strong>Real-world: Find suspicious processes</strong><br>
+            <code>Get-Process | Where-Object { $_.Path -like "*\Temp\*" -or $_.Path -like "*\Users\*\Downloads\*" } | Select-Object Name, Id, Path</code>
+        </div>
+        <div class="automation-box">
+            💡 <strong>Common operators:</strong> `-eq` (equals), `-ne` (not equals), `-gt` (greater than), `-lt` (less than), `-like` (wildcard match), `-match` (regex match)
+        </div>
+    </div>
+
+    <!-- Section 4: If/Else Conditionals -->
+    <div class="card">
+        <h2>⚖️ If/Else — Making Decisions</h2>
+        <div class="example-box">
+            <strong>Basic If statement:</strong><br>
+            <code>if ($cpuUsage -gt 90) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Warning "High CPU usage detected!"</code><br>
+            <code>}</code>
+        </div>
+        <div class="example-box">
+            <strong>If/Else:</strong><br>
+            <code>if ($processName -eq "powershell") {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Host "Found PowerShell"</code><br>
+            <code>} else {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Host "Not PowerShell"</code><br>
+            <code>}</code>
+        </div>
+        <div class="example-box">
+            <strong>Real-world: Server health check</strong><br>
+            <code>$service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue</code><br>
+            <code>if ($service.Status -eq "Running") {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Host "Spooler is running" -ForegroundColor Green</code><br>
+            <code>} else {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Warning "Spooler is stopped!"</code><br>
+            <code>}</code>
+        </div>
+    </div>
+
+    <!-- Section 5: Error Handling (Try/Catch) -->
+    <div class="card">
+        <h2>🛡️ Try/Catch — Handle Errors Gracefully</h2>
+        <div class="example-box">
+            <strong>Basic error handling:</strong><br>
+            <code>try {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Get-Service -Name "NonexistentService" -ErrorAction Stop</code><br>
+            <code>} catch {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Warning "Service not found: $($_.Exception.Message)"</code><br>
+            <code>}</code>
+        </div>
+        <div class="example-box">
+            <strong>Real-world: Remote command with fallback</strong><br>
+            <code>$computers = @("SRV-01", "SRV-02")</code><br>
+            <code>foreach ($computer in $computers) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>try {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>Invoke-Command -ComputerName $computer -ScriptBlock { Get-Service } -ErrorAction Stop</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>} catch {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>Write-Warning "Failed to connect to $computer"</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>}</code><br>
+            <code>}</code>
+        </div>
+        <div class="automation-box">
+            💡 <strong>Critical:</strong> Always use `-ErrorAction Stop` in try blocks, otherwise non-terminating errors won't trigger catch.
+        </div>
+    </div>
+
+    <!-- Section 6: Functions (Reusable Code) -->
+    <div class="card">
+        <h2>📦 Functions — Build Your Own Commands</h2>
+        <div class="example-box">
+            <strong>Simple function:</strong><br>
+            <code>function Get-ServerUptime {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>param($ComputerName)</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $ComputerName | Select-Object LastBootUpTime</code><br>
+            <code>}</code><br>
+            <code>Get-ServerUptime -ComputerName "localhost"</code>
+        </div>
+        <div class="example-box">
+            <strong>Function with advanced parameters:</strong><br>
+            <code>function Test-ServerConnection {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>param(</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>[Parameter(Mandatory=$true)]</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>[string[]]$ComputerName,</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>[int]$Port = 445</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>)</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>foreach ($computer in $ComputerName) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>$result = Test-NetConnection -ComputerName $computer -Port $Port -WarningAction SilentlyContinue</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if ($result.TcpTestSucceeded) { Write-Host "$computer is reachable on port $Port" -ForegroundColor Green }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>else { Write-Warning "$computer is NOT reachable on port $Port" }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>}</code><br>
+            <code>}</code><br>
+            <code>Test-ServerConnection -ComputerName "SRV-01", "SRV-02" -Port 3389</code>
+        </div>
+    </div>
+
+    <!-- Section 7: Remoting (Invoke-Command) -->
+    <div class="card">
+        <h2>🌐 Invoke-Command — Manage Your Entire Network</h2>
+        <p><strong>This is the most powerful cmdlet for administrators.</strong> Run commands on any computer in your domain without leaving your chair.</p>
+        
+        <div class="example-box">
+            <strong>Run a single command on one remote computer:</strong><br>
+            <code>Invoke-Command -ComputerName "SRV-FILE-01" -ScriptBlock { Get-Service }</code>
+        </div>
+        
+        <div class="example-box">
+            <strong>Run the same command on multiple computers:</strong><br>
+            <code>$servers = @("SRV-01", "SRV-02", "SRV-03")</code><br>
+            <code>Invoke-Command -ComputerName $servers -ScriptBlock { Get-Service -Name "Spooler" | Select-Object MachineName, Status }</code>
+        </div>
+
+        <div class="example-box">
+            <strong>Real-world: Check all domain controllers for replication issues</strong><br>
+            <code>$DCs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty Name</code><br>
+            <code>Invoke-Command -ComputerName $DCs -ScriptBlock { repadmin /replsum }</code>
+        </div>
+
+        <div class="example-box">
+            <strong>Compare Linux SSH equivalent:</strong><br>
+            <code># PowerShell:</code><br>
+            <code>Invoke-Command -ComputerName "SRV-01" -ScriptBlock { Get-Process }</code><br><br>
+            <code># Linux equivalent (SSH):</code><br>
+            <code>ssh user@server "ps aux"</code><br><br>
+            <code># Linux loop for multiple servers:</code><br>
+            <code>for server in srv01 srv02 srv03; do ssh $server "uptime"; done</code>
+        </div>
+
+        <div class="automation-box">
+            💡 <strong>Prerequisite:</strong> WinRM (Windows Remote Management) must be enabled. Run <code>Enable-PSRemoting -Force</code> as admin on target computers.
+        </div>
+    </div>
+
+    <!-- Section 8: Real-World Automation Scripts -->
+    <div class="card">
+        <h2>📜 Real-World Automation Scripts (Copy-Paste Ready)</h2>
+        
+        <div class="script-box">
+            <strong>🔍 Script 1: Audit all servers for running services</strong><br>
+            <code>$servers = Get-ADComputer -Filter {OperatingSystem -like "*Server*"} | Select-Object -ExpandProperty Name</code><br>
+            <code>$results = @()</code><br>
+            <code>foreach ($server in $servers) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>try {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>$services = Invoke-Command -ComputerName $server -ScriptBlock { Get-Service | Where-Object {$_.Status -eq "Running"} } -ErrorAction Stop</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>$results += [PSCustomObject]@{ Server = $server; RunningServices = $services.Count }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>} catch {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>$results += [PSCustomObject]@{ Server = $server; RunningServices = "Unreachable" }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>}</code><br>
+            <code>}</code><br>
+            <code>$results | Export-Csv -Path "C:\Audit\ServerServices.csv" -NoTypeInformation</code>
+        </div>
+
+        <div class="script-box">
+            <strong>🛡️ Script 2: Find inactive AD users and export report</strong><br>
+            <code>$inactiveUsers = Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00</code><br>
+            <code>$report = $inactiveUsers | Select-Object Name, SamAccountName, LastLogonDate, Enabled</code><br>
+            <code>$report | Export-Csv -Path "C:\Audit\InactiveUsers.csv" -NoTypeInformation</code><br>
+            <code>Write-Host "Found $($inactiveUsers.Count) inactive users" -ForegroundColor Yellow</code>
+        </div>
+
+        <div class="script-box">
+            <strong>🔥 Script 3: Monitor for suspicious processes across the network</strong><br>
+            <code>$suspiciousProcesses = @("nc.exe", "ncat.exe", "mimikatz.exe", "procdump.exe")</code><br>
+            <code>$servers = Get-ADComputer -Filter * | Select-Object -ExpandProperty Name</code><br>
+            <code>$alerts = @()</code><br>
+            <code>foreach ($server in $servers) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>$processes = Invoke-Command -ComputerName $server -ScriptBlock { Get-Process | Select-Object Name, Id, Path } -ErrorAction SilentlyContinue</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>foreach ($proc in $suspiciousProcesses) {</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>$found = $processes | Where-Object { $_.Name -eq $proc }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if ($found) { $alerts += [PSCustomObject]@{ Server = $server; Process = $proc; Path = $found.Path } }</code><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<code>}</code><br>
+            <code>}</code><br>
+            <code>$alerts | Export-Csv -Path "C:\Audit\SuspiciousProcesses.csv" -NoTypeInformation</code>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Write a script that gets all running processes on your computer, filters those using over 100 MB of memory, and writes them to a CSV file</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$processes = Get-Process | Where-Object { $_.WorkingSet -gt 100MB }</code><br>
+                <code>$processes | Select-Object Name, Id, @{Name="Memory(MB)";Expression={[math]::Round($_.WorkingSet/1MB,2)}} | Export-Csv -Path "HighMemoryProcesses.csv" -NoTypeInformation</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Write a function that takes a computer name and a service name, checks if the service is running, and returns "Running" or "Stopped"</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>function Get-ServiceStatus {</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>param([string]$ComputerName, [string]$ServiceName)</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>$service = Get-Service -Name $ServiceName -ComputerName $ComputerName -ErrorAction SilentlyContinue</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>if ($service) { return $service.Status } else { return "Not Found" }</code><br>
+                <code>}</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Write a script that checks disk space on all domain controllers and alerts if any have less than 10% free space</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$DCs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty Name</code><br>
+                <code>foreach ($DC in $DCs) {</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>$disk = Invoke-Command -ComputerName $DC -ScriptBlock { Get-PSDrive -Name C }</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>$freePercent = ($disk.Free / $disk.Used) * 100</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>if ($freePercent -lt 10) { Write-Warning "$DC has only $([math]::Round($freePercent,2))% free space on C:" }</code><br>
+                <code>}</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Scripting & Automation Mastery)</h3>
+            <ul>
+                <li>✅ <strong>Variables ($var)</strong> → Store data for later use</li>
+                <li>✅ <strong>ForEach-Object / foreach</strong> → Loop through collections</li>
+                <li>✅ <strong>Where-Object</strong> → Filter data (find what you need)</li>
+                <li>✅ <strong>If/Else</strong> → Make decisions in your scripts</li>
+                <li>✅ <strong>Try/Catch</strong> → Handle errors without crashing</li>
+                <li>✅ <strong>Functions</strong> → Build reusable commands</li>
+                <li>✅ <strong>Invoke-Command</strong> → Run scripts across your entire network</li>
+                <li>✅ <strong>PowerShell vs Linux:</strong> Both have powerful automation — PowerShell for Windows, bash/ansible for Linux</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="powershell-level4.html" class="nav-btn">◀ Previous: Level 4 (Active Directory)</a>
+        <a href="powershell-index.html" class="nav-btn">🏠 Back to Library Index</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — PowerShell Level 5: Scripting & Automation | Variables, loops, conditionals, error handling, functions, remoting, real-world scripts
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
