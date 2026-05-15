@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Level 4 - Active Directory & Enterprise | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .cmdlet-table th {
+            background: #0078d4;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .attack-box {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .audit-box {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .checklist-box {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🏢 PowerShell Level 4: Active Directory & Enterprise Security</h1>
+        <p><strong>Master Active Directory security auditing, user management, and threat detection.</strong> These cmdlets require the Active Directory module and appropriate domain privileges.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> PowerShell Levels 1-3. These commands require the <code>ActiveDirectory</code> module and domain admin or delegated permissions.
+        </div>
+        <div class="warning-box">
+            ⚠️ <strong>Important:</strong> Install RSAT (Remote Server Administration Tools) first:<br>
+            <code>Add-WindowsCapability -Name "Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0" -Online</code>
+        </div>
+    </div>
+
+    <!-- Section 1: Import Active Directory Module -->
+    <div class="card">
+        <h2>📦 Step 1: Import the Active Directory Module</h2>
+        <div class="example-box">
+            <code>Import-Module ActiveDirectory</code>
+        </div>
+        <div class="tip-box">
+            💡 <strong>Pro tip:</strong> Run PowerShell as Administrator and ensure RSAT is installed. On Windows 10/11, this module is available but not loaded by default.
+        </div>
+    </div>
+
+    <!-- Section 2: AD User Management -->
+    <div class="card">
+        <h2>👤 Active Directory User Management</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-ADUser</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-ADUser [-Identity] username [-Filter filter] [-Properties *]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Get one or more AD user accounts</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-ADUser -Identity "john.doe" -Properties *</code><br>
+                            → Shows ALL properties of user john.doe (last logon, password last set, groups, etc.)<br>
+                            <code>Get-ADUser -Filter {Enabled -eq $true} -Properties LastLogonDate | Select-Object Name, LastLogonDate</code><br>
+                            → Shows all enabled users and when they last logged in
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Search-ADAccount</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Search-ADAccount [-AccountInactive] [-AccountExpired] [-LockedOut] [-PasswordNeverExpires]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Find accounts with specific status (critical for security audits)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 | Select-Object Name, LastLogonDate</code><br>
+                            → Find inactive users (not logged in for 90+ days) — security risk!<br>
+                            <code>Search-ADAccount -LockedOut | Select-Object Name, LockedOut</code><br>
+                            → Find all locked-out accounts (possible brute-force attacks)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="audit-box">
+            <strong>📋 Security Audit: Find high-risk accounts:</strong><br>
+            <code>Search-ADAccount -PasswordNeverExpires | Select-Object Name, Enabled</code><br>
+            → Accounts with passwords that never expire (violates security policy)<br>
+            <code>Get-ADUser -Filter {Enabled -eq $true -and PasswordNeverExpires -eq $true} | Select-Object Name, PasswordNeverExpires</code>
+        </div>
+    </div>
+
+    <!-- Section 3: AD Group Management -->
+    <div class="card">
+        <h2>👥 Active Directory Group Management (Privilege Auditing)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-ADGroup</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-ADGroup [-Identity] groupname [-Properties *]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Get AD group information</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-ADGroup -Identity "Domain Admins" -Properties Members</code><br>
+                            → Shows who is in the Domain Admins group (critical security audit!)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Get-ADGroupMember</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-ADGroupMember [-Identity] groupname [-Recursive]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List all members of an AD group</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-ADGroupMember -Identity "Domain Admins" | Select-Object Name, ObjectClass</code><br>
+                            → Shows every user and group in Domain Admins (recursive)<br>
+                            <code>Get-ADGroupMember -Identity "Enterprise Admins" -Recursive</code><br>
+                            → Finds all nested members — critical for privilege auditing
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="attack-box">
+            <strong>⚠️ Common AD Attack: Over-privileged accounts</strong><br>
+            <code>Get-ADGroupMember -Identity "Domain Admins" | ForEach-Object { Get-ADUser -Identity $_.SamAccountName -Properties LastLogonDate, PasswordLastSet }</code><br>
+            → Audit each Domain Admin: when did they last logon? When did they last change password?
+        </div>
+    </div>
+
+    <!-- Section 4: AD Computer Management -->
+    <div class="card">
+        <h2>🖥️ Active Directory Computer Management</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-ADComputer</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-ADComputer [-Identity] computername [-Filter filter] [-Properties *]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Get domain-joined computers</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-ADComputer -Filter {Enabled -eq $true} -Properties Name, OperatingSystem, LastLogonDate</code><br>
+                            → Shows all active computers in the domain with OS and last logon<br>
+                            <code>Get-ADComputer -Identity "SRV-FILE-01" -Properties * | Select-Object Name, OperatingSystem, IPv4Address</code>
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Get-ADComputer -Filter</code> (advanced)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-ADComputer -Filter "OperatingSystem -like '*Server*'"</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Filter computers by OS, location, or other attributes</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-ADComputer -Filter "OperatingSystem -notlike '*Server*'" | Select-Object Name, OperatingSystem</code><br>
+                            → Find all workstations (non-server OS) for desktop management
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 5: Detecting AD Attacks -->
+    <div class="card">
+        <h2>🚨 Detecting Common Active Directory Attacks</h2>
+        
+        <div class="attack-box">
+            <strong>🔴 Attack 1: Kerberoasting</strong><br>
+            Attackers request service tickets (TGS) for accounts with SPNs and crack them offline.<br>
+            <strong>Detection:</strong><br>
+            <code>Get-ADUser -Filter {ServicePrincipalName -like "*"} -Properties ServicePrincipalName, Name, PasswordLastSet | Select-Object Name, ServicePrincipalName, PasswordLastSet</code><br>
+            → Lists all accounts with SPNs (potential Kerberoasting targets). Investigate accounts with old passwords!
+        </div>
+
+        <div class="attack-box">
+            <strong>🔴 Attack 2: Golden Ticket</strong><br>
+            Attackers forge Kerberos tickets after compromising KRBTGT account.<br>
+            <strong>Detection/Mitigation:</strong><br>
+            <code>Get-ADUser -Identity krbtgt -Properties PasswordLastSet, LastLogonDate</code><br>
+            → Check when KRBTGT password was last changed. Microsoft recommends changing twice!<br>
+            <strong>Monitor Event ID 4769 for unusual TGS requests.</strong>
+        </div>
+
+        <div class="attack-box">
+            <strong>🔴 Attack 3: Password Spraying</strong><br>
+            Attackers try common passwords across many accounts to avoid lockout.<br>
+            <strong>Detection:</strong><br>
+            <code>Search-ADAccount -LockedOut | Select-Object Name, LockedOut</code><br>
+            → Few locked accounts? Good. Many locked at once? Possible password spray.<br>
+            <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} | Where-Object {$_.Message -like "*Account locked out*"} | Group-Object -Property User | Select-Object Count, Name</code>
+        </div>
+
+        <div class="attack-box">
+            <strong>🔴 Attack 4: DCShadow</strong><br>
+            Attackers register a rogue DC and push malicious changes.<br>
+            <strong>Detection:</strong><br>
+            <code>Get-ADComputer -Filter {OperatingSystem -like "*Domain Controller*"} -Properties Name, IPv4Address, Modified</code><br>
+            → Monitor for unexpected domain controllers (Event ID 4928, 4929)
+        </div>
+    </div>
+
+    <!-- Section 6: AD Health & Security Checklist -->
+    <div class="card">
+        <h2>📋 Active Directory Security Audit Checklist</h2>
+        
+        <div class="checklist-box">
+            <strong>✅ Weekly Security Checks:</strong><br><br>
+            
+            <strong>1. Check for inactive user accounts:</strong><br>
+            <code>Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 | Select-Object Name, LastLogonDate</code><br><br>
+            
+            <strong>2. Audit privileged group membership:</strong><br>
+            <code>Get-ADGroupMember -Identity "Domain Admins" | Select-Object Name, ObjectClass</code><br>
+            <code>Get-ADGroupMember -Identity "Enterprise Admins" | Select-Object Name, ObjectClass</code><br>
+            <code>Get-ADGroupMember -Identity "Schema Admins" | Select-Object Name, ObjectClass</code><br><br>
+            
+            <strong>3. Find accounts with never-expiring passwords:</strong><br>
+            <code>Search-ADAccount -PasswordNeverExpires | Select-Object Name, Enabled</code><br><br>
+            
+            <strong>4. Check for locked-out accounts (possible attacks):</strong><br>
+            <code>Search-ADAccount -LockedOut | Select-Object Name, LockedOut</code><br><br>
+            
+            <strong>5. Verify KRBTGT password age:</strong><br>
+            <code>Get-ADUser -Identity krbtgt -Properties PasswordLastSet</code><br>
+            → Should be changed every 6-12 months (twice with delay)<br><br>
+            
+            <strong>6. List all domain controllers:</strong><br>
+            <code>Get-ADDomainController -Filter * | Select-Object Name, IPv4Address, Site</code>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Find all users who haven't logged in for 60+ days and disable them</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$inactiveUsers = Search-ADAccount -AccountInactive -TimeSpan 60.00:00:00</code><br>
+                <code>$inactiveUsers | Disable-ADAccount</code><br>
+                <code>$inactiveUsers | Select-Object Name, LastLogonDate</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Export all members of the "Domain Admins" group to a CSV file for auditing</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-ADGroupMember -Identity "Domain Admins" | Select-Object Name, ObjectClass, DistinguishedName | Export-Csv -Path "C:\Audit\DomainAdmins.csv" -NoTypeInformation</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Find all computers running Windows Server 2019 or newer</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-ADComputer -Filter "OperatingSystem -like '*2019*' -or OperatingSystem -like '*2022*'" -Properties OperatingSystem | Select-Object Name, OperatingSystem</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Find accounts with SPNs that haven't had password changes in over 90 days (Kerberoasting risk)</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$oldDate = (Get-Date).AddDays(-90)</code><br>
+                <code>Get-ADUser -Filter {ServicePrincipalName -like "*" -and PasswordLastSet -lt $oldDate} -Properties ServicePrincipalName, PasswordLastSet | Select-Object Name, ServicePrincipalName, PasswordLastSet</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Active Directory Security)</h3>
+            <ul>
+                <li>✅ <strong>Import-Module ActiveDirectory</strong> first — RSAT must be installed</li>
+                <li>✅ <strong>Search-ADAccount</strong> → Find inactive, locked-out, expired accounts</li>
+                <li>✅ <strong>Get-ADGroupMember -Identity "Domain Admins"</strong> → Audit privileged access weekly</li>
+                <li>✅ <strong>Accounts with PasswordNeverExpires</strong> are security violations — remediate immediately</li>
+                <li>✅ <strong>KRBTGT password must be changed</strong> regularly (protect against Golden Ticket attacks)</li>
+                <li>✅ <strong>Monitor for Kerberoasting</strong> — accounts with old passwords + SPNs are high risk</li>
+                <li>✅ <strong>Export audits to CSV</strong> for compliance documentation</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="powershell-level3.html" class="nav-btn">◀ Previous: Level 3 (Hardening)</a>
+        <a href="powershell-level5.html" class="nav-btn">Next: Level 5 (Scripting) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — PowerShell Level 4: Active Directory & Enterprise Security | User/group/computer management, attack detection, security audit checklist
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
