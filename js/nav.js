@@ -1,67 +1,65 @@
 // Network Security Hub - Navigation Component
-// Version 3.0: Mobile tap support for dropdowns
+// Version 4.0: Absolute paths (works from any page depth)
 
 function loadNavigation() {
     const navHtml = `
-        <a href="../index.html">🏠 Home</a>
+        <a href="/index.html">🏠 Home</a>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">📡 Networking Basics ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../networking-basics/osi-model.html">📘 OSI Model</a>
-                <a href="../networking-basics/tcp-ip-model.html">🌐 TCP/IP Model</a>
-                <a href="../networking-basics/subnetting.html">✂️ Subnetting</a>
-                <a href="../networking-basics/cisco-commands.html">⚙️ Cisco Commands</a>
+                <a href="/networking-basics/osi-model.html">📘 OSI Model</a>
+                <a href="/networking-basics/tcp-ip-model.html">🌐 TCP/IP Model</a>
+                <a href="/networking-basics/subnetting.html">✂️ Subnetting</a>
+                <a href="/networking-basics/cisco-commands.html">⚙️ Cisco Commands</a>
             </div>
         </div>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🔀 Routing & Switching ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
-                <a href="../routing-switching/static-routing.html">🗺️ Static Routing</a>
-                <a href="../routing-switching/ospf.html">🔄 OSPF</a>
-                <a href="../routing-switching/eigrp.html">⚡ EIGRP</a>
+                <a href="/routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
+                <a href="/routing-switching/static-routing.html">🗺️ Static Routing</a>
+                <a href="/routing-switching/ospf.html">🔄 OSPF</a>
+                <a href="/routing-switching/eigrp.html">⚡ EIGRP</a>
             </div>
         </div>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🔥 Firewalls ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../firewalls/iptables.html">🛠️ iptables</a> 
-                <a href="../firewalls/zone-based-firewall.html">🧱 Zone-Based Firewall</a>
-                <!-- Adding spacing to match other dropdowns -->
-                <a href="#" style="opacity: 0.6; visibility: hidden;">placeholder</a>
+                <a href="/firewalls/iptables.html">🛠️ iptables</a>
+                <a href="/firewalls/zone-based-firewall.html">🧱 Zone-Based Firewall</a>
             </div>
         </div>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🖥️ Virtualization ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../virtualization/virtualbox-setup.html">📦 VirtualBox Setup</a>
-                <a href="../virtualization/vmware-setup.html">⚡ VMware Setup</a>
+                <a href="/virtualization/virtualbox-setup.html">📦 VirtualBox Setup</a>
+                <a href="/virtualization/vmware-setup.html">⚡ VMware Setup</a>
             </div>
         </div>
         
         <div class="nav-dropdown">
             <a href="javascript:void(0)">🐧 Server Admin ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../server-admin/linux-commands.html">💻 Linux Commands for Security</a>
-                <a href="../server-admin/windows-server.html">🪟 Windows Server</a>
+                <a href="/server-admin/linux-commands.html">💻 Linux Commands for Security</a>
+                <a href="/server-admin/windows-server.html">🪟 Windows Server</a>
             </div>
         </div>
         
-        <a href="../labs/index.html">🧪 Lab Index</a>
-        <a href="../resources/glossary.html">📖 Glossary</a>
-
+        <a href="/labs/index.html">🧪 Lab Index</a>
+        <a href="/resources/glossary.html">📖 Glossary</a>
+        
         <div class="nav-dropdown">
             <a href="javascript:void(0)">📚 Advanced ▾</a>
             <div class="nav-dropdown-content">
-                <a href="../resources/command-libraries/linux-index.html">🐧 Linux Command Library</a>
-                <a href="#">📊 PowerShell Library (Coming Soon)</a>
+                <a href="/resources/command-libraries/linux-index.html">🐧 Linux Command Library</a>
+                <a href="/resources/command-libraries/powershell-index.html">⚡ PowerShell Library</a>
                 <a href="#">🔬 Deep Dives (Coming Soon)</a>
             </div>
-        </div> 
+        </div>
     `;
     
     document.querySelectorAll('.navbar').forEach(nav => {
@@ -144,43 +142,30 @@ function initMobileDropdowns() {
 }
 
 function handleMobileTap(e) {
-    // Only handle on mobile screens
     if (window.innerWidth > 768) return;
     
     e.preventDefault();
     const dropdown = this.closest('.nav-dropdown');
     if (!dropdown) return;
     
-    // Close all other dropdowns
     document.querySelectorAll('.nav-dropdown').forEach(d => {
-        if (d !== dropdown) {
-            d.classList.remove('active');
-        }
+        if (d !== dropdown) d.classList.remove('active');
     });
     
-    // Toggle current dropdown
     dropdown.classList.toggle('active');
 }
 
-// Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
     if (window.innerWidth > 768) return;
-    
     if (!e.target.closest('.nav-dropdown')) {
-        document.querySelectorAll('.nav-dropdown').forEach(d => {
-            d.classList.remove('active');
-        });
+        document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('active'));
     }
 });
 
-// Initialize everything
 document.addEventListener('DOMContentLoaded', () => {
     loadNavigation();
     addDropdownStyles();
     initMobileDropdowns();
 });
 
-// Re-initialize on orientation change
-window.addEventListener('resize', () => {
-    initMobileDropdowns();
-});
+window.addEventListener('resize', () => initMobileDropdowns());
