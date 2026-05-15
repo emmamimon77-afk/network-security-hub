@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Level 3 - Hardening & Administration | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .cmdlet-table th {
+            background: #0078d4;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .hardening-tip {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .danger-warning {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .checklist-box {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔧 PowerShell Level 3: Hardening & System Administration</h1>
+        <p><strong>Secure Windows systems like a pro.</strong> Learn to manage users, configure firewalls, harden services, and implement security baselines — all from PowerShell.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> PowerShell Levels 1 & 2 (basics + incident response). These cmdlets change system configuration — test in a VM first!
+        </div>
+    </div>
+
+    <!-- Section 1: Local User Management -->
+    <div class="card">
+        <h2>👤 Local User Management (Who Has Access?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-LocalUser</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-LocalUser [[-Name] username]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List all local user accounts</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-LocalUser | Where-Object {$_.Enabled -eq $true}</code><br>
+                            → Shows only enabled (active) user accounts<br>
+                            <code>Get-LocalUser -Name "Administrator" | Select-Object Name, Enabled, PasswordLastSet</code><br>
+                            → Check if default Administrator is still enabled (security risk!)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>New-LocalUser</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>New-LocalUser -Name username -Password (Read-Host -AsSecureString) [-PasswordNeverExpires]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Create a new local user account</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>$password = Read-Host -AsSecureString</code><br>
+                            <code>New-LocalUser -Name "secuser" -Password $password -FullName "Security User" -Description "For security monitoring"</code><br>
+                            <strong>Translation:</strong> Creates a new user with a secure password prompt.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Add-LocalGroupMember</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Add-LocalGroupMember -Group "GroupName" -Member "username"</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Add a user to a local group (e.g., Administrators)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Add-LocalGroupMember -Group "Administrators" -Member "secuser"</code><br>
+                            <strong>Translation:</strong> "Grant secuser administrator privileges."<br>
+                            <strong>⚠️ Warning:</strong> Only add trusted users to Administrators group!
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hardening-tip">
+            <strong>🔐 User Management Security Best Practices:</strong><br>
+            • <code>Get-LocalUser | Where-Object {$_.PasswordNeverExpires -eq $true}</code> → Find accounts with never-expiring passwords<br>
+            • <code>Disable-LocalUser -Name "Guest"</code> → Disable built-in Guest account<br>
+            • <code>Rename-LocalUser -Name "Administrator" -NewName "admin_secure_2024"</code> → Rename default admin
+        </div>
+    </div>
+
+    <!-- Section 2: Local Group Management -->
+    <div class="card">
+        <h2>👥 Local Group Management (Who Has What Privileges?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-LocalGroup</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-LocalGroup [[-Name] groupname]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List all local security groups</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-LocalGroup | Select-Object Name, Description</code><br>
+                        <tr>
+                        <td><code>Get-LocalGroupMember</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-LocalGroupMember -Group "GroupName"</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List members of a specific local group</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-LocalGroupMember -Group "Administrators"</code><br>
+                            → Shows all users with admin privileges — audit this regularly!
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 3: Firewall Management -->
+    <div class="card">
+        <h2>🔥 Windows Defender Firewall (Block the Bad Guys)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-NetFirewallRule</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-NetFirewallRule [-DisplayName name] [-Direction Inbound\|Outbound]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List all firewall rules</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-NetFirewallRule -Direction Inbound | Where-Object {$_.Enabled -eq $true} | Select-Object DisplayName, Action</code><br>
+                            → Shows all active inbound rules (what's allowed into your machine!)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>New-NetFirewallRule</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>New-NetFirewallRule -DisplayName "Name" -Direction Inbound -Protocol TCP -LocalPort port -Action Allow\|Block</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Create a new firewall rule</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>New-NetFirewallRule -DisplayName "Allow SSH" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow</code><br>
+                            → Opens port 22 for SSH (Secure Shell)<br>
+                            <code>New-NetFirewallRule -DisplayName "Block Malicious IP" -Direction Inbound -RemoteAddress 203.0.113.5 -Action Block</code><br>
+                            → Blocks a specific malicious IP address
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Set-NetFirewallProfile</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Enable/disable firewall profiles</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Set-NetFirewallProfile -All -Enabled True</code><br>
+                            → Enables firewall on all profiles (Domain, Private, Public)<br>
+                            <code>Set-NetFirewallProfile -Profile Public -DefaultInboundAction Block</code><br>
+                            → Blocks all inbound traffic on public networks (coffee shop security!)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="danger-warning">
+            ⚠️ <strong>Warning:</strong> If you create a "Block all" rule without allowing RDP/SSH first, you can lock yourself out of a remote server! Always test rules locally first.
+        </div>
+    </div>
+
+    <!-- Section 4: Service Management -->
+    <div class="card">
+        <h2>⚙️ Service Management (What's Running in the Background?)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-Service</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-Service [[-Name] servicename] [-Status Running\|Stopped]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List Windows services and their status</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object Name, DisplayName</code><br>
+                            → Shows all running services (attack surface!)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Stop-Service</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Stop-Service -Name "servicename" [-Force]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Stop a running service</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Stop-Service -Name "Spooler"</code><br>
+                            → Stops the print spooler service<br>
+                            <code>Set-Service -Name "Fax" -StartupType Disabled</code><br>
+                            → Disables unnecessary services (reduces attack surface)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hardening-tip">
+            <strong>🔒 Services to disable on a secure system:</strong><br>
+            • <code>Remote Registry</code> (remote registry access — security risk)<br>
+            • <code>Print Spooler</code> (if no printers — PrintNightmare vulnerability)<br>
+            • <code>Fax</code> (obsolete)<br>
+            • <code>Xbox Live services</code> (not needed on servers)
+        </div>
+    </div>
+
+    <!-- Section 5: System Hardening Checklist -->
+    <div class="card">
+        <h2>📋 System Hardening Checklist (Copy-Paste Ready)</h2>
+        
+        <div class="checklist-box">
+            <strong>✅ Run these commands on a new Windows system:</strong><br><br>
+
+            <strong>1. List all users and check for suspicious accounts:</strong><br>
+            <code>Get-LocalUser | Select-Object Name, Enabled, PasswordLastSet, PasswordNeverExpires</code><br><br>
+            
+            <strong>2. Audit local administrators group:</strong><br>
+            <code>Get-LocalGroupMember -Group "Administrators"</code><br><br>
+            
+            <strong>3. Remove unnecessary users from Administrators group:</strong><br>
+            <code>Remove-LocalGroupMember -Group "Administrators" -Member "olduser"</code><br><br>
+            
+            <strong>4. Enable firewall on all profiles:</strong><br>
+            <code>Set-NetFirewallProfile -All -Enabled True</code><br><br>
+            
+            <strong>5. Block all inbound traffic by default on Public networks:</strong><br>
+            <code>Set-NetFirewallProfile -Profile Public -DefaultInboundAction Block</code><br><br>
+            
+            <strong>6. Disable unnecessary services:</strong><br>
+            <code>Set-Service -Name "RemoteRegistry" -StartupType Disabled</code><br>
+            <code>Stop-Service -Name "RemoteRegistry" -Force</code><br><br>
+            
+            <strong>7. Enable PowerShell logging for security auditing:</strong><br>
+            <code>Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging" -Name "EnableScriptBlockLogging" -Value 1 -Type DWord</code>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Create a new local user named "auditor" with a secure password, add them to the "Remote Management Users" group, and disable password expiration</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$password = Read-Host -AsSecureString</code><br>
+                <code>New-LocalUser -Name "auditor" -Password $password -PasswordNeverExpires</code><br>
+                <code>Add-LocalGroupMember -Group "Remote Management Users" -Member "auditor"</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Create a firewall rule that allows inbound SSH (port 22) only from the IP range 192.168.1.0/24</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>New-NetFirewallRule -DisplayName "Allow SSH from LAN" -Direction Inbound -Protocol TCP -LocalPort 22 -RemoteAddress 192.168.1.0/24 -Action Allow</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Find all services that are currently running with their startup type set to "Automatic"</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-Service | Where-Object {$_.Status -eq "Running" -and $_.StartType -eq "Automatic"} | Select-Object Name, DisplayName</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (PowerShell Hardening & Admin)</h3>
+            <ul>
+                <li>✅ <strong>Get-LocalUser</strong> → Audit local accounts, disable unused ones</li>
+                <li>✅ <strong>Get-LocalGroupMember -Group "Administrators"</strong> → Know who has admin rights</li>
+                <li>✅ <strong>New-NetFirewallRule</strong> → Create granular firewall rules (allow/block by IP, port, program)</li>
+                <li>✅ <strong>Set-NetFirewallProfile -Enabled True</strong> → Enable firewall on all profiles (critical security step)</li>
+                <li>✅ <strong>Get-Service</strong> → Find unnecessary running services and disable them</li>
+                <li>✅ <strong>Disable services like RemoteRegistry, Print Spooler</strong> — reduces attack surface</li>
+                <li>✅ <strong>Always test hardening changes in a VM first</strong> — avoid locking yourself out!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="powershell-level2.html" class="nav-btn">◀ Previous: Level 2 (Security & IR)</a>
+        <a href="powershell-level4.html" class="nav-btn">Next: Level 4 (Active Directory) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — PowerShell Level 3: Hardening & System Administration | Local users, firewall rules, service management, hardening checklist
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
