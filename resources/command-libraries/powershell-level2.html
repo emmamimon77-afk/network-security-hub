@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Level 2 - Security & Incident Response | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .cmdlet-table th {
+            background: #0078d4;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .event-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .incident-box {
+            background: #f0f7f4;
+            border: 1px solid #52b788;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+        .tip-note {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🛡️ PowerShell Level 2: Security & Incident Response</h1>
+        <p><strong>Essential cmdlets for security analysts, SOC teams, and incident responders.</strong> Learn to investigate processes, analyze event logs, detect network connections, and respond to security incidents.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> PowerShell Level 1 (navigation, files, help). If you're new, start there first!
+        </div>
+    </div>
+
+    <!-- Section 1: Process Investigation -->
+    <div class="card">
+        <h2>🔍 Process Investigation (Find Suspicious Activity)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-Process</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-Process [[-Name] processname]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Lists all running processes with CPU, memory, and ID</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-Process | Sort-Object CPU -Descending | Select -First 10</code><br>
+                            → Shows top 10 CPU-consuming processes (detect cryptominers!)<br>
+                            <code>Get-Process -Name "powershell" | Select-Object Id, CPU, WorkingSet</code><br>
+                            → Shows specific details about PowerShell processes
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                    <tr>
+                        <td><code>Stop-Process</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Stop-Process -Id [PID] [-Force]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Terminates a running process (use with caution)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Stop-Process -Id 1234 -Force</code><br>
+                            → Immediately terminates process with ID 1234<br>
+                            <strong>⚠️ Warning:</strong> Can crash the system if used on critical processes!
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tip-note">
+            💡 <strong>Detect suspicious processes:</strong><br>
+            <code>Get-Process | Where-Object {$_.Path -like "*\Temp\*"}</code><br>
+            → Finds processes running from Temp folder (common malware location)
+        </div>
+    </div>
+
+    <!-- Section 2: Event Log Analysis -->
+    <div class="card">
+        <h2>📜 Event Log Analysis (Track Attacks & Failures)</h2>
+        
+        <h3>Critical Windows Event IDs for Security</h3>
+        <div style="overflow-x: auto;">
+            <table class="event-table">
+                <thead>
+                    <tr><th>Event ID</th><th>Description</th><th>What It Means</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>4624</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Successful logon</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Normal user login. Monitor for unusual hours or location</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4625</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Failed logon</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Brute-force indicator — too many = active attack</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4648</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Logon using explicit credentials</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Possible lateral movement (runas, scheduled tasks)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4672</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Special privileges assigned to new logon</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Admin logon — monitor carefully</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4688</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>New process created</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Detect malware execution (with command-line logging enabled)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>7045</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>New service installed</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Persistence mechanism — malware loves this</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Querying Event Logs with PowerShell</h3>
+        <div class="example-box">
+            <strong>📋 Get failed logons in last 24 hours:</strong><br>
+            <code>$startTime = (Get-Date).AddHours(-24)</code><br>
+            <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625; StartTime=$startTime} | Select-Object TimeCreated, Message</code>
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Get process creation events (requires command-line auditing enabled):</strong><br>
+            <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4688} | Select-Object -First 20 | Format-List TimeCreated, Message</code>
+        </div>
+
+        <div class="tip-note">
+            💡 <strong>Pro tip:</strong> Enable command-line auditing in Event 4688 via Group Policy to see exactly what commands were run!
+        </div>
+    </div>
+
+    <!-- Section 3: Network Investigation -->
+    <div class="card">
+        <h2>🌐 Network Investigation (Find Active Connections)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-NetTCPConnection</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-NetTCPConnection [-State Listen\|Established]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Shows TCP connections, listening ports, and process IDs</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-NetTCPConnection -State Listen</code><br>
+                            → Shows all ports your machine is listening on (potential backdoors!)<br>
+                            <code>Get-NetTCPConnection -State Established | Where-Object {$_.RemotePort -eq 4444}</code><br>
+                            → Find connections on suspicious port 4444 (common for reverse shells)
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="incident-box">
+            <strong>🚨 Incident Response Quick Check:</strong><br>
+            <code>Get-NetTCPConnection -State Established | Group-Object RemotePort | Sort-Object Count -Descending | Select-Object -First 10</code><br>
+            → Shows top 10 remote ports your machine is connected to — look for unusual ones like 4444, 1337, 31337!
+        </div>
+    </div>
+
+    <!-- Section 4: File Hashing & Integrity -->
+    <div class="card">
+        <h2>🔐 File Hashing (Verify Integrity, Detect Tampering)</h2>
+        <div style="overflow-x: auto;">
+            <table class="cmdlet-table">
+                <thead>
+                    <tr><th>Cmdlet</th><th>Syntax</th><th>Description</th><th>Example & Explanation</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Get-FileHash</code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>Get-FileHash -Path [file] -Algorithm [SHA256\|MD5]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Generates cryptographic hash of a file (fingerprint)</code></code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>
+                            <code>Get-FileHash -Path C:\Windows\System32\notepad.exe -Algorithm SHA256</code><br>
+                            → Returns a unique hash like <code>a1b2c3d4...</code><br>
+                            <strong>Use case:</strong> Compare against known good hash to detect if system file was replaced by rootkit.
+                          </code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code></code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 5: Incident Response Checklist -->
+    <div class="card">
+        <h2>🚨 Incident Response Quick Checklist (Copy-Paste Ready)</h2>
+        
+        <div class="incident-box">
+            <strong>Step 1 — Check for suspicious processes (CPU hogs):</strong><br>
+            <code>Get-Process | Sort-Object CPU -Descending | Select-Object -First 10</code><br><br>
+            
+            <strong>Step 2 — Find processes from suspicious locations:</strong><br>
+            <code>Get-Process | Where-Object {$_.Path -like "*\Users\*\AppData\*"} | Select-Object Name, Id, Path</code><br><br>
+            
+            <strong>Step 3 — Check for listening ports (potential backdoors):</strong><br>
+            <code>Get-NetTCPConnection -State Listen | Select-Object LocalPort, OwningProcess | ForEach-Object { $_.OwningProcess = (Get-Process -Id $_.OwningProcess).ProcessName; $_ }</code><br><br>
+            
+            <strong>Step 4 — Review failed logins in last hour:</strong><br>
+            <code>$startTime = (Get-Date).AddHours(-1); Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625; StartTime=$startTime} | Select-Object TimeCreated, Message</code><br><br>
+            
+            <strong>Step 5 — Check for suspicious scheduled tasks (persistence):</strong><br>
+            <code>Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"} | Select-Object TaskName, TaskPath, State</code>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Find all processes using more than 100 MB of memory</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-Process | Where-Object {$_.WorkingSet -gt 100MB} | Select-Object Name, Id, @{Name="Memory(MB)";Expression={[math]::Round($_.WorkingSet/1MB,2)}}</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Find all failed logins (Event ID 4625) from a specific IP address</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} | Where-Object {$_.Message -like "*192.168.1.100*"} | Select-Object TimeCreated, Message</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Generate SHA256 hash of a file and compare to a known good hash</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$hash = (Get-FileHash -Path C:\file.exe -Algorithm SHA256).Hash</code><br>
+                <code>if ($hash -eq "known-good-hash-here") { Write-Host "File is clean" } else { Write-Host "File may be tampered!" }</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (PowerShell Security & IR)</h3>
+            <ul>
+                <li>✅ <strong>Get-Process</strong> → Detect cryptominers and suspicious processes</li>
+                <li>✅ <strong>Get-WinEvent</strong> → Query security logs (Event ID 4625 = failed logins)</li>
+                <li>✅ <strong>Get-NetTCPConnection</strong> → Find listening ports (potential backdoors)</li>
+                <li>✅ <strong>Get-FileHash</strong> → Verify file integrity (detect tampering)</li>
+                <li>✅ <strong>Enable command-line auditing</strong> — see exactly what attackers ran</li>
+                <li>✅ <strong>Always investigate Event ID 4688 (process creation)</strong> — reveals malware execution</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="powershell-level1.html" class="nav-btn">◀ Previous: Level 1 (Essential)</a>
+        <a href="powershell-level3.html" class="nav-btn">Next: Level 3 (Hardening) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — PowerShell Level 2: Security & Incident Response | Process forensics, event logs, network investigation, file hashing, IR checklist
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
+
