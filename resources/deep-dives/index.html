@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Dives | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .deep-card {
+            transition: transform 0.2s;
+        }
+        .deep-card:hover {
+            transform: translateY(-4px);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .status-complete { background: #52b788; color: white; }
+        .status-inprogress { background: #e68a2e; color: white; }
+        .status-planned { background: #cbd5e1; color: #1a3b32; }
+        .category-tag {
+            display: inline-block;
+            background: #eef2ff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            margin-right: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .preview-text {
+            font-size: 0.85rem;
+            color: #5e8b74;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card" style="text-align: center;">
+        <h1>🔬 Deep Dives Library</h1>
+        <p><strong>Advanced topics, real-world case studies, and expert-level content.</strong> Each deep dive extracts essential knowledge from official documentation, research papers, and industry best practices — presented in our clear, modular format.</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">📚 New deep dives added regularly as courses develop</p>
+    </div>
+
+    <!-- How to Use -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 How to Use This Library</h3>
+            <ul>
+                <li>✅ <strong>Complete core lessons first</strong> — Deep Dives assume you know the basics</li>
+                <li>✅ <strong>Study in any order</strong> — Each deep dive is self-contained</li>
+                <li>✅ <strong>Use as reference</strong> — Return when you encounter these topics in the real world</li>
+                <li>✅ <strong>Suggest new topics</strong> — Found a great resource? We can extract and add it!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Routing & Switching Deep Dives -->
+    <h2>🔀 Routing & Switching Deep Dives</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- EIGRP Advanced -->
+        <div class="card deep-card">
+            <span class="status-badge status-complete">✅ Complete</span>
+            <h3>⚡ EIGRP Advanced</h3>
+            <div>
+                <span class="category-tag">Cisco</span>
+                <span class="category-tag">Routing</span>
+                <span class="category-tag">Advanced</span>
+            </div>
+            <p><strong>Beyond the basics:</strong> Stub routing, route summarization, wide metrics, named mode EIGRP, and advanced troubleshooting.</p>
+            <div class="preview-text">
+                📋 Preview: Stub routing configuration · Manual summarization · EIGRP named mode · Advanced metric tuning
+            </div>
+            <a href="eigrp-advanced.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Deep Dive →</a>
+        </div>
+
+        <!-- OSPF Deep Dive -->
+        <div class="card deep-card">
+            <span class="status-badge status-complete">✅ Complete</span>
+            <h3>🔄 OSPF Deep Dive</h3>
+            <div>
+                <span class="category-tag">Open Standard</span>
+                <span class="category-tag">Routing</span>
+                <span class="category-tag">Advanced</span>
+            </div>
+            <p><strong>Master OSPF internals:</strong> LSA types (1-7), special area types (Stub, NSSA, Totally Stubby), route summarization, and virtual links.</p>
+            <div class="preview-text">
+                📋 Preview: LSA Type 1-7 explained · Stub vs NSSA · Virtual links · Route filtering · SPF algorithm deep dive
+            </div>
+            <a href="ospf-deep-dive.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Deep Dive →</a>
+        </div>
+    </div>
+
+    <!-- Firewalls Deep Dives -->
+    <h2>🔥 Firewalls Deep Dives</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- iptables Advanced -->
+        <div class="card deep-card">
+            <span class="status-badge status-complete">✅ Complete</span>
+            <h3>🛠️ iptables Advanced</h3>
+            <div>
+                <span class="category-tag">Linux</span>
+                <span class="category-tag">Firewall</span>
+                <span class="category-tag">Advanced</span>
+            </div>
+            <p><strong>Go beyond basic rules:</strong> Custom chains, packet marking, rate limiting, string matching, connection tracking tuning, and advanced logging.</p>
+            <div class="preview-text">
+                📋 Preview: Custom chain creation · Packet marking (for QoS) · `recent` module for dynamic blocking · `string` module for content filtering
+            </div>
+            <a href="iptables-advanced.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Deep Dive →</a>
+        </div>
+
+        <!-- ZBF Advanced -->
+        <div class="card deep-card">
+            <span class="status-badge status-complete">✅ Complete</span>
+            <h3>🧱 Zone-Based Firewall Advanced</h3>
+            <div>
+                <span class="category-tag">Cisco</span>
+                <span class="category-tag">Firewall</span>
+                <span class="category-tag">Advanced</span>
+            </div>
+            <p><strong>Master ZBF:</strong> Application inspection (NBAR), VoIP inspection, advanced policy configurations, and troubleshooting ZBF.</p>
+            <div class="preview-text">
+                📋 Preview: NBAR (Layer 7 inspection) · VoIP/H.323 inspection · Zone-pair debugging · Performance tuning
+            </div>
+            <a href="zbf-advanced.html" class="nav-btn" style="display: inline-block; margin-top: 1rem;">Start Deep Dive →</a>
+        </div>
+    </div>
+
+    <!-- Future Deep Dives (Modular & Expandable) -->
+    <h2>📅 Planned Deep Dives (Coming Soon)</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>🐧 Linux Security Hardening</h3>
+            <p>SELinux/AppArmor deep dive, kernel hardening, auditing with auditd, and advanced system monitoring.</p>
+        </div>
+
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>🪟 Windows Security Internals</h3>
+            <p>Windows kernel security, PatchGuard, Secure Kernel, Credential Guard, and advanced event log analysis.</p>
+        </div>
+
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>🔐 SSL/TLS Deep Dive</h3>
+            <p>Certificate authorities, handshake process, cipher suites, Perfect Forward Secrecy, and TLS 1.3.</p>
+        </div>
+
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>🌐 BGP Deep Dive</h3>
+            <p>Border Gateway Protocol: AS paths, route reflectors, communities, and BGP security (RPKI).</p>
+        </div>
+
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>📡 Wireshark Mastery</h3>
+            <p>Advanced packet analysis, custom display filters, protocol dissectors, and troubleshooting complex issues.</p>
+        </div>
+
+        <div class="card">
+            <span class="status-badge status-planned">📅 Planned</span>
+            <h3>🐳 Docker & Container Security</h3>
+            <p>Container isolation, image security, runtime security, Kubernetes security contexts.</p>
+        </div>
+    </div>
+
+    <!-- Request a Deep Dive -->
+    <div class="card" style="text-align: center; background: #eef2ff;">
+        <h2>📖 Request a Deep Dive</h2>
+        <p>Found a topic you'd like covered? Found a great resource that should be extracted?<br>
+        The hub is <strong>modular and expandable</strong> — new deep dives can be added anytime.</p>
+        <div class="tip-box" style="display: inline-block; margin-top: 0.5rem;">
+            💡 Topics will be prioritized based on student needs when courses start in August
+        </div>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Deep Dives Library | Advanced topics for students who want to go deeper
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>

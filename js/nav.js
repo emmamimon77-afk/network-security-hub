@@ -57,7 +57,7 @@ function loadNavigation() {
             <div class="nav-dropdown-content">
                 <a href="/resources/command-libraries/linux-index.html">🐧 Linux Command Library</a>
                 <a href="/resources/command-libraries/powershell-index.html">⚡ PowerShell Library</a>
-                <a href="#">🔬 Deep Dives (Coming Soon)</a>
+                <a href="/resources/deep-dives/index.html">🔬 Deep Dives</a>
             </div>
         </div>
     `;
