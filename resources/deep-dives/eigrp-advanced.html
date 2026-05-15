@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIGRP Advanced Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .advanced-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⚡ EIGRP Advanced Deep Dive</h1>
+        <p><strong>Beyond the basics — master EIGRP for enterprise networks.</strong> This deep dive covers stub routing, route summarization, wide metrics, named mode EIGRP, and advanced troubleshooting techniques used by CCNP/CCIE professionals.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Complete the core EIGRP lesson first. This deep dive assumes you understand EIGRP fundamentals (AS numbers, successors, feasible successors, variance).
+        </div>
+    </div>
+
+    <!-- Section 1: EIGRP Stub Routing -->
+    <div class="card">
+        <h2>📡 EIGRP Stub Routing — Control Query Scope</h2>
+        <p>Stub routing is <strong>critical for large networks</strong>. It tells a router: "I am a stub — don't query me for alternate paths." This prevents unnecessary query floods when a route goes down.</p>
+        
+        <h3>Why Stub Routing Matters:</h3>
+        <ul>
+            <li>✅ <strong>Reduces query scope</strong> — Stub routers don't propagate queries</li>
+            <li>✅ <strong>Faster convergence</strong> — No waiting for stub routers to respond</li>
+            <li>✅ <strong>Prevents SIA (Stuck-In-Active) errors</strong> — Major cause of EIGRP instability</li>
+            <li>✅ <strong>Required for hub-and-spoke WAN designs</strong> — Branch routers should always be stubs</li>
+        </ul>
+
+        <h3>Configuration:</h3>
+        <div class="config-block">
+            Router(config)# router eigrp 100<br>
+            Router(config-router)# eigrp stub<br>
+            ! Default: connected + summary routes advertised<br>
+            <br>
+            ! More restrictive options:<br>
+            Router(config-router)# eigrp stub receive-only   ! Does not advertise any routes<br>
+            Router(config-router)# eigrp stub connected      ! Advertises only connected routes<br>
+            Router(config-router)# eigrp stub static         ! Advertises static routes<br>
+            Router(config-router)# eigrp stub redistributed  ! Advertises redistributed routes<br>
+            Router(config-router)# eigrp stub leak-map MYMAP ! Selectively leak specific routes
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Verification:</strong><br>
+            Router# show ip eigrp neighbors detail<br>
+            ! Look for "Stub Peer Advertising" section<br>
+            Router# show ip protocols | section eigrp stub<br>
+            ! Shows stub configuration
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Best Practice:</strong> Every branch router should be configured as `eigrp stub connected summary`. This prevents query floods from destabilizing the WAN.
+        </div>
+    </div>
+
+    <!-- Section 2: Route Summarization -->
+    <div class="card">
+        <h2>🗺️ EIGRP Route Summarization — Shrink the Routing Table</h2>
+        <p>Route summarization reduces routing table size, improves stability, and hides flapping subnets.</p>
+        
+        <h3>Manual Summarization (on interface):</h3>
+        <div class="config-block">
+            Router(config)# interface serial0/0/0<br>
+            Router(config-if)# ip summary-address eigrp 100 192.168.0.0 255.255.252.0<br>
+            ! Summarizes 192.168.0.0/22 (covers 192.168.0.0-192.168.3.0)
+        </div>
+
+        <h3>Benefits of Summarization:</h3>
+        <ul>
+            <li>✅ <strong>Smaller routing tables</strong> — One route instead of 4+</li>
+            <li>✅ <strong>Query boundary</strong> — Summaries block queries from propagating</li>
+            <li>✅ <strong>Flapping suppression</strong> — A flapping subnet doesn't trigger updates across the summary</li>
+        </ul>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Warning:</strong> Over-summarization can cause routing loops or black holes. Always ensure your summary includes all subnets reachable via that interface!
+        </div>
+
+        <h3>Verifying Summarization:</h3>
+        <div class="config-block">
+            Router# show ip route | include "192.168.0.0/22"<br>
+            D    192.168.0.0/22 [90/409600] via 10.0.0.2, 00:01:23, Serial0/0/0
+        </div>
+    </div>
+
+    <!-- Section 3: EIGRP Wide Metrics -->
+    <div class="card">
+        <h2>📏 EIGRP Wide Metrics — Beyond 10 Gbps</h2>
+        <p>Classic EIGRP metrics max out at 10 Gbps. **Wide metrics** support higher bandwidth interfaces (40G, 100G) and use 64-bit calculations.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="advanced-table">
+                <thead>
+                    <tr><th>Feature</th><th>Classic EIGRP</th><th>EIGRP Wide Metrics</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Metric width</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>32-bit</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>64-bit</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Max bandwidth support</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>10 Gbps</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>4.2 Tbps (theoretically unlimited)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Router compatibility</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>All IOS routers</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IOS 15.2+ / IOS-XE only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Enabling Wide Metrics:</h3>
+        <div class="config-block">
+            Router(config)# router eigrp 100<br>
+            Router(config-router)# metric version 64bit  ! Enables wide metrics<br>
+            ! Also enables classic metrics for backward compatibility<br>
+            Router(config-router)# metric version 64bit 1-65535  ! Specify AS range
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Design Note:</strong> Wide metrics are only supported on routers running IOS 15.2+ or IOS-XE. Mixed environments require careful planning — wide metrics routers can still peer with classic routers using scaled metrics.
+        </div>
+    </div>
+
+    <!-- Section 4: Named Mode EIGRP -->
+    <div class="card">
+        <h2>📁 Named Mode EIGRP — Modern Configuration</h2>
+        <p>Named mode EIGRP is the **modern configuration method** (IOS 15+). It organizes settings into **address families** (IPv4, IPv6) and **topologies** (base, multicast).</p>
+
+        <h3>Traditional vs Named Mode:</h3>
+        <div class="config-block">
+            ! TRADITIONAL (still works, but limited)<br>
+            router eigrp 100<br>
+             network 192.168.1.0<br>
+             variance 2<br>
+            <br>
+            ! NAMED MODE (recommended for new deployments)<br>
+            router eigrp MY-COMPANY<br>
+             address-family ipv4 autonomous-system 100<br>
+              network 192.168.1.0<br>
+              variance 2<br>
+              topology base<br>
+               summary-address 192.168.0.0 255.255.252.0<br>
+              exit-af-topology<br>
+             exit-address-family
+        </div>
+
+        <h3>Named Mode Benefits:</h3>
+        <ul>
+            <li>✅ <strong>IPv4 and IPv6 unified config</strong> — Same router process handles both</li>
+            <li>✅ <strong>Multi-topology routing</strong> — Different paths for voice vs data</li>
+            <li>✅ <strong>Simpler migration</strong> — Change settings without restarting the protocol</li>
+            <li>✅ <strong>Per-address-family settings</strong> — Different variance for IPv4 vs IPv6</li>
+        </ul>
+
+        <h3>Multi-Topology Routing (Voice vs Data):</h3>
+        <div class="config-block">
+            router eigrp MY-COMPANY<br>
+             address-family ipv4 autonomous-system 100<br>
+              topology base<br>
+               ! Data traffic uses standard metrics<br>
+              exit-af-topology<br>
+              topology voice<br>
+               ! Voice traffic prefers low-latency links<br>
+               metric rib-metric 100 1000 255 1 1500<br>
+               exit-af-topology<br>
+             exit-address-family
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Compatibility Note:</strong> Named mode EIGRP can peer with classic mode EIGRP (both speak the same protocol). However, named mode features (wide metrics, multi-topology) require named mode peers.
+        </div>
+    </div>
+
+    <!-- Section 5: EIGRP Authentication (MD5 + SHA) -->
+    <div class="card">
+        <h2>🔐 EIGRP Authentication — Beyond MD5</h2>
+        <p>Classic EIGRP supports MD5 authentication. Named mode adds **SHA (Secure Hash Algorithm)** for stronger security.</p>
+
+        <h3>MD5 Authentication (Classic):</h3>
+        <div class="config-block">
+            key chain EIGRP-KEY<br>
+             key 1<br>
+              key-string SecurePass123<br>
+            !<br>
+            interface serial0/0/0<br>
+             ip authentication mode eigrp 100 md5<br>
+             ip authentication key-chain eigrp 100 EIGRP-KEY
+        </div>
+
+        <h3>SHA Authentication (Named Mode):</h3>
+        <div class="config-block">
+            router eigrp MY-COMPANY<br>
+             address-family ipv4 autonomous-system 100<br>
+              authentication mode hmac-sha-256  <! SHA-256, stronger than MD5<br>
+              authentication key-chain EIGRP-KEY<br>
+             exit-address-family
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Recommendation:</strong> Use SHA-256 when all routers support it. MD5 is acceptable for mixed environments but considered legacy.
+        </div>
+    </div>
+
+    <!-- Section 6: Troubleshooting SIA (Stuck-In-Active) -->
+    <div class="card">
+        <h2>🛠️ Troubleshooting SIA (Stuck-In-Active) — The #1 EIGRP Problem</h2>
+        <p>SIA occurs when a router waits too long for replies to queries. This often indicates a problem with **stub configuration** or **query scope**.</p>
+
+        <h3>Common SIA Causes:</h3>
+        <ul>
+            <li>❌ Branch routers not configured as stubs</li>
+            <li>❌ High-latency links (satellite, cellular)</li>
+            <li>❌ Large routing tables with many queries</li>
+            <li>❌ Router CPU overload (slow to respond)</li>
+        </ul>
+
+        <h3>Diagnostic Commands:</h3>
+        <div class="config-block">
+            ! Show active routes (routes in ACTIVE state — problematic)<br>
+            Router# show ip eigrp topology active<br>
+            <br>
+            ! Show stuck routes<br>
+            Router# show ip eigrp topology pending<br>
+            <br>
+            ! Increase active timer (default 3 minutes)<br>
+            Router(config-router)# timers active-time 5<br>
+            <br>
+            ! Disable SIA checking (not recommended for production)<br>
+            Router(config-router)# no eigrp log-neighbor-warnings
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>SIA Prevention:</strong> Always configure `eigrp stub` on branch routers. This is the single most effective SIA mitigation.
+        </div>
+    </div>
+
+    <!-- Section 7: Advanced Verification Commands -->
+    <div class="card">
+        <h2>📊 Advanced Verification Commands (CCNP/CCIE Level)</h2>
+        
+        <div class="example-box">
+            <strong>🔍 EIGRP Topology Table Details:</strong><br>
+            Router# show ip eigrp topology 192.168.1.0/24<br>
+            ! Shows detailed information about a specific route
+        </div>
+
+        <div class="example-box">
+            <strong>🔍 EIGRP Traffic Statistics:</strong><br>
+            Router# show ip eigrp traffic<br>
+            ! Shows queries, replies, updates — helps diagnose SIA
+        </div>
+
+        <div class="example-box">
+            <strong>🔍 EIGRP Interface Details:</strong><br>
+            Router# show ip eigrp interfaces detail<br>
+            ! Shows hello interval, hold time, split horizon, summary addresses
+        </div>
+
+        <div class="example-box">
+            <strong>🔍 EIGRP Events (Debugging):</strong><br>
+            Router# debug eigrp fsm<br>
+            ! Shows Finite State Machine transitions (when routes go active/passive)<br>
+            Router# debug eigrp packets query<br>
+            ! Shows only query packets — less noisy than full debug
+        </div>
+    </div>
+
+    <!-- Section 8: EIGRP for IPv6 -->
+    <div class="card">
+        <h2>🌐 EIGRP for IPv6 — Configuration Differences</h2>
+        <p>EIGRP for IPv6 uses a **similar configuration** but with some key differences.</p>
+
+        <div class="config-block">
+            ! Enable IPv6 routing (required)<br>
+            Router(config)# ipv6 unicast-routing<br>
+            <br>
+            ! Named mode EIGRP for IPv6<br>
+            Router(config)# router eigrp MY-COMPANY<br>
+            Router(config-router)# address-family ipv6 autonomous-system 100<br>
+            Router(config-router-af)# network 2001:db8::/64<br>
+            Router(config-router-af)# exit-address-family<br>
+            <br>
+            ! Interface configuration<br>
+            Router(config)# interface gig0/0<br>
+            Router(config-if)# ipv6 eigrp 100
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Note:</strong> EIGRP for IPv6 requires explicit interface configuration (`ipv6 eigrp AS`). It does NOT use network statements like IPv4.
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Advanced Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Your branch router is causing SIA across the WAN. What configuration is likely missing?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> `eigrp stub` on the branch router. Without stub configuration, EIGRP queries propagate to all routers, causing delays.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Your network has 100Gbps links. Classic EIGRP can't differentiate between 10G and 100G. How do you fix this?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Enable wide metrics with `metric version 64bit` in router configuration mode. This supports up to 4.2 Tbps.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What's the advantage of named mode EIGRP over traditional configuration?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Named mode supports wide metrics, multi-topology routing (voice vs data), unified IPv4/IPv6 configuration, and SHA authentication.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> You need to advertise 5 branch subnets to headquarters. Should you use separate route advertisements or summarization?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Summarization! Configure `ip summary-address eigrp 100 192.168.0.0 255.255.248.0` to advertise one route covering all 5 subnets.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the difference between classic MD5 and SHA authentication for EIGRP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> MD5 is 128-bit, considered legacy but widely supported. SHA-256 is 256-bit, stronger, and recommended for modern networks (requires named mode).
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (EIGRP Advanced)</h3>
+            <ul>
+                <li>✅ <strong>Stub routing</strong> — Critical for preventing SIA. Configure `eigrp stub` on all branch routers</li>
+                <li>✅ <strong>Summarization</strong> — Reduces routing table size, hides flapping routes, blocks queries</li>
+                <li>✅ <strong>Wide metrics</strong> — Required for 10G+ links. Enable with `metric version 64bit`</li>
+                <li>✅ <strong>Named mode</strong> — Modern configuration (IOS 15+), supports multi-topology routing</li>
+                <li>✅ <strong>SHA authentication</strong> — Use instead of MD5 when all routers support it</li>
+                <li>✅ <strong>SIA troubleshooting</strong> — Check stub configuration first, then active timers</li>
+                <li>✅ <strong>IPv6 EIGRP</strong> — Requires explicit interface configuration, not network statements</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More (Official Cisco Documentation)</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/16406-eigrp-toc.html" target="_blank">Cisco: EIGRP Documentation</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_eigrp/configuration/xe-16/ire-xe-16-book/eigrp-named-config.html" target="_blank">Named Mode EIGRP Configuration Guide</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="index.html" class="nav-btn">◀ Back to Deep Dives Index</a>
+        <a href="ospf-deep-dive.html" class="nav-btn">Next: OSPF Deep Dive ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — EIGRP Advanced Deep Dive | Stub routing, summarization, wide metrics, named mode, SHA authentication, SIA troubleshooting
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
