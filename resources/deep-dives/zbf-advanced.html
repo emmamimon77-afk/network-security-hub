@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone-Based Firewall Advanced Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .advanced-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .table-block th {
+            background: #1b4332;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🧱 Zone-Based Firewall (ZBF) Advanced Deep Dive</h1>
+        <p><strong>Master ZBF for enterprise Cisco networks.</strong> This deep dive covers application inspection (NBAR), VoIP inspection, advanced policy configurations, performance tuning, and troubleshooting complex ZBF deployments.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Complete the core ZBF lesson first. This deep dive assumes you understand zones, zone-pairs, and basic policy-maps.
+        </div>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Note:</strong> ZBF is Cisco-specific. Commands work on Cisco IOS routers (ISR 4000, ASR 1000) running IOS 15.1+ or IOS-XE.
+        </div>
+    </div>
+
+    <!-- Section 1: NBAR (Layer 7 Application Inspection) -->
+    <div class="card">
+        <h2>🔍 NBAR — Layer 7 Application Visibility</h2>
+        <p><strong>NBAR (Network-Based Application Recognition)</strong> allows ZBF to inspect traffic beyond Layer 4 (ports). It can identify applications by their signatures — even if they use non-standard ports.</p>
+
+        <h3>What NBAR Can Detect:</h3>
+        <ul>
+            <li>✅ Peer-to-peer (BitTorrent, eDonkey)</li>
+            <li>✅ Social media (Facebook, Twitter, YouTube)</li>
+            <li>✅ VoIP protocols (SIP, H.323, MGCP)</li>
+            <li>✅ Instant messaging (WhatsApp, WeChat)</li>
+            <li>✅ Custom applications (using custom NBAR signatures)</li>
+        </ul>
+
+        <h3>Enabling NBAR Inspection:</h3>
+        <div class="config-block">
+            ! Enable NBAR on the router (required)<br>
+            Router(config)# ip nbar protocol-discovery<br>
+            <br>
+            ! Create class-map to match NBAR protocols<br>
+            Router(config)# class-map type inspect match-any P2P-TRAFFIC<br>
+            Router(config-cmap)# match protocol bittorrent<br>
+            Router(config-cmap)# match protocol edonkey<br>
+            Router(config-cmap)# exit<br>
+            <br>
+            ! Apply to policy-map<br>
+            Router(config)# policy-map type inspect ZBF-POLICY<br>
+            Router(config-pmap)# class type inspect P2P-TRAFFIC<br>
+            Router(config-pmap-c)# drop<br>
+            Router(config-pmap-c)# log<br>
+            Router(config-pmap-c)# exit
+        </div>
+
+        <div class="example-box">
+            <strong>📋 View NBAR protocol discovery statistics:</strong><br>
+            Router# show ip nbar protocol-discovery interface gig0/0<br>
+            <br>
+            <strong>Update NBAR protocol pack (Cisco subscription):</strong><br>
+            Router# copy tftp://server/protocol-pack.pdlm flash:<br>
+            Router(config)# ip nbar protocol-pack flash:protocol-pack.pdlm
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Use case:</strong> Block peer-to-peer traffic while allowing legitimate web browsing — cannot be done with port-based filtering alone.
+        </div>
+    </div>
+
+    <!-- Section 2: VoIP Inspection (SIP, H.323) -->
+    <div class="card">
+        <h2>📞 VoIP Inspection — SIP, H.323, MGCP</h2>
+        <p>VoIP protocols dynamically open ports for media streams. ZBF can inspect these protocols to allow media traffic automatically.</p>
+
+        <h3>SIP (Session Initiation Protocol) Inspection:</h3>
+        <div class="config-block">
+            ! Create parameter-map for SIP inspection<br>
+            Router(config)# parameter-map type inspect sip SIP-PARAM<br>
+            Router(config-profile)# max-connections 5000<br>
+            Router(config-profile)# timeout-rtp 60<br>
+            Router(config-profile)# exit<br>
+            <br>
+            ! Create class-map for SIP traffic<br>
+            Router(config)# class-map type inspect match-all SIP-TRAFFIC<br>
+            Router(config-cmap)# match protocol sip<br>
+            Router(config-cmap)# exit<br>
+            <br>
+            ! Policy-map with SIP inspection<br>
+            Router(config)# policy-map type inspect VOICE-POLICY<br>
+            Router(config-pmap)# class type inspect SIP-TRAFFIC<br>
+            Router(config-pmap-c)# inspect SIP-PARAM<br>
+            Router(config-pmap-c)# exit
+        </div>
+
+        <h3>H.323 Inspection:</h3>
+        <div class="config-block">
+            ! Create parameter-map for H.323<br>
+            Router(config)# parameter-map type inspect h323 H323-PARAM<br>
+            Router(config-profile)# max-calls 2000<br>
+            Router(config-profile)# exit<br>
+            <br>
+            ! Match H.323 protocol<br>
+            Router(config)# class-map type inspect match-all H323-TRAFFIC<br>
+            Router(config-cmap)# match protocol h323<br>
+            Router(config-cmap)# exit
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Important:</strong> Without VoIP inspection, RTP media ports (often 16384-32767) will be blocked. Always include inspection for VoIP protocols if your network carries voice traffic.
+        </div>
+    </div>
+
+    <!-- Section 3: Advanced Policy Configuration -->
+    <div class="card">
+        <h2>⚙️ Advanced Policy Configuration — Time-Based Rules</h2>
+        <p>ZBF policies can be time-based — block social media during work hours, allow during lunch, etc.</p>
+
+        <div class="config-block">
+            ! Create time-range for work hours<br>
+            Router(config)# time-range WORK-HOURS<br>
+            Router(config-time-range)# periodic weekdays 8:00 to 17:00<br>
+            Router(config-time-range)# exit<br>
+            <br>
+            ! Create class-map with time constraint<br>
+            Router(config)# class-map type inspect match-all SOCIAL-MEDIA<br>
+            Router(config-cmap)# match protocol facebook<br>
+            Router(config-cmap)# match protocol twitter<br>
+            Router(config-cmap)# match time-range WORK-HOURS<br>
+            Router(config-cmap)# exit<br>
+            <br>
+            ! Policy: block social media during work hours<br>
+            Router(config)# policy-map type inspect INTERNET-POLICY<br>
+            Router(config-pmap)# class type inspect SOCIAL-MEDIA<br>
+            Router(config-pmap-c)# drop<br>
+            Router(config-pmap-c)# log<br>
+            Router(config-pmap-c)# exit
+        </div>
+
+        <h3>User-Based Policies (using ACLs):</h3>
+        <div class="config-block">
+            ! Create ACL for specific users/subnets<br>
+            Router(config)# ip access-list extended HR-USERS<br>
+            Router(config-ext-nacl)# permit ip 192.168.10.0 0.0.0.255 any<br>
+            Router(config-ext-nacl)# exit<br>
+            <br>
+            ! Class-map matching HR users AND protocol<br>
+            Router(config)# class-map type inspect match-all HR-WEB<br>
+            Router(config-cmap)# match access-group name HR-USERS<br>
+            Router(config-cmap)# match protocol http<br>
+            Router(config-cmap)# match protocol https<br>
+            Router(config-cmap)# exit<br>
+            <br>
+            ! Policy: Allow web for HR, block for others<br>
+            Router(config)# policy-map type inspect ZBF-POLICY<br>
+            Router(config-pmap)# class type inspect HR-WEB<br>
+            Router(config-pmap-c)# inspect<br>
+            Router(config-pmap-c)# exit
+        </div>
+    </div>
+
+    <!-- Section 4: Performance Tuning -->
+    <div class="card">
+        <h2>⚡ ZBF Performance Tuning — Scaling for High Traffic</h2>
+        <p>ZBF performance depends on inspection complexity, session table size, and hardware acceleration.</p>
+
+        <h3>Session Table Tuning:</h3>
+        <div class="config-block">
+            ! Increase maximum sessions (default 10000-50000 depending on platform)<br>
+            Router(config)# ip inspect max-sessions 50000<br>
+            <br>
+            ! Configure session timeout<br>
+            Router(config)# parameter-map type inspect global<br>
+            Router(config-profile)# tcp-idle-time 3600   ! 1 hour<br>
+            Router(config-profile)# udp-idle-time 60     ! 1 minute<br>
+            Router(config-profile)# icmp-idle-time 30   ! 30 seconds
+        </div>
+
+        <h3>Zone-Pair Performance:</h3>
+        <div class="config-block">
+            ! Disable inspection for trusted zone-pairs (fast path)<br>
+            Router(config)# zone-pair security TRUSTED source TRUSTED destination TRUSTED<br>
+            Router(config-sec-zone-pair)# service-policy type inspect TRUSTED-POLICY<br>
+            ! Use 'pass' instead of 'inspect' for high-throughput trusted traffic
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Monitor session table usage:</strong><br>
+            Router# show policy-map type inspect zone-pair sessions | count<br>
+            Router# show policy-map type inspect zone-pair session-aging-timers
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Best Practice:</strong> For high-volume traffic (backup, replication), consider placing interfaces in the same zone (no inspection) or using `pass` in the policy-map.
+        </div>
+    </div>
+
+    <!-- Section 5: Advanced Troubleshooting -->
+    <div class="card">
+        <h2>🛠️ Advanced ZBF Troubleshooting</h2>
+
+        <h3>1. Debug Zone-Pair Drops (Live Traffic Monitoring):</h3>
+        <div class="config-block">
+            Router# debug zone-pair security drops<br>
+            Router# debug zone-pair security packet<br>
+            Router# debug zone-pair security events<br>
+            <br>
+            ! Monitor specific zone-pair<br>
+            Router# debug zone-pair security zone-pair FROM-INSIDE-TO-OUTSIDE
+        </div>
+
+        <h3>2. Show Policy-Map Hit Counts:</h3>
+        <div class="config-block">
+            Router# show policy-map type inspect zone-pair<br>
+            Router# show policy-map type inspect zone-pair sessions<br>
+            Router# show policy-map type inspect zone-pair statistics
+        </div>
+
+        <h3>3. Common ZBF Issues & Fixes:</h3>
+        <ul>
+            <li><strong>Traffic not passing</strong> → Check zone-pair is configured (no default policy between zones)</li>
+            <li><strong>Asymmetric routing</strong> → ZBF is stateful; traffic must ingress/egress same router</li>
+            <li><strong>FTP/SIP not working</strong> → Need `inspect` for these protocols (they open dynamic ports)</li>
+            <li><strong>High CPU usage</strong> → Too many inspected sessions; consider increasing thresholds or using `pass` for trusted traffic</li>
+        </ul>
+
+        <div class="example-box">
+            <strong>📋 Show zone membership:</strong><br>
+            Router# show zone-pair security<br>
+            Router# show zone security<br>
+            Router# show interface gig0/0 | include zone
+        </div>
+    </div>
+
+    <!-- Section 6: ZBF with VRF (Virtual Routing and Forwarding) -->
+    <div class="card">
+        <h2>🌐 ZBF with VRF — Multi-Tenant Firewalling</h2>
+        <p>ZBF can operate within VRF instances, allowing separate firewall policies for different tenants or customers.</p>
+
+        <div class="config-block">
+            ! Create VRFs<br>
+            Router(config)# vrf definition TENANT-A<br>
+            Router(config-vrf)# rd 100:1<br>
+            Router(config-vrf)# exit<br>
+            <br>
+            Router(config)# vrf definition TENANT-B<br>
+            Router(config-vrf)# rd 100:2<br>
+            Router(config-vrf)# exit<br>
+            <br>
+            ! Assign interfaces to VRFs<br>
+            Router(config)# interface gig0/0<br>
+            Router(config-if)# vrf forwarding TENANT-A<br>
+            Router(config-if)# ip address 10.0.0.1 255.255.255.0<br>
+            Router(config-if)# exit<br>
+            <br>
+            ! Configure ZBF per VRF<br>
+            Router(config)# zone security INSIDE vrf TENANT-A<br>
+            Router(config)# zone security OUTSIDE vrf TENANT-A<br>
+            Router(config)# zone-pair security TENANT-A-IN source INSIDE destination OUTSIDE vrf TENANT-A<br>
+            Router(config-sec-zone-pair)# service-policy type inspect TENANT-A-POLICY
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Use case:</strong> Service providers or large enterprises with multiple departments/customers requiring isolated firewall policies.
+        </div>
+    </div>
+
+    <!-- Section 7: ZBF vs Cisco ASA/FTD -->
+    <div class="card">
+        <h2>📊 ZBF vs Cisco ASA/FTD — Which One to Use?</h2>
+        <div style="overflow-x: auto;">
+            <table class="advanced-table">
+                <thead>
+                    <tr><th>Feature</th><th>ZBF on IOS Router</th><th>Cisco ASA / FTD</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Deployment</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Built into router (ISR/ASR)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Dedicated firewall appliance</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Throughput</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Lower (CPU-based)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Higher (ASIC/FPGA acceleration)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Features</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Basic (NBAR, VoIP inspection)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Advanced (VPN, IPS, AMP, URL filtering)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Best for</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Branch offices, small businesses</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Data centers, campus, enterprise</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Advanced Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Your users are bypassing web filters by using non-standard ports (e.g., running HTTP on port 8080). How can ZBF block this?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Use NBAR (Layer 7 inspection) with `match protocol http` — NBAR identifies HTTP regardless of port number.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> VoIP calls connect but have no audio. What's the likely issue?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> RTP (media) ports are being blocked. Ensure SIP/H.323 inspection is configured with `inspect` in the policy-map, which dynamically opens media ports.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> You want to block social media during work hours but allow it during lunch. How do you implement this?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Create a `time-range` for work hours, then a class-map with `match time-range WORK-HOURS` and `match protocol` for social media apps, then `drop` in the policy-map.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Your router's CPU is high due to ZBF inspection. What can you do to reduce load?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Increase session limits, adjust idle timeouts, use `pass` (not `inspect`) for trusted traffic, or move high-throughput traffic to the same zone.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Traffic between two interfaces in the same zone is not being inspected. Is this expected?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Yes — ZBF only inspects traffic between DIFFERENT zones. Same zone = no inspection (routed only). This is by design.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (ZBF Advanced)</h3>
+            <ul>
+                <li>✅ <strong>NBAR</strong> → Layer 7 application inspection (identify apps regardless of port)</li>
+                <li>✅ <strong>VoIP inspection</strong> → Required for SIP/H.323 to open dynamic RTP ports</li>
+                <li>✅ <strong>Time-based policies</strong> → Block social media during work hours, allow during lunch</li>
+                <li>✅ <strong>Performance tuning</strong> → Increase session limits, adjust timeouts, use `pass` for trusted traffic</li>
+                <li>✅ <strong>VRF support</strong> → Multi-tenant firewall policies</li>
+                <li>✅ <strong>Troubleshooting</strong> → `debug zone-pair security drops`, `show policy-map type inspect zone-pair statistics`</li>
+                <li>✅ <strong>ZBF vs ASA</strong> → ZBF for branch routers, ASA for data center/enterprise</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/212213-zone-based-policy-firewall-zbf-configurat.html" target="_blank">Cisco: ZBF Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/security/zbf/configuration/xe-16/zbf-xe-16-book.html" target="_blank">Cisco ZBF Official Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="iptables-advanced.html" class="nav-btn">◀ Previous: iptables Advanced</a>
+        <a href="index.html" class="nav-btn">🏠 Back to Deep Dives Index</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — ZBF Advanced Deep Dive | NBAR (Layer 7), VoIP inspection (SIP/H.323), time-based policies, performance tuning, VRF, troubleshooting
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
