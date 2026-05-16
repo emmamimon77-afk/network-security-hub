@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSPF Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .advanced-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .lsa-table td {
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔄 OSPF Deep Dive</h1>
+        <p><strong>Master OSPF internals for enterprise networks.</strong> This deep dive covers LSA types (1-7), special area types (Stub, NSSA, Totally Stubby, Totally NSSA), virtual links, route filtering, summarization, and advanced troubleshooting techniques used by CCNP/CCIE professionals.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Complete the core OSPF lesson first. This deep dive assumes you understand OSPF fundamentals (areas, DR/BDR, cost metric).
+        </div>
+    </div>
+
+    <!-- Section 1: LSA Types 1-7 (The Heart of OSPF) -->
+    <div class="card">
+        <h2>📊 LSA Types 1-7 — The Language of OSPF</h2>
+        <p>OSPF routers exchange <strong>Link State Advertisements (LSAs)</strong> to build the network map. Understanding LSA types is essential for advanced troubleshooting and design.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="advanced-table lsa-table">
+                <thead>
+                    <tr><th>Type</th><th>Name</th><th>What It Contains</th><th>Flooded Where?</th><th>Who Generates?</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Type 1</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Router LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Lists all router's interfaces, neighbors, and link types (point-to-point, transit, stub)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Within area only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Every OSPF router</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Type 2</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Network LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Lists all routers attached to a broadcast segment (Ethernet) — DR generates this</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Within area only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Designated Router (DR)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Type 3</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Network Summary LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Advertises networks from one area to another (inter-area routes)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Throughout OSPF domain</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Area Border Router (ABR)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Type 4</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>ASBR Summary LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Points to the ASBR (needed to reach external routes)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Throughout OSPF domain</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>ABR (from ASBR's area)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Type 5</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>External LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Advertises routes redistributed from other protocols (static, RIP, BGP, connected)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Throughout OSPF domain (except stub areas)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Autonomous System Border Router (ASBR)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    <tr>
+                    <tr>
+                        <td><strong>Type 6</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Group Membership LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Used for multicast OSPF (MOSPF) — obsolete, not supported on modern Cisco IOS</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Not used</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>—</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Type 7</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>NSSA External LSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>External routes inside a Not-So-Stubby Area (Type 5 alternative for NSSA)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Within NSSA only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>ASBR inside NSSA</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Memory Aid:</strong> Remember LSA types by function:<br>
+            • Type 1 & 2 → Within area topology<br>
+            • Type 3 & 4 → Inter-area connectivity<br>
+            • Type 5 → External routes (redistributed)<br>
+            • Type 7 → External routes in NSSA
+        </div>
+    </div>
+
+    <!-- Section 2: Special Area Types -->
+    <div class="card">
+        <h2>📡 Special Area Types — Reduce Routing Tables</h2>
+        <p>OSPF areas can be modified to <strong>block certain LSAs</strong>, reducing routing table size and improving performance.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="advanced-table">
+                <thead>
+                    <tr><th>Area Type</th><th>Blocked LSAs</th><th>Default Route Injected?</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Standard Area</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>None (Type 3,4,5 allowed)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Regular areas</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Stub Area</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Type 4, Type 5</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (Type 3 default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Remote sites without external routes</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Totally Stubby</strong> (Cisco)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Type 3,4,5 (only default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (only default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Maximum reduction for branch offices</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>NSSA</strong> (Not-So-Stubby)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Type 4,5 (Type 7 allowed for redistribution)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (Type 3 default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Stub area that needs to redistribute external routes</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Totally NSSA</strong> (Cisco)</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Type 3,4,5 (Type 7 allowed + default only)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (only default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Maximum reduction with redistribution capability</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Configuration Examples:</h3>
+        <div class="config-block">
+            ! Stub Area<br>
+            Router(config-router)# area 1 stub<br>
+            <br>
+            ! Totally Stubby Area (Cisco proprietary — blocks Type 3 as well)<br>
+            Router(config-router)# area 1 stub no-summary<br>
+            <br>
+            ! NSSA<br>
+            Router(config-router)# area 1 nssa<br>
+            <br>
+            ! Totally NSSA<br>
+            Router(config-router)# area 1 nssa no-summary
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Important:</strong> All routers in the same area must agree on the area type. Mixing stub and non-stub configuration breaks neighbor relationships!
+        </div>
+    </div>
+
+    <!-- Section 3: Virtual Links -->
+    <div class="card">
+        <h2>🔗 Virtual Links — Connecting Areas Through Area 0</h2>
+        <p>Virtual links allow a non-backbone area to connect to the backbone (Area 0) through another non-backbone area. <strong>Use sparingly — indicates poor design!</strong></p>
+
+        <h3>When to Use Virtual Links:</h3>
+        <ul>
+            <li>✅ Merging two OSPF networks after a company acquisition</li>
+            <li>✅ Temporary solution while redesigning area layout</li>
+            <li>✅ When physical connectivity prevents direct Area 0 connection</li>
+        </ul>
+
+        <h3>Configuration:</h3>
+        <div class="config-block">
+            ! On Router A (connecting Area 1 to Area 0 via Area 2)<br>
+            router ospf 1<br>
+             area 2 virtual-link 2.2.2.2    ! 2.2.2.2 is Router B's router-id<br>
+            <br>
+            ! On Router B (other end of the virtual link)<br>
+            router ospf 1<br>
+             area 2 virtual-link 1.1.1.1    ! 1.1.1.1 is Router A's router-id
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Verification:</strong><br>
+            Router# show ip ospf virtual-links<br>
+            Virtual Link OSPF_VL0 to router 2.2.2.2 is up<br>
+              Run as demand circuit<br>
+              Transit area 2, via interface Serial0/0/0, Cost: 64
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Design Warning:</strong> Virtual links complicate troubleshooting and can cause routing loops. Always prefer physical redesign over virtual links.
+        </div>
+    </div>
+
+    <!-- Section 4: OSPF Route Summarization -->
+    <div class="card">
+        <h2>🗺️ OSPF Route Summarization — Shrink the Routing Table</h2>
+        
+        <h3>Inter-Area Summarization (on ABR):</h3>
+        <div class="config-block">
+            router ospf 1<br>
+             area 1 range 192.168.0.0 255.255.252.0<br>
+             ! Summarizes all routes from Area 1 into 192.168.0.0/22
+        </div>
+
+        <h3>External Route Summarization (on ASBR):</h3>
+        <div class="config-block">
+            router ospf 1<br>
+             summary-address 10.0.0.0 255.255.0.0<br>
+             ! Summarizes redistributed routes into 10.0.0.0/16
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Best Practice:</strong> Summarize at area boundaries whenever possible. Each summarized route hides flapping subnets from the rest of the network.
+        </div>
+    </div>
+
+    <!-- Section 5: OSPF Authentication -->
+    <div class="card">
+        <h2>🔐 OSPF Authentication — MD5 vs SHA</h2>
+        
+        <h3>MD5 Authentication (Classic, widely supported):</h3>
+        <div class="config-block">
+            router ospf 1<br>
+             area 0 authentication message-digest<br>
+            !<br>
+            interface serial0/0/0<br>
+             ip ospf message-digest-key 1 md5 SecurePass123
+        </div>
+
+        <h3>SHA Authentication (Stronger, IOS 15.2+):</h3>
+        <div class="config-block">
+            router ospf 1<br>
+             area 0 authentication message-digest<br>
+             security credential<br>
+              key-chain OSPF-KEY<br>
+            !<br>
+            key chain OSPF-KEY<br>
+             key 1<br>
+              key-string SecurePass123<br>
+              cryptographic-algorithm hmac-sha-256
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Recommendation:</strong> Use SHA-256 when all routers support it. MD5 is acceptable for legacy networks but considered weak.
+        </div>
+    </div>
+
+    <!-- Section 6: Advanced Troubleshooting -->
+    <div class="card">
+        <h2>🛠️ Advanced OSPF Troubleshooting</h2>
+
+        <h3>1. Check LSA Flooding Issues:</h3>
+        <div class="config-block">
+            Router# show ip ospf database<br>
+            Router# show ip ospf database external   ! Type 5 LSAs<br>
+            Router# show ip ospf database summary    ! Type 3 LSAs
+        </div>
+
+        <h3>2. View SPF Calculations (CPU intensive!):</h3>
+        <div class="config-block">
+            Router# show ip ospf statistic   ! View SPF run history<br>
+            Router# debug ip ospf spf        ! Live SPF debugging (use sparingly)
+        </div>
+
+        <h3>3. Check OSPF Neighbor Issues:</h3>
+        <div class="config-block">
+            Router# show ip ospf neighbor detail<br>
+            Router# show ip ospf interface serial0/0/0<br>
+            ! Check: area ID, hello/dead timers, authentication, MTU
+        </div>
+
+        <h3>4. Common OSPF Problems & Fixes:</h3>
+        <ul>
+            <li><strong>Neighbors stuck in EXSTART/EXCHANGE</strong> → MTU mismatch. Fix: `ip ospf mtu-ignore` on interface</li>
+            <li><strong>Neighbors stuck in 2-WAY</strong> → DR/BDR election issue (check priority)</li>
+            <li><strong>Missing routes</strong> → Stub area blocking Type 5 LSAs, or summarization too aggressive</li>
+            <li><strong>High CPU from SPF</strong> → Network flapping or too many LSAs (summarize!)</li>
+        </ul>
+    </div>
+
+    <!-- Section 7: OSPFv3 (IPv6) Differences -->
+    <div class="card">
+        <h2>🌐 OSPFv3 — What Changes for IPv6?</h2>
+        
+        <div style="overflow-x: auto;">
+            <table class="advanced-table">
+                <thead>
+                    <tr><th>Aspect</th><th>OSPFv2 (IPv4)</th><th>OSPFv3 (IPv6)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Address family</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IPv4 only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IPv6 only (can run alongside OSPFv2)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Network statements</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>network 192.168.1.0 0.0.0.255 area 0</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ipv6 ospf 1 area 0</code> (on interface)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentication</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>MD5, SHA (using IPsec)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IPsec (mandatory for secure deployments)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="config-block">
+            ! OSPFv3 basic configuration<br>
+            Router(config)# ipv6 unicast-routing<br>
+            Router(config)# interface gig0/0<br>
+            Router(config-if)# ipv6 address 2001:db8:1::1/64<br>
+            Router(config-if)# ipv6 ospf 1 area 0
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Advanced Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Your branch office router has a 250,000 route routing table. How can you reduce it?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Configure the area as Totally Stubby (`area X stub no-summary`). This blocks Type 3,4,5 LSAs, injecting only a default route — drastically reducing the table.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Two routers in the same area can't form adjacency — they're stuck in 2-WAY state. What's the likely cause?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> They are on a broadcast network (Ethernet) with identical DR priority. OSPF doesn't elect DR/BDR when both priorities are 0. Set priority on at least one router: `ip ospf priority 1`.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> You need to redistribute static routes into OSPF from a branch router, but the area is Totally Stubby. What should you do?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Change the area to NSSA (or Totally NSSA). NSSA allows Type 7 LSAs for redistributed routes while still blocking Type 5 LSAs.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What LSA type advertises external routes, and which router generates it?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Type 5 (External LSA), generated by an ASBR (Autonomous System Border Router).
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Your OSPF database has thousands of Type 3 LSAs from multiple areas. How can you reduce them?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Configure inter-area summarization on the ABR: `area 1 range 192.168.0.0 255.255.252.0` to advertise one summary instead of many specific routes.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (OSPF Deep Dive)</h3>
+            <ul>
+                <li>✅ <strong>LSA Types 1-7</strong> — Know what each does and where it floods</li>
+                <li>✅ <strong>Stub areas</strong> — Block Type 4/5 LSAs (reduce routing tables)</li>
+                <li>✅ <strong>Totally Stubby</strong> — Also blocks Type 3 (Cisco proprietary, maximum reduction)</li>
+                <li>✅ <strong>NSSA</strong> — Allows redistribution into stub areas (Type 7 LSAs)</li>
+                <li>✅ <strong>Virtual links</strong> — Last resort for connecting to Area 0 (avoid when possible)</li>
+                <li>✅ <strong>Summarization</strong> — Configure on ABRs (`area X range`) or ASBRs (`summary-address`)</li>
+                <li>✅ <strong>Authentication</strong> — Use SHA over MD5 when possible</li>
+                <li>✅ <strong>OSPFv3</strong> — No network statements; authentication via IPsec</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More (Official Cisco Documentation)</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/7039-1.html" target="_blank">Cisco: OSPF Design Guide</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_ospf/configuration/xe-16/iro-xe-16-book/ospf-stub-nssa.html" target="_blank">OSPF Stub & NSSA Areas</a></div>
+        <div class="external-link">🎓 <a href="https://learningnetwork.cisco.com/" target="_blank">Cisco Learning Network</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="eigrp-advanced.html" class="nav-btn">◀ Previous: EIGRP Advanced</a>
+        <a href="iptables-advanced.html" class="nav-btn">Next: iptables Advanced ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — OSPF Deep Dive | LSA types 1-7, special areas, virtual links, summarization, authentication, troubleshooting
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
