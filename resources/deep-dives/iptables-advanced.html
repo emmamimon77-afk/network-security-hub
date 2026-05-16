@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iptables Advanced Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .advanced-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .table-block th {
+            background: #1b4332;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🛠️ iptables Advanced Deep Dive</h1>
+        <p><strong>Master iptables for enterprise security.</strong> This deep dive covers custom chains, packet marking (for QoS/intrusion prevention), advanced modules (`recent`, `string`), connection tracking tuning, and advanced logging techniques.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Complete the core iptables lesson first. This deep dive assumes you understand basic chains (INPUT, FORWARD, OUTPUT) and rule structure.
+        </div>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Note on Commands:</strong> These iptables commands work on <strong>Linux only</strong> (Ubuntu, Debian, CentOS, RHEL, Fedora). They do NOT work on Cisco or Huawei routers — those use zone-based firewalls (covered in ZBF deep dive).
+        </div>
+    </div>
+
+    <!-- Section 1: Custom Chains -->
+    <div class="card">
+        <h2>🔗 Custom Chains — Organize Complex Rules</h2>
+        <p>Custom chains help organize firewall rules, especially when you have dozens or hundreds of rules.</p>
+
+        <h3>Creating and Using Custom Chains:</h3>
+        <div class="config-block">
+            # Create a custom chain<br>
+            iptables -N WEB_SERVER<br>
+            iptables -N MAIL_SERVER<br>
+            iptables -N BLOCKED_IPS<br>
+            <br>
+            # Add rules to custom chains<br>
+            iptables -A WEB_SERVER -p tcp --dport 80 -j ACCEPT<br>
+            iptables -A WEB_SERVER -p tcp --dport 443 -j ACCEPT<br>
+            iptables -A WEB_SERVER -j DROP<br>
+            <br>
+            # Jump to custom chain from INPUT<br>
+            iptables -A INPUT -p tcp --dport 80 -j WEB_SERVER<br>
+            iptables -A INPUT -p tcp --dport 443 -j WEB_SERVER
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Listing custom chains:</strong><br>
+            iptables -L WEB_SERVER -v -n<br>
+            <br>
+            <strong>Flushing/Deleting custom chain:</strong><br>
+            iptables -F WEB_SERVER<br>
+            iptables -X WEB_SERVER   (removes chain, must be empty first)
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Best Practice:</strong> Organize rules by service (WEB_SERVER, SSH, DNS) or by client (TRUSTED_IPS, DMZ, GUEST). This makes management much easier.
+        </div>
+    </div>
+
+    <!-- Section 2: Packet Marking (mangle table) -->
+    <div class="card">
+        <h2>🏷️ Packet Marking — QoS, Traffic Shaping, and IPS Integration</h2>
+        <p>The <code>mangle</code> table modifies packet headers for advanced features like QoS, policy routing, and integration with intrusion prevention systems.</p>
+
+        <h3>Common Marking Use Cases:</h3>
+        <ul>
+            <li>✅ <strong>QoS (Quality of Service):</strong> Mark VoIP packets for priority queuing</li>
+            <li>✅ <strong>Policy-based routing:</strong> Route marked packets through specific interfaces</li>
+            <li>✅ <strong>IPS integration:</strong> Send suspicious traffic to IPS for inspection</li>
+        </ul>
+
+        <div class="config-block">
+            # Mark SSH traffic with mark 10<br>
+            iptables -t mangle -A PREROUTING -p tcp --dport 22 -j MARK --set-mark 10<br>
+            <br>
+            # Mark HTTP traffic with mark 20<br>
+            iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 20<br>
+            <br>
+            # Mark ICMP with mark 30<br>
+            iptables -t mangle -A PREROUTING -p icmp -j MARK --set-mark 30
+        </div>
+
+        <div class="example-box">
+            <strong>📋 View marked packets:</strong><br>
+            iptables -t mangle -L -v -n<br>
+            <br>
+            <strong>Route marked packets differently (policy routing):</strong><br>
+            echo "101 voip" >> /etc/iproute2/rt_tables<br>
+            ip rule add fwmark 10 table voip<br>
+            ip route add default via 10.0.0.1 dev eth1 table voip
+        </div>
+    </div>
+
+    <!-- Section 3: recent Module — Dynamic Blocking -->
+    <div class="card">
+        <h2>🔄 recent Module — Dynamic IP Blacklisting</h2>
+        <p>The <code>recent</code> module tracks recent connections and can automatically block IPs that exceed thresholds — like fail2ban but directly in iptables.</p>
+
+        <div class="config-block">
+            # Track SSH connection attempts<br>
+            iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --set --name SSH_ATTACKS<br>
+            <br>
+            # Block IPs with more than 4 attempts in 60 seconds<br>
+            iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_ATTACKS -j DROP<br>
+            <br>
+            # Log blocked attempts<br>
+            iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_ATTACKS -j LOG --log-prefix "SSH Brute Force Blocked: "
+        </div>
+
+        <div class="example-box">
+            <strong>📋 View recent module statistics:</strong><br>
+            cat /proc/net/xt_recent/SSH_ATTACKS<br>
+            <br>
+            <strong>Flush recent lists:</strong><br>
+            echo clear > /proc/net/xt_recent/SSH_ATTACKS
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Pro tip:</strong> The `recent` module is much lighter than fail2ban (no Python overhead). Perfect for embedded systems or high-performance environments.
+        </div>
+    </div>
+
+    <!-- Section 4: string Module — Content Filtering -->
+    <div class="card">
+        <h2>🔍 string Module — Filter by Packet Content</h2>
+        <p>The <code>string</code> module inspects packet payloads and matches patterns — useful for blocking malware domains, SQL injection attempts, or specific file types.</p>
+
+        <div class="config-block">
+            # Block packets containing "BitCoin" (mining traffic)<br>
+            iptables -A FORWARD -m string --string "BitCoin" --algo bm -j DROP<br>
+            <br>
+            # Block known malware domain<br>
+            iptables -A FORWARD -m string --string "evil-malware-site.com" --algo bm -j DROP<br>
+            <br>
+            # Log SQL injection attempts (looking for ' OR ' pattern)<br>
+            iptables -A INPUT -p tcp --dport 80 -m string --string "' OR '1'='1" --algo bm -j LOG --log-prefix "SQLi Attempt: "
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Performance Warning:</strong> The `string` module processes every packet's payload — can be CPU intensive on high-traffic links. Use sparingly and with specific patterns.
+        </div>
+
+        <h3>String Matching Algorithms:</h3>
+        <ul>
+            <li><code>bm</code> (Boyer-Moore): Fast for large patterns, good for text</li>
+            <li><code>kmp</code> (Knuth-Morris-Pratt): Better for short patterns</li>
+        </ul>
+    </div>
+
+    <!-- Section 5: Connection Tracking Tuning -->
+    <div class="card">
+        <h2>🔗 Connection Tracking — Performance Tuning</h2>
+        <p>Linux's connection tracking system (used by `-m state --state`) has memory and performance limits. Tuning is essential for high-traffic servers.</p>
+
+        <div class="config-block">
+            # View current connection tracking statistics<br>
+            cat /proc/sys/net/netfilter/nf_conntrack_count<br>
+            cat /proc/sys/net/netfilter/nf_conntrack_max<br>
+            <br>
+            # Increase maximum tracked connections (default 65536)<br>
+            sysctl -w net.netfilter.nf_conntrack_max=262144<br>
+            <br>
+            # Reduce timeout for established connections (default 5 days!)<br>
+            sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=3600<br>
+            <br>
+            # Disable connection tracking for specific traffic (reduce load)<br>
+            iptables -t raw -A PREROUTING -p tcp --dport 80 -j NOTRACK<br>
+            iptables -t raw -A OUTPUT -p tcp --sport 80 -j NOTRACK
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Monitor connection tracking:</strong><br>
+            # Show top connection trackers<br>
+            conntrack -L | cut -d ' ' -f 6 | sort | uniq -c | sort -nr | head -10<br>
+            <br>
+            # Watch real-time tracking<br>
+            watch -n 1 'conntrack -L | wc -l'
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Important:</strong> `NOTRACK` completely disables connection tracking. This saves memory but also breaks `-m state` matching. Only use for trusted, high-volume traffic (like web servers).
+        </div>
+    </div>
+
+    <!-- Section 6: Advanced Logging -->
+    <div class="card">
+        <h2>📝 Advanced Logging — Rate Limiting and Custom Logs</h2>
+        <p>Prevent log flooding with rate limiting, and send suspicious traffic to dedicated log files.</p>
+
+        <div class="config-block">
+            # Limit logging to 5 messages per minute<br>
+            iptables -A INPUT -p tcp --dport 22 -m limit --limit 5/minute -j LOG --log-prefix "SSH Connection: "<br>
+            <br>
+            # Log only first 10 dropped packets of each type<br>
+            iptables -A INPUT -p tcp --dport 80 -m limit --limit 10 -j LOG --log-level 4 --log-prefix "HTTP DROPPED: "<br>
+            <br>
+            # Send logs to a dedicated chain for processing<br>
+            iptables -N LOGGING<br>
+            iptables -A LOGGING -j LOG --log-prefix "FIREWALL DROP: " --log-level 4<br>
+            iptables -A LOGGING -j DROP
+        </div>
+
+        <h3>Custom Log File Configuration (rsyslog):</h3>
+        <div class="config-block">
+            # /etc/rsyslog.d/iptables.conf<br>
+            :msg, contains, "FIREWALL DROP" -/var/log/iptables.log<br>
+            & stop<br>
+            <br>
+            # Restart rsyslog<br>
+            systemctl restart rsyslog
+        </div>
+    </div>
+
+    <!-- Section 7: Rate Limiting (Revisited - Advanced) -->
+    <div class="card">
+        <h2>⏱️ Advanced Rate Limiting — Protect Against DoS</h2>
+        <p>Combining `limit` and `recent` modules provides sophisticated DDoS protection.</p>
+
+        <div class="config-block">
+            # Allow only 10 new HTTP connections per second per IP<br>
+            iptables -A INPUT -p tcp --dport 80 -m state --state NEW -m recent --set --name HTTPLIMIT<br>
+            iptables -A INPUT -p tcp --dport 80 -m state --state NEW -m recent --update --seconds 1 --hitcount 10 --name HTTPLIMIT -j DROP<br>
+            <br>
+            # Allow only 50 new connections total per second<br>
+            iptables -A INPUT -m state --state NEW -m limit --limit 50/second --limit-burst 100 -j ACCEPT<br>
+            iptables -A INPUT -m state --state NEW -j DROP<br>
+            <br>
+            # Protect against SYN flood (using hashlimit)<br>
+            iptables -A INPUT -p tcp --syn -m hashlimit --hashlimit-name synlimit --hashlimit-above 100/sec --hashlimit-burst 200 -j DROP
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>hashlimit vs recent:</strong> `hashlimit` is more efficient for high-volume rate limiting; `recent` is better for per-IP connection tracking.
+        </div>
+    </div>
+
+    <!-- Section 8: nftables Migration -->
+    <div class="card">
+        <h2>🔄 nftables — The Modern Replacement for iptables</h2>
+        <p>`nftables` is the new Linux firewall framework (replacing iptables for kernel 4.13+). Concepts are similar, but syntax is cleaner and performance is better.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="advanced-table">
+                <thead>
+                    <tr><th>Aspect</th><th>iptables</th><th>nftables</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tables</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>filter, nat, mangle, raw</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Unified (family ip, ip6, inet, arp)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Command</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>iptables, iptables-save</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>nft (unified)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Configuration</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Multiple commands</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Single atomic transaction</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Compatibility</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Legacy, widely understood</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Modern (RHEL 8+, Debian 10+)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    <tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>nftables Example (Same Rules, Cleaner Syntax):</h3>
+        <div class="config-block">
+            #!/usr/sbin/nft -f<br>
+            <br>
+            # Flush existing rules<br>
+            flush ruleset<br>
+            <br>
+            # Create table<br>
+            table inet filter {<br>
+             chain input {<br>
+              type filter hook input priority 0;<br>
+              # Accept SSH<br>
+              tcp dport 22 accept<br>
+              # Accept HTTP/HTTPS<br>
+              tcp dport { 80, 443 } accept<br>
+              # Accept established/related<br>
+              ct state established,related accept<br>
+              # Drop everything else<br>
+              drop<br>
+             }<br>
+            }
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Advanced Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Your web server is under DDoS attack. How can you limit each IP to 20 new connections per second?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong><br>
+                <code>iptables -A INPUT -p tcp --dport 80 -m state --state NEW -m recent --set --name WEBLIMIT</code><br>
+                <code>iptables -A INPUT -p tcp --dport 80 -m state --state NEW -m recent --update --seconds 1 --hitcount 20 --name WEBLIMIT -j DROP</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Your connection tracking table is full, causing packet drops. How do you increase the limit?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>sysctl -w net.netfilter.nf_conntrack_max=262144</code> (or higher)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> You need to block all packets containing the word "malware" in their payload. Which module do you use?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> The `string` module: <code>iptables -A FORWARD -m string --string "malware" --algo bm -j DROP</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> How do you log dropped packets but limit to 10 logs per minute to avoid filling disk?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>iptables -A INPUT -m limit --limit 10/minute -j LOG --log-prefix "DROP: "</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What's the advantage of nftables over iptables?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> nftables has better performance, atomic rule updates (no gaps), unified syntax for IPv4/IPv6, and cleaner configuration syntax.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (iptables Advanced)</h3>
+            <ul>
+                <li>✅ <strong>Custom chains</strong> → Organize complex rule sets by service or client</li>
+                <li>✅ <strong>mangle table</strong> → Mark packets for QoS, policy routing, or IPS inspection</li>
+                <li>✅ <strong>recent module</strong> → Dynamic IP blacklisting without external tools</li>
+                <li>✅ <strong>string module</strong> → Content filtering (malware domains, SQL injection patterns)</li>
+                <li>✅ <strong>Connection tracking tuning</strong> → Essential for high-traffic servers</li>
+                <li>✅ <strong>hashlimit vs recent</strong> → hashlimit for high-volume, recent for per-IP tracking</li>
+                <li>✅ <strong>nftables</strong> → Modern replacement; learn it for future deployments</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.netfilter.org/documentation/" target="_blank">Netfilter/iptables Documentation</a></div>
+        <div class="external-link">📘 <a href="https://wiki.nftables.org/" target="_blank">nftables Wiki</a></div>
+        <div class="external-link">🎓 <a href="https://linux.die.net/man/8/iptables" target="_blank">iptables Man Page</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="ospf-deep-dive.html" class="nav-btn">◀ Previous: OSPF Deep Dive</a>
+        <a href="zbf-advanced.html" class="nav-btn">Next: ZBF Advanced ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — iptables Advanced Deep Dive | Custom chains, packet marking, recent/string modules, connection tracking tuning, nftables migration
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+
+</body>
+</html>
