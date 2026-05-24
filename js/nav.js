@@ -11,6 +11,7 @@ function loadNavigation() {
                 <a href="/networking-basics/osi-model.html">📘 OSI Model</a>
                 <a href="/networking-basics/tcp-ip-model.html">🌐 TCP/IP Model</a>
                 <a href="/networking-basics/subnetting.html">✂️ Subnetting</a>
+                <a href="/networking-basics/nat-pat.html">🔄 NAT/PAT</a>
                 <a href="/networking-basics/cisco-commands.html">⚙️ Cisco Commands</a>
                 <a href="/networking-basics/huawei-commands.html">🇨🇳 Huawei Commands</a>
             </div>

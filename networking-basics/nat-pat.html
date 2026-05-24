@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAT/PAT - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .nat-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .diagram-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔄 NAT/PAT — Complete Guide</h1>
+        <p><strong>Network Address Translation (NAT) and Port Address Translation (PAT)</strong> allow private IP addresses to communicate with the public internet. Without NAT, IPv4 would have run out of addresses years ago.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic IP addressing and subnetting. NAT is what makes your home router work!
+        </div>
+    </div>
+
+    <!-- Why NAT Matters -->
+    <div class="card">
+        <h2>🎯 Why NAT Matters</h2>
+        <ul>
+            <li>✅ <strong>Conserves IPv4 addresses</strong> — Thousands of private IPs share one public IP</li>
+            <li>✅ <strong>Security through obscurity</strong> — Private IPs are hidden from the internet</li>
+            <li>✅ <strong>Flexibility</strong> — Change ISPs without renumbering your entire network</li>
+            <li>✅ <strong>Every home/office router uses it</strong> — Essential technology</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Note:</strong> NAT is a workaround for IPv4 address exhaustion. IPv6 eliminates the need for NAT, but IPv4 NAT will be with us for decades.
+        </div>
+    </div>
+
+    <!-- Private IP Address Ranges -->
+    <div class="card">
+        <h2>🔒 Private IP Address Ranges (RFC 1918)</h2>
+        <div style="overflow-x: auto;">
+            <table class="nat-table">
+                <thead>
+                    <tr><th>Class</th><th>IP Range</th><th>CIDR</th><th>Number of Addresses</th></td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Class A</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>10.0.0.0 - 10.255.255.255</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>/8</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>16,777,216</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Class B</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>172.16.0.0 - 172.31.255.255</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>/12</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>1,048,576</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Class C</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>192.168.0.0 - 192.168.255.255</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>/16</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>65,536</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Memory aid:</strong> 10.0.0.0/8 (single 10), 172.16.0.0/12 (16-31), 192.168.0.0/16 (168 is popular!)
+        </div>
+    </div>
+
+    <!-- Types of NAT -->
+    <div class="card">
+        <h2>📊 Types of NAT</h2>
+        <div style="overflow-x: auto;">
+            <table class="nat-table">
+                <thead>
+                    <tr><th>Type</th><th>Also Known As</th><th>Description</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Static NAT</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>1-to-1</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>One private IP → One public IP (always same mapping)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Web server accessible from internet</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Dynamic NAT</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Pooled</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Private IP → Public IP from a pool (mapping varies)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Many-to-many, but limited by pool size</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>PAT (Overloading)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>NAT Overload, Many-to-1</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Many private IPs → One public IP (differentiated by port numbers)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Home routers, small offices (most common)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- How PAT Works (Diagram) -->
+    <div class="card">
+        <h2>🔧 How PAT Works — The Magic Behind Your Home Router</h2>
+        <div class="diagram-box">
+    Private Network (192.168.1.0/24)          Internet (Public)
+    ┌─────────────────┐
+    │ PC1: 192.168.1.10│
+    │ Port: 12345      │
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐     ┌─────────────┐
+    │ Home Router     │────▶│ Internet    │
+    │ Public IP:      │     │ Destination │
+    │ 203.0.113.1     │     │ 8.8.8.8:80  │
+    └─────────────────┘     └─────────────┘
+             │
+             │ NAT Table:
+             │ 192.168.1.10:12345 ↔ 203.0.113.1:54321
+             │
+    PC2 can use the SAME public IP with different source port:
+             │ 192.168.1.20:54321 ↔ 203.0.113.1:54322
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Key insight:</strong> PAT uses <strong>source ports</strong> to distinguish between thousands of devices sharing one public IP. Each session gets a unique port number.
+        </div>
+    </div>
+
+    <!-- Static NAT Configuration -->
+    <div class="card">
+        <h2>⚙️ Static NAT Configuration (Cisco CLI)</h2>
+        <div class="config-block">
+            ! Define static mapping: Inside Local → Inside Global<br>
+            Router(config)# ip nat inside source static 192.168.1.10 203.0.113.10<br>
+            <br>
+            ! Define which interfaces are inside (private) and outside (public)<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip nat inside<br>
+            Router(config-if)# exit<br>
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# ip nat outside<br>
+            <br>
+            ! Verify<br>
+            Router# show ip nat translations<br>
+            Router# show ip nat statistics
+        </div>
+        <div class="example-box">
+            <strong>📋 Use case:</strong> A web server at 192.168.1.10 needs to be accessible from the internet at 203.0.113.10.
+        </div>
+    </div>
+
+    <!-- PAT (NAT Overload) Configuration -->
+    <div class="card">
+        <h2>⚙️ PAT / NAT Overload Configuration (Most Common)</h2>
+        <div class="config-block">
+            ! Define ACL to identify which inside traffic to translate<br>
+            Router(config)# access-list 1 permit 192.168.1.0 0.0.0.255<br>
+            <br>
+            ! Configure PAT on the outside interface<br>
+            Router(config)# ip nat inside source list 1 interface serial0/0/0 overload<br>
+            <br>
+            ! Define inside/outside interfaces<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip nat inside<br>
+            Router(config-if)# exit<br>
+            Router(config)# interface serial0/0/0<br>
+            Router(config-if)# ip nat outside<br>
+            <br>
+            ! Verify<br>
+            Router# show ip nat translations<br>
+            Router# show ip nat statistics<br>
+            Router# debug ip nat
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>This is what your home router does!</strong> One public IP serves all devices on your network.
+        </div>
+    </div>
+
+    <!-- Dynamic NAT Configuration -->
+    <div class="card">
+        <h2>⚙️ Dynamic NAT Configuration (Pooled)</h2>
+        <div class="config-block">
+            ! Define public IP pool<br>
+            Router(config)# ip nat pool PUBLIC-POOL 203.0.113.10 203.0.113.20 netmask 255.255.255.0<br>
+            <br>
+            ! Define ACL for inside traffic<br>
+            Router(config)# access-list 1 permit 192.168.1.0 0.0.0.255<br>
+            <br>
+            ! Configure dynamic NAT<br>
+            Router(config)# ip nat inside source list 1 pool PUBLIC-POOL<br>
+            <br>
+            ! Define interfaces<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip nat inside<br>
+            Router(config)# interface serial0/0/0<br>
+            Router(config-if)# ip nat outside
+        </div>
+    </div>
+
+    <!-- Port Forwarding -->
+    <div class="card">
+        <h2>🔌 Port Forwarding (Static PAT)</h2>
+        <p>Forward specific ports from the public IP to an internal server — common for game servers, webcams, or home lab access.</p>
+        <div class="config-block">
+            ! Forward port 8080 (public) to port 80 on internal web server<br>
+            Router(config)# ip nat inside source static tcp 192.168.1.10 80 203.0.113.1 8080<br>
+            <br>
+            ! Forward port 22 (SSH) to internal server<br>
+            Router(config)# ip nat inside source static tcp 192.168.1.20 22 203.0.113.1 22
+        </div>
+        <div class="example-box">
+            <strong>📋 Use case:</strong> "I want to access my home web server from anywhere using port 8080."
+        </div>
+    </div>
+
+    <!-- NAT Troubleshooting -->
+    <div class="card">
+        <h2>🔧 NAT Troubleshooting</h2>
+        
+        <h3>Common Issues:</h3>
+        <ul>
+            <li><strong>Inside hosts cannot reach internet</strong> — Check NAT configuration: <code>show ip nat statistics</code></li>
+            <li><strong>Outside cannot reach inside server</strong> — Verify static NAT or port forwarding rules</li>
+            <li><strong>NAT table full</strong> — Increase timeout or table size: <code>ip nat translation timeout 300</code></li>
+            <li><strong>Asymmetric routing issues</strong> — Traffic must egress the same interface it ingressed (stateful NAT)</li>
+        </ul>
+
+        <div class="config-block">
+            ! Clear NAT translations<br>
+            Router# clear ip nat translation *<br>
+            <br>
+            ! Increase timeout for specific protocols<br>
+            Router(config)# ip nat translation tcp-timeout 3600<br>
+            Router(config)# ip nat translation udp-timeout 60<br>
+            <br>
+            ! Debug NAT (use sparingly - CPU intensive)<br>
+            Router# debug ip nat
+        </div>
+    </div>
+
+    <!-- NAT Table Example -->
+    <div class="card">
+        <h2>📊 Understanding the NAT Translation Table</h2>
+        <div class="config-block">
+            Router# show ip nat translations<br>
+            Pro Inside global      Inside local       Outside local      Outside global<br>
+            icmp 203.0.113.1:12345 192.168.1.10:12345 8.8.8.8:12345     8.8.8.8:12345<br>
+            tcp  203.0.113.1:54321 192.168.1.20:54321 151.101.1.1:80     151.101.1.1:80<br>
+            tcp  203.0.113.1:54322 192.168.1.30:443   52.12.34.56:443    52.12.34.56:443<br>
+            ---  203.0.113.10      192.168.1.10       ---                ---
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Reading the table:</strong>
+            <ul>
+                <li><strong>Inside local:</strong> Private IP of your device</li>
+                <li><strong>Inside global:</strong> Public IP after translation</li>
+                <li><strong>Outside local/global:</strong> Destination address (usually the same)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- NAT Security Considerations -->
+    <div class="card">
+        <h2>🛡️ NAT and Security</h2>
+        <ul>
+            <li>✅ <strong>Provides basic obscurity</strong> — Private IPs not directly reachable from internet</li>
+            <li>✅ <strong>Not a firewall!</strong> — Do not rely on NAT alone for security</li>
+            <li>⚠️ <strong>Breaks end-to-end encryption</strong> — Some protocols (IPsec) have issues with NAT</li>
+            <li>⚠️ <strong>Complicates logging</strong> — Real source IP is hidden behind NAT</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Important:</strong> NAT is not a replacement for a proper firewall. Always use firewall rules in addition to NAT.
+        </div>
+    </div>
+
+    <!-- IPv6 and NAT -->
+    <div class="card">
+        <h2>🌐 IPv6 and NAT — The End of NAT?</h2>
+        <p>IPv6 provides enough addresses that every device can have a globally unique IP. NAT is not needed in pure IPv6 networks.</p>
+        <div class="tip-box-advanced">
+            💡 <strong>Reality check:</strong> IPv4 will coexist with IPv6 for decades. NAT is still essential for most networks today, and NAT64/NAT46 translation will continue to exist.
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the difference between Static NAT and PAT?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Static NAT is 1-to-1 (one private IP maps to one public IP). PAT is many-to-1 (many private IPs share one public IP using different source ports).
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> Which RFC defines private IP address ranges?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> RFC 1918.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> You want to access your home web server from the internet on port 8080. What NAT feature do you use?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Port forwarding (Static PAT): <code>ip nat inside source static tcp 192.168.1.10 80 [public-ip] 8080</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> How does PAT distinguish between multiple devices sharing the same public IP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> PAT uses unique source port numbers for each session/device.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> Is NAT a substitute for a firewall?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> No. NAT provides obscurity but not true security. Always use firewall rules in addition to NAT.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (NAT/PAT Mastery)</h3>
+            <ul>
+                <li>✅ <strong>Private IPs (RFC 1918)</strong> — 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</li>
+                <li>✅ <strong>Static NAT</strong> — 1-to-1 mapping (for servers)</li>
+                <li>✅ <strong>PAT (NAT Overload)</strong> — Many-to-1 (home routers, most common)</li>
+                <li>✅ <strong>Port forwarding</strong> — Expose internal services on specific ports</li>
+                <li>✅ <strong>NAT is not a firewall</strong> — use proper firewall rules</li>
+                <li>✅ <strong>Verify with <code>show ip nat translations</code></strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/26704-nat-faq-00.html" target="_blank">Cisco: NAT FAQ</a></div>
+        <div class="external-link">📘 <a href="https://networklessons.com/network-services/nat-network-address-translation" target="_blank">NetworkLessons: NAT Tutorial</a></div>
+        <div class="external-link">🎓 <a href="https://datatracker.ietf.org/doc/html/rfc1918" target="_blank">RFC 1918 - Private IP Addresses</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="subnetting.html" class="nav-btn">◀ Previous: Subnetting</a>
+        <a href="../routing-switching/stp.html" class="nav-btn">Next: Spanning Tree (STP) ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — NAT/PAT | Complete guide with static/dynamic NAT, PAT, port forwarding, configuration, and troubleshooting
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
