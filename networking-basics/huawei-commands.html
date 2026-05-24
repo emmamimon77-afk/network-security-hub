@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huawei Commands - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .comparison-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .cisco-col {
+            background: #eef2ff;
+        }
+        .huawei-col {
+            background: #fef9e3;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .vendor-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .cisco-badge {
+            background: #0078d4;
+            color: white;
+        }
+        .huawei-badge {
+            background: #dc2626;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⚙️ Huawei Commands — Complete Guide</h1>
+        <p><strong>For Cisco professionals transitioning to Huawei.</strong> This lesson provides side-by-side comparisons of Cisco and Huawei CLI commands. Concepts are identical — only the syntax changes.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Complete the Cisco Commands lesson first. This lesson assumes you understand networking concepts and focuses on the differences.
+        </div>
+    </div>
+
+    <!-- CLI Mode Comparison -->
+    <div class="card">
+        <h2>🔐 CLI Modes Comparison</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Mode</th><th>Cisco</th><th>Huawei</th><th>Prompt Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>User View</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No command needed (default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No command needed (default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>&lt;Huawei&gt;</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Privileged View</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>enable</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>system-view</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>[~Huawei]</code> (if unsaved) or <code>[Huawei]</code> (saved)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Interface View</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>interface gig0/0</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>interface gigabitEthernet 0/0/0</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>[Huawei-GigabitEthernet0/0/0]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Command Comparison Table -->
+    <div class="card">
+        <h2>📊 Cisco vs Huawei Command Comparison</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Purpose</th><th>Cisco Command</th><th>Huawei Command</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>View current configuration</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show running-config</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display current-configuration</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>View saved configuration</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show startup-config</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display saved-configuration</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>View interface status</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show ip interface brief</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display ip interface brief</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>View routing table</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show ip route</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display ip routing-table</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>View VLANs</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show vlan brief</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display vlan</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Save configuration</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>write memory</code> or <code>copy running-config startup-config</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>save</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Exit current mode</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>exit</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>quit</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Return to privileged view</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>end</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>return</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Negate/remove command</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>no [command]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>undo [command]</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Basic Device Configuration -->
+    <div class="card">
+        <h2>⚙️ Basic Device Configuration — Side by Side</h2>
+        
+        <h3><span class="vendor-badge cisco-badge">Cisco</span></h3>
+        <div class="config-block">
+            Router&gt; enable<br>
+            Router# configure terminal<br>
+            Router(config)# hostname BRANCH-ROUTER<br>
+            BRANCH-ROUTER(config)# banner motd ^C Authorized Access Only ^C<br>
+            BRANCH-ROUTER(config)# enable secret Cisco123<br>
+            BRANCH-ROUTER(config)# line console 0<br>
+            BRANCH-ROUTER(config-line)# password admin123<br>
+            BRANCH-ROUTER(config-line)# login<br>
+            BRANCH-ROUTER(config-line)# exit<br>
+            BRANCH-ROUTER(config)# exit<br>
+            BRANCH-ROUTER# write memory
+        </div>
+
+        <h3><span class="vendor-badge huawei-badge">Huawei</span></h3>
+        <div class="config-block">
+            &lt;Huawei&gt; system-view<br>
+            [~Huawei] sysname BRANCH-ROUTER<br>
+            [~BRANCH-ROUTER] header login information "Authorized Access Only"<br>
+            [~BRANCH-ROUTER] aaa<br>
+            [~BRANCH-ROUTER-aaa] local-user admin password cipher admin123<br>
+            [~BRANCH-ROUTER-aaa] local-user admin privilege level 15<br>
+            [~BRANCH-ROUTER-aaa] local-user admin service-type terminal<br>
+            [~BRANCH-ROUTER-aaa] quit<br>
+            [~BRANCH-ROUTER] user-interface console 0<br>
+            [~BRANCH-ROUTER-ui-console0] authentication-mode aaa<br>
+            [~BRANCH-ROUTER-ui-console0] quit<br>
+            [~BRANCH-ROUTER] return<br>
+            &lt;BRANCH-ROUTER&gt; save
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Differences:</strong>
+            <ul>
+                <li>Huawei uses <code>system-view</code> to enter privileged mode (not <code>enable</code>)</li>
+                <li>Huawei uses <code>sysname</code> (not <code>hostname</code>)</li>
+                <li>Huawei uses <code>undo</code> (not <code>no</code>)</li>
+                <li>Huawei uses <code>quit</code> (not <code>exit</code>)</li>
+                <li>Huawei uses <code>return</code> (not <code>end</code>)</li>
+                <li>Huawei uses <code>save</code> (not <code>write memory</code>)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Interface Configuration -->
+    <div class="card">
+        <h2>🔌 Interface Configuration — Side by Side</h2>
+        
+        <h3><span class="vendor-badge cisco-badge">Cisco</span></h3>
+        <div class="config-block">
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip address 192.168.1.1 255.255.255.0<br>
+            Router(config-if)# no shutdown<br>
+            Router(config-if)# description Link to Main Office<br>
+            Router(config-if)# exit
+        </div>
+
+        <h3><span class="vendor-badge huawei-badge">Huawei</span></h3>
+        <div class="config-block">
+            [~BRANCH-ROUTER] interface gigabitEthernet 0/0/0<br>
+            [~BRANCH-ROUTER-GigabitEthernet0/0/0] ip address 192.168.1.1 24<br>
+            [~BRANCH-ROUTER-GigabitEthernet0/0/0] undo shutdown<br>
+            [~BRANCH-ROUTER-GigabitEthernet0/0/0] description Link to Main Office<br>
+            [~BRANCH-ROUTER-GigabitEthernet0/0/0] quit
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Differences:</strong>
+            <ul>
+                <li>Huawei interface naming: <code>gigabitEthernet 0/0/0</code> (slot/subslot/port) vs Cisco <code>gig0/0</code></li>
+                <li>Huawei subnet mask can be written as <code>24</code> instead of <code>255.255.255.0</code></li>
+                <li>Huawei uses <code>undo shutdown</code> (not <code>no shutdown</code>)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- VLAN Configuration -->
+    <div class="card">
+        <h2>🏷️ VLAN Configuration — Side by Side</h2>
+        
+        <h3><span class="vendor-badge cisco-badge">Cisco</span></h3>
+        <div class="config-block">
+            Switch(config)# vlan 10<br>
+            Switch(config-vlan)# name Engineering<br>
+            Switch(config-vlan)# exit<br>
+            Switch(config)# interface range gigabitEthernet 0/1-12<br>
+            Switch(config-if-range)# switchport mode access<br>
+            Switch(config-if-range)# switchport access vlan 10<br>
+            Switch(config-if-range)# no shutdown
+        </div>
+
+        <h3><span class="vendor-badge huawei-badge">Huawei</span></h3>
+        <div class="config-block">
+            [~Switch] vlan batch 10<br>
+            [~Switch] vlan 10<br>
+            [~Switch-vlan10] description Engineering<br>
+            [~Switch-vlan10] quit<br>
+            [~Switch] interface gigabitEthernet 0/0/1 to 0/0/12<br>
+            [~Switch-GigabitEthernet0/0/1] port link-type access<br>
+            [~Switch-GigabitEthernet0/0/1] port default vlan 10<br>
+            [~Switch-GigabitEthernet0/0/1] undo shutdown
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Differences:</strong>
+            <ul>
+                <li>Huawei uses <code>vlan batch 10</code> to create multiple VLANs at once</li>
+                <li>Huawei uses <code>port link-type access</code> (not <code>switchport mode access</code>)</li>
+                <li>Huawei uses <code>port default vlan 10</code> (not <code>switchport access vlan 10</code>)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Static Route Configuration -->
+    <div class="card">
+        <h2>🗺️ Static Route Configuration — Side by Side</h2>
+        
+        <h3><span class="vendor-badge cisco-badge">Cisco</span></h3>
+        <div class="config-block">
+            Router(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2<br>
+            Router(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.1<br>
+            Router(config)# ip route 172.16.0.0 255.255.0.0 serial0/0/0
+        </div>
+
+        <h3><span class="vendor-badge huawei-badge">Huawei</span></h3>
+        <div class="config-block">
+            [~Router] ip route-static 192.168.2.0 24 10.0.0.2<br>
+            [~Router] ip route-static 0.0.0.0 0.0.0.0 10.0.0.1<br>
+            [~Router] ip route-static 172.16.0.0 16 serial 0/0/0
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Differences:</strong>
+            <ul>
+                <li>Huawei uses <code>ip route-static</code> (not <code>ip route</code>)</li>
+                <li>Huawei can use CIDR notation (<code>24</code> instead of <code>255.255.255.0</code>)</li>
+                <li>Huawei interface syntax: <code>serial 0/0/0</code> (not <code>serial0/0/0</code>)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- OSPF Configuration -->
+    <div class="card">
+        <h2>🔄 OSPF Configuration — Side by Side</h2>
+        
+        <h3><span class="vendor-badge cisco-badge">Cisco</span></h3>
+        <div class="config-block">
+            Router(config)# router ospf 1<br>
+            Router(config-router)# router-id 1.1.1.1<br>
+            Router(config-router)# network 192.168.1.0 0.0.0.255 area 0<br>
+            Router(config-router)# network 10.0.0.0 0.0.0.3 area 0<br>
+            Router(config-router)# passive-interface gig0/0
+        </div>
+
+        <h3><span class="vendor-badge huawei-badge">Huawei</span></h3>
+        <div class="config-block">
+            [~Router] ospf 1 router-id 1.1.1.1<br>
+            [~Router-ospf-1] area 0<br>
+            [~Router-ospf-1-area-0.0.0.0] network 192.168.1.0 0.0.0.255<br>
+            [~Router-ospf-1-area-0.0.0.0] network 10.0.0.0 0.0.0.3<br>
+            [~Router-ospf-1-area-0.0.0.0] quit<br>
+            [~Router-ospf-1] silent-interface gigabitEthernet 0/0/0
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Differences:</strong>
+            <ul>
+                <li>Huawei configures OSPF in a single command: <code>ospf 1 router-id 1.1.1.1</code></li>
+                <li>Huawei uses <code>area 0</code> sub-mode (Cisco includes area in network statement)</li>
+                <li>Huawei uses <code>silent-interface</code> (not <code>passive-interface</code>)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Verification Commands -->
+    <div class="card">
+        <h2>📊 Verification Commands — Side by Side</h2>
+        <div style="overflow-x: auto;">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Purpose</th><th>Cisco</th><th>Huawei</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>OSPF neighbors</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show ip ospf neighbor</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display ospf peer</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>OSPF interface</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show ip ospf interface</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display ospf interface</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>ARP table</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show arp</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display arp</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>MAC address table</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>show mac address-table</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>display mac-address</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- eNSP Lab Setup -->
+    <div class="card">
+        <h2>🧪 Lab Exercise: Getting Started with eNSP (Huawei Simulator)</h2>
+        <p><strong>eNSP (Enterprise Network Simulation Platform)</strong> is Huawei's free network simulator — equivalent to Cisco Packet Tracer.</p>
+
+        <h3>Step 1: Download and Install eNSP</h3>
+        <div class="example-box">
+            Download from Huawei's official site (requires free registration):<br>
+            https://support.huawei.com/enterprise/en/ensp<br>
+            <br>
+            Installation includes:<br>
+            - eNSP itself<br>
+            - WinPcap (network driver)<br>
+            - Wireshark (packet capture)<br>
+            - VirtualBox (for router/switch emulation)
+        </div>
+
+        <h3>Step 2: Create a Simple Topology</h3>
+        <div class="config-block">
+            1. Open eNSP → New Topology<br>
+            2. Add two AR2220 routers<br>
+            3. Connect with Ethernet cable<br>
+            4. Right-click routers → Start
+        </div>
+
+        <h3>Step 3: Configure Basic Huawei CLI</h3>
+        <div class="config-block">
+            &lt;Huawei&gt; system-view<br>
+            [~Huawei] sysname R1<br>
+            [~R1] interface gigabitEthernet 0/0/0<br>
+            [~R1-GigabitEthernet0/0/0] ip address 10.0.0.1 24<br>
+            [~R1-GigabitEthernet0/0/0] undo shutdown<br>
+            [~R1-GigabitEthernet0/0/0] quit<br>
+            [~R1] return<br>
+            &lt;R1&gt; save
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Challenge:</strong> Add a second router, configure IPs in the same subnet, and ping between them. Then add static routes to reach non-directly connected networks.
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the Huawei equivalent of Cisco's <code>show running-config</code>?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>display current-configuration</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> How do you enter privileged view on a Huawei device?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>system-view</code> (Cisco uses <code>enable</code>)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command saves the configuration on a Huawei router?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>save</code> (Cisco uses <code>write memory</code> or <code>copy running-config startup-config</code>)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> How do you negate a command on Huawei?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>undo [command]</code> (Cisco uses <code>no [command]</code>)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the Huawei equivalent of Cisco's <code>no shutdown</code>?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>undo shutdown</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Cisco → Huawei Migration)</h3>
+            <ul>
+                <li>✅ <strong>Concepts are identical</strong> — only syntax changes</li>
+                <li>✅ <strong>show → display</strong> (e.g., <code>show ip route</code> → <code>display ip routing-table</code>)</li>
+                <li>✅ <strong>no → undo</strong> (e.g., <code>no shutdown</code> → <code>undo shutdown</code>)</li>
+                <li>✅ <strong>enable → system-view</strong> (privileged mode entry)</li>
+                <li>✅ <strong>exit → quit</strong> (exit current mode)</li>
+                <li>✅ <strong>end → return</strong> (return to user view)</li>
+                <li>✅ <strong>write memory → save</strong> (save configuration)</li>
+                <li>✅ <strong>ip route → ip route-static</strong> (static routes)</li>
+                <li>✅ <strong>interface naming:</strong> Cisco <code>gig0/0</code> → Huawei <code>gigabitEthernet 0/0/0</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://support.huawei.com/enterprise/en/support/" target="_blank">Huawei Enterprise Support</a></div>
+        <div class="external-link">📘 <a href="https://e.huawei.com/en/talent/#/certification" target="_blank">Huawei Certification (HCIA/HCIP/HCIE)</a></div>
+        <div class="external-link">🎓 <a href="https://support.huawei.com/enterprise/en/ensp" target="_blank">eNSP Download</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="cisco-commands.html" class="nav-btn">◀ Previous: Cisco Commands</a>
+        <a href="../index.html" class="nav-btn">🏠 Back to Hub</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Huawei Commands | Complete guide for Cisco professionals transitioning to Huawei CLI
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
