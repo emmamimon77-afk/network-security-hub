@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spanning Tree Protocol (STP) - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .stp-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .port-state {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+        }
+        .blocking { background: #dc2626; color: white; }
+        .listening { background: #f59e0b; color: white; }
+        .learning { background: #3b82f6; color: white; }
+        .forwarding { background: #10b981; color: white; }
+        .disabled { background: #6b7280; color: white; }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🌲 Spanning Tree Protocol (STP) — Complete Guide</h1>
+        <p><strong>STP prevents network loops in Ethernet networks.</strong> Without STP, a single broadcast storm can bring down your entire network. This is essential for any network with redundant links.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic switching concepts (VLANs, MAC addresses). STP operates at Layer 2.
+        </div>
+    </div>
+
+    <!-- Why STP Matters -->
+    <div class="card">
+        <h2>🎯 Why STP Matters</h2>
+        <ul>
+            <li>✅ <strong>Prevents broadcast storms</strong> — One loop can flood the network</li>
+            <li>✅ <strong>Enables redundancy</strong> — Multiple paths without breaking the network</li>
+            <li>✅ <strong>Automatic failover</strong> — When a link fails, STP recalculates</li>
+            <li>✅ <strong>Every switch runs it</strong> — STP is enabled by default on almost all switches</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Without STP:</strong> A single loop can cause broadcast frames to circulate forever, consuming all bandwidth and CPU — network goes down in seconds.
+        </div>
+    </div>
+
+    <!-- The Problem: Network Loops -->
+    <div class="card">
+        <h2>🔁 The Problem: What Happens Without STP?</h2>
+        <div class="ascii-box">
+    ┌─────────┐         ┌─────────┐
+    │ Switch1 │═════════│ Switch2 │
+    └────┬────┘         └────┬────┘
+         │                   │
+         │      ┌─────────┐  │
+         └══════│ Switch3 │══┘
+                └─────────┘
+    
+    This topology has a loop. Without STP:
+    1. Broadcast frame enters Switch1
+    2. Forwarded to Switch2 AND Switch3
+    3. Switch2 sends to Switch3, Switch3 sends to Switch2
+    4. Frames circulate FOREVER → BROADCAST STORM
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Real-world analogy:</strong> Two people shouting in a circular room — the echo never stops.
+        </div>
+    </div>
+
+    <!-- How STP Works -->
+    <div class="card">
+        <h2>⚙️ How STP Works (The 4-Step Process)</h2>
+        
+        <h3>Step 1: Elect a Root Bridge</h3>
+        <p>The switch with the <strong>lowest Bridge ID</strong> (Priority + MAC address) becomes the root.</p>
+        <div class="example-box">
+            Bridge ID = Priority (2 bytes) + MAC Address (6 bytes)<br>
+            Default priority: 32768<br>
+            Lower priority = more likely to become root
+        </div>
+
+        <h3>Step 2: Determine Root Ports</h3>
+        <p>Each <strong>non-root switch</strong> selects one port with the <strong>lowest cost</strong> to reach the root.</p>
+
+        <h3>Step 3: Determine Designated Ports</h3>
+        <p>On each segment, one port is elected as the <strong>designated port</strong> (forwarding).</p>
+
+        <h3>Step 4: Block Alternate Ports</h3>
+        <p>All other ports become <strong>alternate/backup ports</strong> and are placed in <strong>blocking state</strong>.</p>
+
+        <div class="ascii-box">
+                  Root Bridge
+                      │
+                      │ (Root Port)
+                      ▼
+    ┌─────────┐    ┌─────────┐
+    │ Switch1 │────│ Switch2 │
+    └─────────┘    └─────────┘
+         │(Designated)   │(Alternate - BLOCKED)
+         │               │
+         ▼               ▼
+    ┌─────────┐    ┌─────────┐
+    │ Switch3 │────│ Switch4 │
+    └─────────┘    └─────────┘
+        </div>
+    </div>
+
+    <!-- Port States -->
+    <div class="card">
+        <h2>🔄 STP Port States (5 States)</h2>
+        <div style="overflow-x: auto;">
+            <table class="stp-table">
+                <thead>
+                    <tr><th>State</th><th>Forwards Frames?</th><th>Learns MACs?</th><th>Duration</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="port-state blocking">Blocking</span></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>20 sec (default)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Initial state; discards frames, no MAC learning</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><span class="port-state listening">Listening</span></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>15 sec</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Electing root and designated ports</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><span class="port-state learning">Learning</span></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>15 sec</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Building MAC table; still not forwarding frames</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><span class="port-state forwarding">Forwarding</span></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Indefinite</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Normal operation — forwards frames, learns MACs</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><span class="port-state disabled">Disabled</span></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Administrative</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                         домаћинстваAdministratively shut down</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Total convergence time (default):</strong> Blocking → Forwarding takes ~50 seconds (20 + 15 + 15). RSTP reduces this to < 6 seconds.
+        </div>
+    </div>
+
+    <!-- STP Configuration -->
+    <div class="card">
+        <h2>⚙️ STP Configuration (Cisco CLI)</h2>
+
+        <h3>Configuring Root Bridge</h3>
+        <div class="config-block">
+            ! Set switch as root for VLAN 1<br>
+            Switch(config)# spanning-tree vlan 1 root primary<br>
+            <br>
+            ! Or manually set priority (lower = more likely to be root)<br>
+            Switch(config)# spanning-tree vlan 1 priority 4096
+        </div>
+
+        <h3>Configuring Port Cost (Influences Path Selection)</h3>
+        <div class="config-block">
+            ! Set port cost on specific interface<br>
+            Switch(config)# interface gigabitEthernet 0/12<br>
+            Switch(config-if)# spanning-tree cost 4<br>
+            <br>
+            ! Verify STP status<br>
+            Switch# show spanning-tree<br>
+            Switch# show spanning-tree interface gig0/12
+        </div>
+
+        <h3>PortFast (for End Devices)</h3>
+        <div class="config-block">
+            ! Bypasses listening/learning states — port goes directly to forwarding<br>
+            Switch(config)# interface gigabitEthernet 0/1<br>
+            Switch(config-if)# spanning-tree portfast<br>
+            <br>
+            ! Enable PortFast on all access ports<br>
+            Switch(config)# spanning-tree portfast default
+        </div>
+
+        <h3>BPDUGuard (Security)</h3>
+        <div class="config-block">
+            ! Disable port if BPDU is received (prevents unauthorized switches)<br>
+            Switch(config)# interface gigabitEthernet 0/1<br>
+            Switch(config-if)# spanning-tree bpduguard enable
+        </div>
+    </div>
+
+    <!-- RSTP (Rapid STP) -->
+    <div class="card">
+        <h2>⚡ RSTP (Rapid Spanning Tree Protocol) — 802.1w</h2>
+        <p>RSTP is the modern replacement for STP, with <strong>much faster convergence</strong> (< 6 seconds vs 50 seconds).</p>
+        
+        <div style="overflow-x: auto;">
+            <table class="stp-table">
+                <thead>
+                    <tr><th>Feature</th><th>STP (802.1D)</th><th>RSTP (802.1w)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Convergence time</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>~50 seconds</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>< 6 seconds</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Port states</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Blocking, Listening, Learning, Forwarding</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Discarding, Learning, Forwarding</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Backward compatible</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>—</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>✅ Yes (works with legacy STP)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="config-block">
+            ! Enable RSTP (default on most modern switches)<br>
+            Switch(config)# spanning-tree mode rapid-pvst
+        </div>
+    </div>
+
+    <!-- MST (Multiple Spanning Tree) -->
+    <div class="card">
+        <h2>🌳 MST (Multiple Spanning Tree) — 802.1s</h2>
+        <p>MST allows multiple VLANs to be mapped to a single spanning tree instance, reducing CPU load.</p>
+        <div class="config-block">
+            ! Configure MST region<br>
+            Switch(config)# spanning-tree mst configuration<br>
+            Switch(config-mst)# name REGION1<br>
+            Switch(config-mst)# revision 1<br>
+            Switch(config-mst)# instance 1 vlan 10,20,30<br>
+            Switch(config-mst)# instance 2 vlan 40,50,60<br>
+            Switch(config-mst)# end
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card">
+        <h2>🔧 STP Troubleshooting</h2>
+        
+        <h3>Common STP Issues:</h3>
+        <ul>
+            <li><strong>Root bridge election problems</strong> — Check bridge priorities: <code>show spanning-tree</code></li>
+            <li><strong>No redundant path</strong> — A port in blocking state is normal (that's the backup!)</li>
+            <li><strong>Slow network after link failure</strong> — Classic STP takes 50 seconds; migrate to RSTP</li>
+            <li><strong>PortFast not working</strong> — Port may still go through listening/learning</li>
+            <li><strong>BPDUGuard triggered</strong> — Someone plugged in a switch on an access port</li>
+        </ul>
+
+        <div class="example-box">
+            <strong>📋 Useful Commands:</strong><br>
+            show spanning-tree<br>
+            show spanning-tree root<br>
+            show spanning-tree interface gig0/12 detail<br>
+            show spanning-tree summary<br>
+            debug spanning-tree events
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the default STP priority on Cisco switches?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> 32768. Lower priority = more likely to become root bridge.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> How long does classic STP take to converge after a link failure?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Approximately 50 seconds (20 sec Blocking → 15 sec Listening → 15 sec Learning → Forwarding).
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command enables PortFast on an interface?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>spanning-tree portfast</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why would you configure BPDUGuard on an access port?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> To prevent unauthorized switches from being connected — if a BPDU is received, the port is shut down.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the main advantage of RSTP over classic STP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Much faster convergence (< 6 seconds vs ~50 seconds).
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (STP Mastery)</h3>
+            <ul>
+                <li>✅ <strong>STP prevents loops</strong> — essential for redundant network design</li>
+                <li>✅ <strong>Root bridge election</strong> — lowest Bridge ID (priority + MAC) wins</li>
+                <li>✅ <strong>Port states</strong> — Blocking → Listening → Learning → Forwarding (~50 sec)</li>
+                <li>✅ <strong>PortFast</strong> — skip states for end devices (access ports only!)</li>
+                <li>✅ <strong>BPDUGuard</strong> — security feature to block unauthorized switches</li>
+                <li>✅ <strong>RSTP</strong> — modern replacement, ~6 sec convergence, backward compatible</li>
+                <li>✅ <strong>MST</strong> — multiple VLANs per STP instance (reduces CPU load)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/5234-5.html" target="_blank">Cisco: Understanding Spanning Tree Protocol</a></div>
+        <div class="external-link">📘 <a href="https://networklessons.com/switching/spanning-tree-protocol-stp" target="_blank">NetworkLessons: STP Tutorial</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="vlan-config.html" class="nav-btn">◀ Previous: VLAN Configuration</a>
+        <a href="../networking-basics/nat-pat.html" class="nav-btn">Next: NAT/PAT ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Spanning Tree Protocol (STP) | Complete guide with port states, RSTP, MST, configuration, and troubleshooting
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
