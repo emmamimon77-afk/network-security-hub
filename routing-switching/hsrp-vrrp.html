@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSRP/VRRP - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .protocol-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .diagram-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .active { color: #10b981; font-weight: bold; }
+        .standby { color: #f59e0b; font-weight: bold; }
+        .virtual { color: #8b5cf6; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔄 HSRP/VRRP — First Hop Redundancy Protocols</h1>
+        <p><strong>Hot Standby Router Protocol (HSRP)</strong> and <strong>Virtual Router Redundancy Protocol (VRRP)</strong> provide gateway redundancy. If your default gateway router fails, another router automatically takes over — clients don't even notice.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic routing and IP addressing. HSRP/VRRP are essential for high-availability networks.
+        </div>
+    </div>
+
+    <!-- The Problem -->
+    <div class="card">
+        <h2>🎯 The Problem: Single Point of Failure</h2>
+        <div class="diagram-box">
+    Without First Hop Redundancy:
+    
+        Client (192.168.1.10)
+               │
+               ▼
+        Router A (192.168.1.1) ← DEFAULT GATEWAY
+               │
+               ▼
+           INTERNET
+    
+    🔴 If Router A fails → Client has NO gateway → NO internet
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>The solution:</strong> Two routers share a <strong>virtual IP address</strong>. One is active (forwards traffic), the other is standby (ready to take over).
+        </div>
+    </div>
+
+    <!-- HSRP vs VRRP vs GLBP Comparison -->
+    <div class="card">
+        <h2>📊 HSRP vs VRRP vs GLBP</h2>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table">
+                <thead>
+                    <tr><th>Feature</th><th>HSRP</th><th>VRRP</th><th>GLBP</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Vendor</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco proprietary</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Open standard (RFC 5798)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco proprietary</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </table>
+                    <tr>
+                        <td><strong>Virtual IP</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (separate from physical IPs)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (separate from physical IPs)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Yes (multiple virtual IPs possible)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Active/Standby</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>1 Active, 1+ Standby</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>1 Master, 1+ Backup</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Multiple Active (load balancing)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Load balancing</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>❌ No (only one active router)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>❌ No (only one master router)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>✅ Yes (up to 4 routers per group)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentication</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>MD5, text</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>MD5, text (RFC)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>MD5, text</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Which to use?</strong> HSRP for Cisco-only networks, VRRP for multi-vendor, GLBP for load balancing.
+        </div>
+    </div>
+
+    <!-- HSRP Detailed -->
+    <div class="card">
+        <h2>🔵 HSRP — Hot Standby Router Protocol (Cisco)</h2>
+        
+        <h3>How HSRP Works</h3>
+        <div class="diagram-box">
+    Virtual IP: 192.168.1.254 (clients use this)
+    Virtual MAC: 0000.0c07.ac01
+    
+                     ┌─────────────────────────────────────┐
+                     │         Client PC (192.168.1.10)     │
+                     │   Default Gateway: 192.168.1.254    │
+                     └─────────────────────────────────────┘
+                                       │
+                    ┌──────────────────┴──────────────────┐
+                    │                                      │
+                    ▼                                      ▼
+        ┌───────────────────┐                  ┌───────────────────┐
+        │   Router A        │                  │   Router B        │
+        │   <span class="active">ACTIVE</span> (Priority 110) │                  │   <span class="standby">STANDBY</span> (Priority 100)│
+        │   Physical IP:    │                  │   Physical IP:    │
+        │   192.168.1.1     │                  │   192.168.1.2     │
+        └───────────────────┘                  └───────────────────┘
+                    │                                      │
+                    └──────────────────┬──────────────────┘
+                                       │
+                                      ▼
+                                 INTERNET
+        </div>
+
+        <h3>HSRP States</h3>
+        <ul>
+            <li><strong>Initial:</strong> HSRP not yet started</li>
+            <li><strong>Learn:</strong> Router looking for active router</li>
+            <li><strong>Listen:</strong> Router knows active/standby, not participating</li>
+            <li><strong>Speak:</strong> Router sends hello messages</li>
+            <li><strong>Standby:</strong> Ready to take over (sends hellos)</li>
+            <li><strong>Active:</strong> Forwards traffic for virtual IP</li>
+        </ul>
+
+        <h3>HSRP Configuration (Cisco)</h3>
+        <div class="config-block">
+            ! Router A (ACTIVE - higher priority)<br>
+            RouterA(config)# interface gigabitEthernet 0/0<br>
+            RouterA(config-if)# ip address 192.168.1.1 255.255.255.0<br>
+            RouterA(config-if)# standby 1 ip 192.168.1.254<br>
+            RouterA(config-if)# standby 1 priority 110<br>
+            RouterA(config-if)# standby 1 preempt<br>
+            RouterA(config-if)# standby 1 authentication md5 key-string SecurePass<br>
+            RouterA(config-if)# standby 1 timers 3 10<br>
+            <br>
+            ! Router B (STANDBY - lower priority)<br>
+            RouterB(config)# interface gigabitEthernet 0/0<br>
+            RouterB(config-if)# ip address 192.168.1.2 255.255.255.0<br>
+            RouterB(config-if)# standby 1 ip 192.168.1.254<br>
+            RouterB(config-if)# standby 1 priority 100<br>
+            RouterB(config-if)# standby 1 authentication md5 key-string SecurePass<br>
+            <br>
+            ! Verification commands<br>
+            Router# show standby<br>
+            Router# show standby brief
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Understanding the commands:</strong>
+            <ul>
+                <li><code>standby 1 ip ...</code> — Group 1, virtual IP address (clients use this)</li>
+                <li><code>standby priority</code> — Higher priority = becomes active (default 100)</li>
+                <li><code>standby preempt</code> — If active router fails and returns, it retakes active role</li>
+                <li><code>standby authentication</code> — Prevents rogue routers from joining</li>
+                <li><code>standby timers 3 10</code> — Hello every 3 sec, hold timer 10 sec (fast failover)</li>
+            </ul>
+        </div>
+
+        <div class="config-block">
+            RouterA# show standby brief<br>
+                     P indicates configured to preempt.<br>
+            <br>
+            Interface   Grp  Pri P    State    Active          Standby         Virtual IP<br>
+            Gi0/0       1    110 P   Active   local           192.168.1.2     192.168.1.254
+        </div>
+    </div>
+
+    <!-- VRRP Detailed -->
+    <div class="card">
+        <h2>🟢 VRRP — Virtual Router Redundancy Protocol (Open Standard)</h2>
+        
+        <h3>VRRP Differences from HSRP</h3>
+        <ul>
+            <li>✅ <strong>Open standard</strong> — Works with non-Cisco routers (Juniper, Huawei, etc.)</li>
+            <li>✅ <strong>VRRP uses "Master/Backup"</strong> instead of Active/Standby</li>
+            <li>✅ <strong>Virtual IP can be one of the physical IPs</strong> (not required to be separate)</li>
+            <li>✅ <strong>IPv6 support built-in</strong> (HSRPv6 also exists)</li>
+        </ul>
+
+        <h3>VRRP Configuration (Cisco)</h3>
+        <div class="config-block">
+            ! Router A (MASTER - higher priority)<br>
+            RouterA(config)# interface gigabitEthernet 0/0<br>
+            RouterA(config-if)# ip address 192.168.1.1 255.255.255.0<br>
+            RouterA(config-if)# vrrp 1 ip 192.168.1.254<br>
+            RouterA(config-if)# vrrp 1 priority 110<br>
+            RouterA(config-if)# vrrp 1 preempt<br>
+            RouterA(config-if)# vrrp 1 authentication md5 key-string SecurePass<br>
+            <br>
+            ! Router B (BACKUP - lower priority)<br>
+            RouterB(config)# interface gigabitEthernet 0/0<br>
+            RouterB(config-if)# ip address 192.168.1.2 255.255.255.0<br>
+            RouterB(config-if)# vrrp 1 ip 192.168.1.254<br>
+            RouterB(config-if)# vrrp 1 priority 100<br>
+            <br>
+            ! Verification<br>
+            Router# show vrrp<br>
+            Router# show vrrp brief
+        </div>
+    </div>
+
+    <!-- HSRP vs VRRP vs GLBP Comparison Table -->
+    <div class="card">
+        <h2>📊 HSRP, VRRP, GLBP — When to Use Each</h2>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table">
+                <thead>
+                    <tr><th>Use Case</th><th>Recommended Protocol</th><th>Reason</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pure Cisco network, active/standby only</code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><strong>HSRP</strong></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco proprietary, simple, widely deployed</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Multi-vendor environment (Cisco + Juniper + Huawei)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><strong>VRRP</strong></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Open standard, interoperable</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td>Need load balancing (utilize both routers)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><strong>GLBP</strong></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Up to 4 active routers sharing traffic</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card">
+        <h2>🔧 Troubleshooting First Hop Redundancy</h2>
+        
+        <h3>Common Issues:</h3>
+        <ul>
+            <li><strong>No active router elected</strong> — Check that HSRP/VRRP is configured on both routers</li>
+            <li><strong>Both routers are active</strong> — Authentication mismatch or different group numbers</li>
+            <li><strong>Failover not working</strong> — Check preempt configuration</li>
+            <li><strong>Clients can't ping virtual IP</strong> — Verify interface status and routing</li>
+        </ul>
+
+        <div class="config-block">
+            ! Debug HSRP events (use carefully)<br>
+            Router# debug standby events<br>
+            Router# debug standby packets<br>
+            <br>
+            ! Clear HSRP state<br>
+            Router# clear standby counters<br>
+            <br>
+            ! Show HSRP statistics<br>
+            Router# show standby counters
+        </div>
+    </div>
+
+    <!-- HSRP on Layer 3 Switches -->
+    <div class="card">
+        <h2>⚡ HSRP on Layer 3 Switches (Special Notes)</h2>
+        <p>HSRP works almost identically on L3 switches, but there's one critical requirement:</p>
+        <div class="config-block">
+            ! Required on L3 switches for each VLAN<br>
+            Router(config)# interface vlan 10<br>
+            Router(config-if)# standby 1 ip 192.168.1.254<br>
+            Router(config-if)# standby 1 priority 110<br>
+            Router(config-if)# standby 1 preempt<br>
+            <br>
+            ! Enable IP routing (must be enabled!)<br>
+            Router(config)# ip routing
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the purpose of HSRP/VRRP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> To provide gateway redundancy — if the active router fails, a standby router takes over so clients don't lose connectivity.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the main difference between HSRP and VRRP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> HSRP is Cisco proprietary; VRRP is an open standard (RFC 5798) that works with any vendor.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What command makes a router reclaim active role after it recovers from a failure?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>standby preempt</code> (HSRP) or <code>vrrp preempt</code> (VRRP)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Which protocol supports load balancing across multiple routers?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> GLBP (Gateway Load Balancing Protocol) — up to 4 active routers can share traffic.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the default HSRP hello and hold timer?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Hello timer: 3 seconds, Hold timer: 10 seconds.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (HSRP/VRRP)</h3>
+            <ul>
+                <li>✅ <strong>HSRP</strong> — Cisco proprietary, Active/Standby, virtual IP + virtual MAC</li>
+                <li>✅ <strong>VRRP</strong> — Open standard, Master/Backup, works with all vendors</li>
+                <li>✅ <strong>GLBP</strong> — Cisco only, load balancing across up to 4 routers</li>
+                <li>✅ <strong>Higher priority = Active/Master</strong> (default priority 100)</li>
+                <li>✅ <strong>Preempt</strong> — Allows active router to reclaim role after recovery</li>
+                <li>✅ <strong>Authentication</strong> — Prevents rogue routers from joining the group</li>
+                <li>✅ <strong>Virtual IP must match</strong> on all routers in the same group</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9234-hsrp-guide.html" target="_blank">Cisco: HSRP Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://datatracker.ietf.org/doc/html/rfc5798" target="_blank">RFC 5798 — VRRP Specification</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/ipapp_fhrp/configuration/xe-16/fhp-xe-16-book/glbp-xe-16.html" target="_blank">Cisco: GLBP Guide</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="../networking-basics/dhcp-dns.html" class="nav-btn">◀ Previous: DHCP & DNS</a>
+        <a href="../firewalls/acls-advanced.html" class="nav-btn">Next: Advanced ACLs ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — HSRP/VRRP | First hop redundancy, gateway failover, active/standby, load balancing (GLBP)
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

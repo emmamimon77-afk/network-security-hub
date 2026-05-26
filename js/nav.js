@@ -24,6 +24,7 @@ function loadNavigation() {
                 <a href="/routing-switching/vlan-config.html">🏷️ VLAN Configuration</a>
                 <a href="/routing-switching/stp.html">🌲 Spanning Tree (STP)</a>
                 <a href="/routing-switching/static-routing.html">🗺️ Static Routing</a>
+                <a href="/routing-switching/hsrp-vrrp.html">🔄 HSRP/VRRP</a>
                 <a href="/routing-switching/ospf.html">🔄 OSPF</a>
                 <a href="/routing-switching/eigrp.html">⚡ EIGRP</a>
             </div>
