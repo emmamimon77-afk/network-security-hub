@@ -35,6 +35,7 @@ function loadNavigation() {
             <div class="nav-dropdown-content">
                 <a href="/firewalls/iptables.html">🛠️ iptables</a>
                 <a href="/firewalls/zone-based-firewall.html">🧱 Zone-Based Firewall</a>
+                <a href="/firewalls/acls-advanced.html">📋 Advanced ACLs</a>
             </div>
         </div>
         

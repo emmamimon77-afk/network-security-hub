@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced ACLs - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .acl-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .number-range {
+            display: inline-block;
+            background: #e9f0ed;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin: 0.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🛡️ Advanced ACLs — Access Control Lists</h1>
+        <p><strong>Access Control Lists (ACLs)</strong> are packet filters that permit or deny traffic based on source/destination IP, port, protocol, and more. Every router and firewall uses ACLs for traffic control and security.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic IP addressing and subnetting. ACLs are essential for network security and traffic management.
+        </div>
+    </div>
+
+    <!-- ACL Types -->
+    <div class="card">
+        <h2>📊 Types of ACLs</h2>
+        <div style="overflow-x: auto;">
+            <table class="acl-table">
+                <thead>
+                    <tr><th>Type</th><th>Number Range</th><th>Filters Based On</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Standard ACL</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><span class="number-range">1-99</span> or <span class="number-range">1300-1999</span></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Source IP address only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Blocking entire subnets (simple)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Extended ACL</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><span class="number-range">100-199</span> or <span class="number-range">2000-2699</span></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Source/destination IP, protocol (TCP/UDP), port, flags</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Granular traffic control (most common)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Standard ACL Configuration -->
+    <div class="card">
+        <h2>📝 Standard ACL Configuration</h2>
+        
+        <div class="config-block">
+            ! Create standard ACL (permit/deny source IP)<br>
+            Router(config)# access-list 10 permit 192.168.1.0 0.0.0.255<br>
+            Router(config)# access-list 10 deny any<br>
+            <br>
+            ! Apply to interface (direction matters!)<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip access-group 10 in<br>
+            <br>
+            ! Verification<br>
+            Router# show access-lists<br>
+            Router# show ip interface gig0/0
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Example: Block all traffic from a specific host</strong><br>
+            <code>Router(config)# access-list 5 deny host 10.0.0.100</code><br>
+            <code>Router(config)# access-list 5 permit any</code><br>
+            <code>Router(config)# interface gig0/0</code><br>
+            <code>Router(config-if)# ip access-group 5 in</code>
+        </div>
+    </div>
+
+    <!-- Extended ACL Configuration -->
+    <div class="card">
+        <h2>🔧 Extended ACL Configuration (Most Common)</h2>
+
+        <div class="config-block">
+            ! Extended ACL syntax:<br>
+            ! access-list NUMBER permit|deny PROTOCOL SOURCE_IP WILDCARD DEST_IP WILDCARD [eq PORT]<br>
+            <br>
+            ! Allow web traffic from internal network to internet<br>
+            Router(config)# access-list 100 permit tcp 192.168.1.0 0.0.0.255 any eq 80<br>
+            Router(config)# access-list 100 permit tcp 192.168.1.0 0.0.0.255 any eq 443<br>
+            <br>
+            ! Allow established connections (return traffic)<br>
+            Router(config)# access-list 100 permit tcp any any established<br>
+            <br>
+            ! Allow DNS<br>
+            Router(config)# access-list 100 permit udp any any eq 53<br>
+            <br>
+            ! Deny everything else (implicit deny at end)<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip access-group 100 out
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Insight:</strong> Extended ACLs process from top to bottom. Place more specific rules first, general rules later. There's an implicit "deny all" at the end.
+        </div>
+    </div>
+
+    <!-- Named ACLs -->
+    <div class="card">
+        <h2>📛 Named ACLs (More Readable)</h2>
+        <p>Named ACLs use descriptive names instead of numbers — much easier to manage.</p>
+
+        <div class="config-block">
+            ! Create named extended ACL<br>
+            Router(config)# ip access-list extended BLOCK-BAD-TRAFFIC<br>
+            Router(config-ext-nacl)# deny tcp any any eq 4444<br>
+            Router(config-ext-nacl)# deny udp any any range 1337 1339<br>
+            Router(config-ext-nacl)# permit ip any any<br>
+            Router(config-ext-nacl)# exit<br>
+            <br>
+            ! Apply to interface<br>
+            Router(config)# interface gigabitEthernet 0/0<br>
+            Router(config-if)# ip access-group BLOCK-BAD-TRAFFIC in
+        </div>
+    </div>
+
+    <!-- Advanced ACL Features -->
+    <div class="card">
+        <h2>⚡ Advanced ACL Features</h2>
+
+        <h3>1. Established Flag (Return Traffic)</h3>
+        <div class="config-block">
+            ! Allow return TCP traffic (if ACK or RST flag is set)<br>
+            Router(config)# access-list 100 permit tcp any any established
+        </div>
+
+        <h3>2. TCP Flags (Special Control)</h3>
+        <div class="config-block">
+            ! Block TCP SYN scans (only SYN flag, no ACK)<br>
+            Router(config)# access-list 100 deny tcp any any syn<br>
+            <br>
+            ! Block TCP reset attacks<br>
+            Router(config)# access-list 100 deny tcp any any rst
+        </div>
+
+        <h3>3. Port Ranges</h3>
+        <div class="config-block">
+            ! Block range of ports<br>
+            Router(config)# access-list 100 deny tcp any any range 6000 6010<br>
+            <br>
+            ! Allow multiple specific ports<br>
+            Router(config)# access-list 100 permit tcp any any eq 22<br>
+            Router(config)# access-list 100 permit tcp any any eq 80<br>
+            Router(config)# access-list 100 permit tcp any any eq 443
+        </div>
+
+        <h3>4. ICMP Control</h3>
+        <div class="config-block">
+            ! Allow ping (echo request) but block other ICMP<br>
+            Router(config)# access-list 100 permit icmp any any echo<br>
+            Router(config)# access-list 100 permit icmp any any echo-reply<br>
+            Router(config)# access-list 100 deny icmp any any
+        </div>
+
+        <h3>5. Established Connections (Reflexive ACLs)</h3>
+        <div class="config-block">
+            ! Allow inside users to browse web, block outside from initiating<br>
+            Router(config)# ip access-list extended OUTBOUND<br>
+            Router(config-ext-nacl)# permit tcp 192.168.1.0 0.0.0.255 any reflect INSIDE-TRAFFIC<br>
+            <br>
+            Router(config)# ip access-list extended INBOUND<br>
+            Router(config-ext-nacl)# evaluate INSIDE-TRAFFIC<br>
+            Router(config-ext-nacl)# deny ip any any
+        </div>
+    </div>
+
+    <!-- Time-Based ACLs -->
+    <div class="card">
+        <h2>⏰ Time-Based ACLs (Restrict by Schedule)</h2>
+
+        <div class="config-block">
+            ! Define time range<br>
+            Router(config)# time-range WORK_HOURS<br>
+            Router(config-time-range)# periodic weekdays 8:00 to 17:00<br>
+            Router(config-time-range)# exit<br>
+            <br>
+            ! Block social media during work hours<br>
+            Router(config)# access-list 100 deny tcp any any eq 80 time-range WORK_HOURS<br>
+            Router(config)# access-list 100 deny tcp any any eq 443 time-range WORK_HOURS
+        </div>
+    </div>
+
+    <!-- ACL Best Practices -->
+    <div class="card">
+        <h2>✅ ACL Best Practices</h2>
+        <ul>
+            <li>✅ <strong>Place extended ACLs as close to source as possible</strong> — Saves bandwidth</li>
+            <li>✅ <strong>Standard ACLs go as close to destination</strong> — They can't see destination IPs</li>
+            <li>✅ <strong>Order matters</strong> — Most specific rules first, general at bottom</li>
+            <li>✅ <strong>Use named ACLs</strong> — Easier to understand than numbers</li>
+            <li>✅ <strong>Add remarks</strong> — Document what each rule does</li>
+            <li>✅ <strong>Test with permit any any temporarily</strong> — Avoid locking yourself out</li>
+            <li>✅ <strong>Never edit ACLs remotely without fallback</strong> — You can lose access</li>
+        </ul>
+
+        <div class="config-block">
+            ! Add remarks to ACLs (documentation)<br>
+            Router(config)# access-list 100 remark Allow web traffic from internal network<br>
+            Router(config)# access-list 100 permit tcp 192.168.1.0 0.0.0.255 any eq 80<br>
+            Router(config)# access-list 100 remark Allow HTTPS<br>
+            Router(config)# access-list 100 permit tcp 192.168.1.0 0.0.0.255 any eq 443
+        </div>
+    </div>
+
+    <!-- Troubleshooting ACLs -->
+    <div class="card">
+        <h2>🔧 Troubleshooting ACLs</h2>
+
+        <h3>Common Issues:</h3>
+        <ul>
+            <li><strong>Traffic blocked unexpectedly</strong> — Use <code>show access-lists</code> to see hit counters</li>
+            <li><strong>Order wrong</strong> — Rules processed top-down; more specific must come first</li>
+            <li><strong>Implicit deny at end</strong> — If nothing matches, traffic is dropped</li>
+            <li><strong>Wrong direction</strong> — Check if ACL applied to correct interface and direction (in/out)</li>
+        </ul>
+
+        <div class="config-block">
+            ! View ACL hit counts (increments when rule matches)<br>
+            Router# show access-lists 100<br>
+            <br>
+            ! Clear ACL counters<br>
+            Router# clear access-list counters<br>
+            <br>
+            ! Debug ACL (use carefully - CPU intensive)<br>
+            Router# debug ip packet 100 detail
+        </div>
+    </div>
+
+    <!-- ACL on VTY Lines -->
+    <div class="card">
+        <h2>🔐 ACLs on VTY Lines (SSH/Telnet Access Control)</h2>
+        <p>Control who can remotely access the router itself.</p>
+
+        <div class="config-block">
+            ! Allow only specific subnet to SSH into router<br>
+            Router(config)# access-list 50 permit 192.168.10.0 0.0.0.255<br>
+            Router(config)# access-list 50 deny any<br>
+            <br>
+            ! Apply to VTY lines<br>
+            Router(config)# line vty 0 4<br>
+            Router(config-line)# access-class 50 in<br>
+            Router(config-line)# transport input ssh
+        </div>
+    </div>
+
+    <!-- Real-World Security Scenarios -->
+    <div class="card">
+        <h2>🌐 Real-World Security Scenarios</h2>
+
+        <div class="example-box">
+            <strong>🔴 Scenario 1: Block SSH brute-force attempts</strong><br>
+            <code>access-list 100 deny tcp any any eq 22</code><br>
+            <code>access-list 100 permit ip any any</code><br>
+            → Place this ACL on the outside interface to block all SSH from internet.
+        </div>
+
+        <div class="example-box">
+            <strong>🔴 Scenario 2: Allow only specific webserver access</strong><br>
+            <code>access-list 100 permit tcp host 10.0.0.50 any eq 80</code><br>
+            <code>access-list 100 permit tcp host 10.0.0.50 any eq 443</code><br>
+            <code>access-list 100 deny ip any any</code><br>
+            → Only webserver 10.0.0.50 can access internet.
+        </div>
+
+        <div class="example-box">
+            <strong>🔴 Scenario 3: Block port scanning</strong><br>
+            <code>access-list 100 deny tcp any any fragments</code><br>
+            → Drops fragmented packets (common in nmap scans)
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What is the difference between a standard and extended ACL?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Standard ACLs filter only on source IP address. Extended ACLs filter on source/destination IP, protocol, port, and TCP flags.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the "established" keyword used for in ACLs?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> It matches TCP packets with the ACK or RST flag set — allowing return traffic for connections initiated from inside while blocking outside-initiated connections.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What happens at the end of every ACL?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> There is an implicit "deny all" (deny ip any any). If no rules match, traffic is dropped.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What is the proper placement of extended ACLs?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Extended ACLs should be placed as close to the source of traffic as possible to save bandwidth.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> How do you restrict SSH access to a router from only one subnet?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Create a standard ACL and apply it to VTY lines using <code>access-class</code>.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Advanced ACLs)</h3>
+            <ul>
+                <li>✅ <strong>Standard ACL</strong> (1-99) — Source IP only. Place near destination</li>
+                <li>✅ <strong>Extended ACL</strong> (100-199) — Source/destination IP, protocol, port. Place near source</li>
+                <li>✅ <strong>Named ACL</strong> — Descriptive names, easier to manage</li>
+                <li>✅ <strong>Order matters</strong> — Specific rules first, general last. Implicit deny at end</li>
+                <li>✅ <strong>Established flag</strong> — Allows return TCP traffic (ACK/RST set)</li>
+                <li>✅ <strong>Time-based ACLs</strong> — Block/allow during specific hours</li>
+                <li>✅ <strong>Always test ACLs</strong> — Temporary permit all before applying remotely</li>
+                <li>✅ <strong>VTY access-class</strong> — Control who can SSH/telnet to router</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/23602-confaccesslists.html" target="_blank">Cisco: ACL Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://networklessons.com/security/access-control-lists" target="_blank">NetworkLessons: ACL Tutorial</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/26426-SecurityWhitePaper.html" target="_blank">Cisco: ACL Best Practices</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="../routing-switching/hsrp-vrrp.html" class="nav-btn">◀ Previous: HSRP/VRRP</a>
+        <a href="../routing-switching/wan-technologies.html" class="nav-btn">Next: WAN Technologies ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Advanced ACLs | Standard/extended ACLs, named ACLs, time-based rules, VTY filtering, security scenarios
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
