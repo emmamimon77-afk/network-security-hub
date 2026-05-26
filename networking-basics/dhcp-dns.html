@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHCP & DNS - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .protocol-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .diagram-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🌐 DHCP & DNS — Complete Guide</h1>
+        <p><strong>Dynamic Host Configuration Protocol (DHCP)</strong> automatically assigns IP addresses to devices. <strong>Domain Name System (DNS)</strong> translates domain names (google.com) into IP addresses (142.250.185.46). Together, they make networks "just work."</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic IP addressing. DHCP and DNS are everywhere — from home routers to enterprise servers.
+        </div>
+    </div>
+
+    <!-- Part 1: DHCP -->
+    <div class="card">
+        <h2>📡 Part 1: DHCP — Dynamic Host Configuration Protocol</h2>
+        
+        <h3>Why DHCP Matters</h3>
+        <ul>
+            <li>✅ <strong>No manual IP configuration</strong> — Plug and play</li>
+            <li>✅ <strong>Prevents IP conflicts</strong> — Server manages unique addresses</li>
+            <li>✅ <strong>Centralized management</strong> — Change DNS servers, gateways from one place</li>
+            <li>✅ <strong>Efficient IP usage</strong> — Leases return to pool when device leaves</li>
+        </ul>
+
+        <h3>DHCP DORA Process (4 Steps)</h3>
+        <div class="diagram-box">
+    Client                        DHCP Server
+       │                              │
+       │  1. DISCOVER (broadcast)      │
+       │  "Is there a DHCP server?"    │
+       │─────────────────────────────▶│
+       │                              │
+       │  2. OFFER (unicast/broadcast) │
+       │  "I can offer 192.168.1.100"  │
+       │◀─────────────────────────────│
+       │                              │
+       │  3. REQUEST (broadcast)       │
+       │  "I'll take 192.168.1.100"    │
+       │─────────────────────────────▶│
+       │                              │
+       │  4. ACK (unicast)             │
+       │  "Approved. Lease duration 24h"│
+       │◀─────────────────────────────│
+       │                              │
+        </div>
+
+        <h3>DHCP Lease Timers</h3>
+        <ul>
+            <li><strong>T1 (50% of lease):</strong> Client tries to renew with original server</li>
+            <li><strong>T2 (87.5% of lease):</strong> Client broadcasts to any DHCP server if T1 failed</li>
+            <li><strong>Lease end:</strong> IP returns to pool, client must request new</li>
+        </ul>
+
+        <h3>DHCP Configuration (Cisco Router)</h3>
+        <div class="config-block">
+            ! Exclude static IPs (servers, printers, routers)<br>
+            Router(config)# ip dhcp excluded-address 192.168.1.1 192.168.1.50<br>
+            <br>
+            ! Create DHCP pool<br>
+            Router(config)# ip dhcp pool LAN_POOL<br>
+            Router(dhcp-config)# network 192.168.1.0 255.255.255.0<br>
+            Router(dhcp-config)# default-router 192.168.1.1<br>
+            Router(dhcp-config)# dns-server 8.8.8.8 8.8.4.4<br>
+            Router(dhcp-config)# lease 7 0 0   (7 days)<br>
+            Router(dhcp-config)# domain-name mycompany.local<br>
+            Router(dhcp-config)# exit<br>
+            <br>
+            ! Verify DHCP<br>
+            Router# show ip dhcp binding<br>
+            Router# show ip dhcp pool<br>
+            Router# debug ip dhcp server events
+        </div>
+
+        <h3>DHCP Relay (IP Helper)</h3>
+        <p>When DHCP server is in a different subnet, you need a relay agent.</p>
+        <div class="config-block">
+            Router(config)# interface vlan 10<br>
+            Router(config-if)# ip helper-address 10.0.0.5   (DHCP server IP)
+        </div>
+
+        <h3>DHCP Security Risks</h3>
+        <ul>
+            <li><strong>Rogue DHCP servers</strong> — Malicious devices handing out bad IPs</li>
+            <li><strong>DHCP starvation</strong> — Attacker exhausts all IP addresses</li>
+            <li><strong>Mitigation:</strong> DHCP Snooping (Cisco feature)</li>
+        </ul>
+    </div>
+
+    <!-- Part 2: DNS -->
+    <div class="card">
+        <h2>🔍 Part 2: DNS — Domain Name System</h2>
+        
+        <h3>Why DNS Matters</h3>
+        <ul>
+            <li>✅ <strong>Human-friendly names</strong> — Remember google.com, not 142.250.185.46</li>
+            <li>✅ <strong>Load balancing</strong> — One name can map to many IPs</li>
+            <li>✅ <strong>Location independence</strong> — Change server IPs without changing names</li>
+        </ul>
+
+        <h3>DNS Hierarchy</h3>
+        <div class="diagram-box">
+                              [Root]   (.)
+                                │
+                        ┌───────┴───────┐
+                       [.com]        [.org]    (Top-Level Domains)
+                         │
+                    ┌────┴────┐
+                  [google]  [cisco]          (Second-Level Domains)
+                     │
+                ┌────┴────┐
+              [www]      [mail]              (Subdomains)
+        </div>
+
+        <h3>DNS Record Types</h3>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table">
+                <thead>
+                    <tr><th>Record</th><th>Purpose</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>A</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IPv4 address</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>google.com → 142.250.185.46</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>AAAA</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>IPv6 address</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>google.com → 2001:4860:4860::8888</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>CNAME</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Alias (name → another name)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>www.google.com → google.com</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>MX</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Mail exchanger (email routing)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>mail.google.com (priority 10)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>NS</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Name server (authoritative DNS servers)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ns1.google.com, ns2.google.com</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>PTR</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Reverse lookup (IP → name)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>142.250.185.46 → google.com</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    <tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>DNS Resolution Process</h3>
+        <div class="diagram-box">
+    Browser → Local Cache → Hosts File → DNS Resolver (ISP/8.8.8.8) → Root Server → TLD Server → Authoritative Server → Response
+        </div>
+
+        <h3>DNS Configuration (Cisco Router as DNS Server)</h3>
+        <div class="config-block">
+            ! Enable DNS server on router<br>
+            Router(config)# ip dns server<br>
+            <br>
+            ! Define hostname-to-IP mappings<br>
+            Router(config)# ip host web-server 192.168.1.10<br>
+            Router(config)# ip host mail-server 192.168.1.20<br>
+            <br>
+            ! Configure DNS forwarders (for unknown domains)<br>
+            Router(config)# ip name-server 8.8.8.8<br>
+            Router(config)# ip name-server 8.8.4.4<br>
+            <br>
+            ! Verify DNS<br>
+            Router# show hosts<br>
+            Router# ping web-server
+        </div>
+
+        <h3>DNS Security</h3>
+        <ul>
+            <li><strong>DNS spoofing/cache poisoning</strong> — Attacker injects fake DNS entries</li>
+            <li><strong>DNSSEC</strong> — Digitally signs DNS responses (prevents spoofing)</li>
+            <li><strong>DNS over TLS (DoT) / DNS over HTTPS (DoH)</strong> — Encrypts DNS queries</li>
+            <li><strong>Best practice:</strong> Use trusted DNS servers (Cloudflare 1.1.1.1, Google 8.8.8.8)</li>
+        </ul>
+    </div>
+
+    <!-- Common Commands -->
+    <div class="card">
+        <h2>💻 Common DHCP/DNS Commands (Client Side)</h2>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table">
+                <thead>
+                    <tr><th>Operating System</th><th>DHCP Release/Renew</th><th>DNS Query</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Windows</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>ipconfig /release</code> then <code>ipconfig /renew</code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>nslookup google.com</code> or <code>Resolve-DnsName google.com</code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Linux/macOS</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>sudo dhclient -r</code> then <code>sudo dhclient</code> (or reboot)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td><code>dig google.com</code> or <code>nslookup google.com</code></code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> What are the four steps of the DHCP DORA process?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Discover → Offer → Request → Acknowledgment (ACK)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What DNS record type maps a domain name to an IPv4 address?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> A record (AAAA is for IPv6)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> A DHCP server is in a different subnet than the clients. What feature is needed?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> DHCP relay (ip helper-address on Cisco routers)
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What is the purpose of DNSSEC?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> DNSSEC digitally signs DNS responses to prevent cache poisoning and spoofing attacks.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What command shows active DHCP leases on a Cisco router?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> <code>show ip dhcp binding</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (DHCP & DNS Mastery)</h3>
+            <ul>
+                <li>✅ <strong>DHCP DORA</strong> — Discover, Offer, Request, ACK</li>
+                <li>✅ <strong>DHCP Relay</strong> — ip helper-address for cross-subnet DHCP</li>
+                <li>✅ <strong>DNS Hierarchy</strong> — Root → TLD → Authoritative</li>
+                <li>✅ <strong>Common DNS records</strong> — A (IPv4), AAAA (IPv6), CNAME (alias), MX (mail)</li>
+                <li>✅ <strong>DHCP Snooping</strong> — Prevents rogue DHCP servers</li>
+                <li>✅ <strong>DNSSEC / DoH / DoT</strong> — DNS security mechanisms</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/dynamic-host-configuration-protocol-dhcp/27470-1.html" target="_blank">Cisco: DHCP Configuration Guide</a></div>
+        <div class="external-link">📘 <a href="https://www.cloudflare.com/learning/dns/what-is-dns/" target="_blank">Cloudflare: DNS Explained</a></div>
+        <div class="external-link">🎓 <a href="https://www.isc.org/dhcp/" target="_blank">ISC DHCP Server (Open Source)</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="nat-pat.html" class="nav-btn">◀ Previous: NAT/PAT</a>
+        <a href="../routing-switching/hsrp-vrrp.html" class="nav-btn">Next: HSRP/VRRP ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — DHCP & DNS | Complete guide with DORA process, DNS hierarchy, records, configuration, and security
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>
