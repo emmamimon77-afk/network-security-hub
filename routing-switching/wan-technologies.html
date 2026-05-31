@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAN Technologies - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .wan-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .diagram-box {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🌍 WAN Technologies — Complete Guide</h1>
+        <p><strong>Wide Area Network (WAN) technologies</strong> connect networks across cities, countries, and continents. This lesson covers HDLC, PPP, GRE tunnels, Frame Relay, and MPLS — essential for enterprise networking and certification exams.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic routing concepts. WAN technologies are how branch offices connect to headquarters.
+        </div>
+    </div>
+
+    <!-- WAN Overview -->
+    <div class="card">
+        <h2>🌐 WAN Overview — Connecting Far Away Networks</h2>
+        <div class="diagram-box">
+    ┌─────────────┐                    ┌─────────────┐
+    │  HQ Office  │                    │ Branch Office│
+    │  Router A   │════════════════════│  Router B   │
+    └─────────────┘                    └─────────────┘
+           │                                  │
+           │         WAN Link (Serial)        │
+           │      (Leased line, MPLS, etc.)   │
+           └──────────────────────────────────┘
+        </div>
+        <ul>
+            <li>✅ <strong>Connects geographically separated networks</strong></li>
+            <li>✅ <strong>Uses different technologies than LAN</strong> (serial links, not Ethernet)</li>
+            <li>✅ <strong>Often provided by ISPs (Internet Service Providers)</strong></li>
+        </ul>
+    </div>
+
+    <!-- WAN Connection Types -->
+    <div class="card">
+        <h2>📊 WAN Connection Types</h2>
+        <div style="overflow-x: auto;">
+            <table class="wan-table">
+                <thead>
+                    <tr><th>Type</th><th>Description</th><th>Speed</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Leased Line</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Dedicated point-to-point circuit</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>64 Kbps - 10 Gbps</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Enterprise HQ to branch</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>MPLS</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Provider managed service</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>10 Mbps - 100 Gbps</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Large enterprise networks</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Broadband (DSL/Cable)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Internet-based connections</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>10-1000 Mbps</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Small office, home office</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Part 1: HDLC -->
+    <div class="card">
+        <h2>🔗 HDLC — High-Level Data Link Control</h2>
+        <p><strong>HDLC</strong> is the default encapsulation on Cisco serial interfaces. It is a bit-oriented, synchronous protocol that uses frame flags and CRC error checking.</p>
+
+        <h3>HDLC Characteristics:</h3>
+        <ul>
+            <li>✅ <strong>Cisco proprietary extension</strong> — Standard HDLC ≠ Cisco HDLC</li>
+            <li>✅ <strong>Default on Cisco serial interfaces</strong> — No configuration needed for basic operation</li>
+            <li>✅ <strong>Point-to-point only</strong> — Does not support multiple connections</li>
+            <li>✅ <strong>No authentication</strong> — Cannot verify peer identity</li>
+        </ul>
+
+        <h3>HDLC Configuration (Cisco):</h3>
+        <div class="config-block">
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# encapsulation hdlc   (default, may not show)<br>
+            Router(config-if)# ip address 10.0.0.1 255.255.255.252<br>
+            Router(config-if)# clock rate 64000     (DCE side only)<br>
+            Router(config-if)# no shutdown
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Verify HDLC:</strong><br>
+            Router# show interface serial 0/0/0 | include Encapsulation
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Note:</strong> Cisco HDLC is NOT compatible with other vendors. Use PPP for multi-vendor environments.
+        </div>
+    </div>
+
+    <!-- Part 2: PPP -->
+    <div class="card">
+        <h2>🔐 PPP — Point-to-Point Protocol</h2>
+        <p><strong>PPP</strong> is the industry standard for point-to-point links. It supports authentication (PAP/CHAP), multilink, and works with any vendor.</p>
+
+        <h3>PPP Components:</h3>
+        <ul>
+            <li><strong>LCP (Link Control Protocol):</strong> Establishes, configures, and tests the link</li>
+            <li><strong>NCP (Network Control Protocol):</strong> Configures network layer protocols (IP, IPX, etc.)</li>
+            <li><strong>Authentication:</strong> PAP (password) or CHAP (challenge-response)</li>
+        </ul>
+
+        <h3>PPP Configuration (Cisco):</h3>
+        <div class="config-block">
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# encapsulation ppp<br>
+            Router(config-if)# ppp authentication chap<br>
+            Router(config-if)# username BRANCH password Cisco123<br>
+            Router(config-if)# ip address 10.0.0.1 255.255.255.252<br>
+            Router(config-if)# no shutdown
+        </div>
+
+        <h3>PPP with PAP Authentication (Less Secure):</h3>
+        <div class="config-block">
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# encapsulation ppp<br>
+            Router(config-if)# ppp authentication pap<br>
+            Router(config-if)# ppp pap sent-username HQ password SecurePass
+        </div>
+
+        <h3>PPP Multilink (Combine Multiple Links):</h3>
+        <div class="config-block">
+            Router(config)# interface multilink 1<br>
+            Router(config-if)# ip address 10.0.0.1 255.255.255.252<br>
+            Router(config-if)# ppp multilink<br>
+            Router(config-if)# ppp multilink group 1<br>
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# ppp multilink group 1<br>
+            Router(config)# interface serial 0/0/1<br>
+            Router(config-if)# ppp multilink group 1
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>CHAP vs PAP:</strong> CHAP is more secure because it never sends the password across the link. Use CHAP whenever possible.
+        </div>
+    </div>
+
+    <!-- Part 3: GRE Tunnels -->
+    <div class="card">
+        <h2>🚇 GRE Tunnels — Generic Routing Encapsulation</h2>
+        <p><strong>GRE</strong> is a tunneling protocol that encapsulates any network layer protocol inside IP. Used for VPNs, routing protocols over internet, and connecting discontinuous networks.</p>
+
+        <div class="diagram-box">
+    ┌─────────────┐         Internet         ┌─────────────┐
+    │   HQ Router │══════════════════════════│ Branch Router│
+    │ 10.0.0.1    │      GRE Tunnel          │ 10.0.0.2    │
+    │ Tunnel IP:  │══════════════════════════│ Tunnel IP:  │
+    │ 192.168.0.1 │                          │ 192.168.0.2 │
+    └─────────────┘                          └─────────────┘
+        </div>
+
+        <h3>GRE Configuration (Cisco):</h3>
+        <div class="config-block">
+            ! HQ Router (10.0.0.1 - physical interface)<br>
+            Router(config)# interface tunnel 0<br>
+            Router(config-if)# ip address 192.168.0.1 255.255.255.252<br>
+            Router(config-if)# tunnel source 10.0.0.1<br>
+            Router(config-if)# tunnel destination 10.0.0.2<br>
+            Router(config-if)# exit<br>
+            <br>
+            ! Branch Router (10.0.0.2 - physical interface)<br>
+            Router(config)# interface tunnel 0<br>
+            Router(config-if)# ip address 192.168.0.2 255.255.255.252<br>
+            Router(config-if)# tunnel source 10.0.0.2<br>
+            Router(config-if)# tunnel destination 10.0.0.1
+        </div>
+
+        <h3>Routing over GRE (OSPF over Tunnel):</h3>
+        <div class="config-block">
+            Router(config)# router ospf 1<br>
+            Router(config-router)# network 192.168.0.0 0.0.0.3 area 0
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>GRE + IPsec:</strong> GRE tunnels are not encrypted. For secure VPNs, combine GRE with IPsec transport mode.
+        </div>
+    </div>
+
+    <!-- Part 4: Frame Relay -->
+    <div class="card">
+        <h2>🖧 Frame Relay — Legacy WAN (Still on Exams!)</h2>
+        <p><strong>Frame Relay</strong> is a packet-switched WAN technology that was widely used from 1990s-2010s. Still appears on CCNA exams despite being legacy.</p>
+
+        <h3>Frame Relay Concepts:</h3>
+        <ul>
+            <li><strong>DLCI (Data Link Connection Identifier):</strong> Local identifier (16-1007)</li>
+            <li><strong>LMI (Local Management Interface):</strong> Signaling protocol between router and Frame Relay switch</li>
+            <li><strong>PVC (Permanent Virtual Circuit):</strong> Predefined path through the Frame Relay cloud</li>
+            <li><strong>DE (Discard Eligibility):</strong> Bit indicating packets that can be dropped during congestion</li>
+        </ul>
+
+        <h3>Frame Relay Configuration (Cisco):</h3>
+        <div class="config-block">
+            ! Interface configuration<br>
+            Router(config)# interface serial 0/0/0<br>
+            Router(config-if)# encapsulation frame-relay<br>
+            Router(config-if)# frame-relay lmi-type ansi<br>
+            Router(config-if)# ip address 10.0.0.1 255.255.255.0<br>
+            <br>
+            ! Static mapping (for non-broadcast environments)<br>
+            Router(config-if)# frame-relay map ip 10.0.0.2 102 broadcast
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Exam Note:</strong> Frame Relay is obsolete in production but appears on CCNA/CCNP exams. Focus on understanding DLCI, LMI, and Inverse ARP.
+        </div>
+    </div>
+
+    <!-- Part 5: MPLS -->
+    <div class="card">
+        <h2>🏷️ MPLS — Multi-Protocol Label Switching</h2>
+        <p><strong>MPLS</strong> is the modern WAN backbone technology used by ISPs and large enterprises. Instead of routing based on IP destination, it uses labels for fast forwarding.</p>
+
+        <div class="diagram-box">
+    ┌─────────┐    Label    ┌─────────┐    Label    ┌─────────┐
+    │  Router │═════════════│  Router │═════════════│  Router │
+    │  (PE)   │  (LSR)      │  (P)    │  (LSR)      │  (PE)   │
+    └─────────┘             └─────────┘             └─────────┘
+         │                       │                       │
+    Customer A             MPLS Cloud              Customer A
+    (VPN)                  (ISP Core)              (VPN)
+        </div>
+
+        <h3>MPLS Advantages:</h3>
+        <ul>
+            <li>✅ <strong>Fast forwarding</strong> — Labels, not IP lookups</li>
+            <li>✅ <strong>Traffic engineering</strong> — Control which path traffic takes</li>
+            <li>✅ <strong>Layer 2/Layer 3 VPNs</strong> — MPLS VPNs are industry standard</li>
+            <li>✅ <strong>QoS integration</strong> — Labels carry priority information</li>
+        </ul>
+
+        <h3>MPLS Terms:</h3>
+        <ul>
+            <li><strong>PE (Provider Edge):</strong> Router connecting customer to MPLS network</li>
+            <li><strong>CE (Customer Edge):</strong> Customer router connecting to PE</li>
+            <li><strong>P (Provider):</strong> Core router that forwards based on labels</li>
+            <li><strong>LSR (Label Switch Router):</strong> Any router that forwards MPLS labels</li>
+            <li><strong>LDP (Label Distribution Protocol):</strong> Distributes labels between routers</li>
+        </ul>
+
+        <div class="tip-box-advanced">
+            💡 <strong>MPLS vs Traditional Routing:</strong> Traditional routing performs IP lookup at every hop. MPLS does one IP lookup at the edge, then uses fast label switching in the core.
+        </div>
+    </div>
+
+    <!-- WAN Encapsulation Comparison -->
+    <div class="card">
+        <h2>📊 WAN Encapsulation Comparison</h2>
+        <div style="overflow-x: auto;">
+            <table class="wan-table">
+                <thead>
+                    <tr><th>Feature</th><th>HDLC</th><th>PPP</th><th>Frame Relay</th><th>MPLS</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Standard</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco proprietary</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Open standard</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Open standard</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Open standard</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentication</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>None</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>PAP, CHAP</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>None</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>VPN layer</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Vendor Support</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>All vendors</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>All vendors</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>All vendors</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Why is HDLC not recommended for multi-vendor environments?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Cisco HDLC is proprietary. It uses a different frame format than standard HDLC, so it won't communicate with non-Cisco routers.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the main advantage of CHAP over PAP in PPP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> CHAP never sends the password across the link. It uses a challenge-response mechanism with hashed values, making it much more secure than PAP.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> Why would you use a GRE tunnel?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> GRE can encapsulate any network layer protocol (not just IP). It's used to route protocols like OSPF over the internet or to connect discontinuous networks.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> What does DLCI represent in Frame Relay?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> DLCI (Data Link Connection Identifier) is a locally significant identifier for PVCs. It's like a virtual circuit number.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> How does MPLS achieve faster forwarding than traditional IP routing?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Traditional IP routing requires a longest-prefix match lookup at each hop. MPLS uses fixed-length labels that can be looked up quickly, often in hardware (ASIC).
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (WAN Technologies)</h3>
+            <ul>
+                <li>✅ <strong>HDLC:</strong> Cisco default, proprietary, no authentication — use for Cisco-only links</li>
+                <li>✅ <strong>PPP:</strong> Industry standard, supports CHAP/PAP authentication, multi-vendor compatible</li>
+                <li>✅ <strong>GRE tunnels:</strong> Encapsulate any protocol, combine with IPsec for security</li>
+                <li>✅ <strong>Frame Relay:</strong> Legacy technology (DLCI, LMI, PVC) — still on exams</li>
+                <li>✅ <strong>MPLS:</strong> Modern ISP backbone, label switching, VPN support, traffic engineering</li>
+                <li>✅ <strong>PPP Multilink:</strong> Combine multiple physical links into one logical link</li>
+                <li>✅ <strong>CHAP > PAP:</strong> Always choose CHAP for better security</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/wan/high-level-data-link-control-hdlc/24884-201.html" target="_blank">Cisco: HDLC vs PPP</a></div>
+        <div class="external-link">📘 <a href="https://www.cisco.com/c/en/us/support/docs/wan/point-to-point-protocol-ppp/9187-ppp-config.html" target="_blank">Cisco: PPP Configuration Guide</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/support/docs/ip/multiprotocol-label-switching-mpls/4940-mpls-doc.html" target="_blank">Cisco: MPLS Documentation</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="hsrp-vrrp.html" class="nav-btn">◀ Previous: HSRP/VRRP</a>
+        <a href="../networking-basics/ntp-snmp-syslog.html" class="nav-btn">Next: NTP/SNMP/Syslog ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — WAN Technologies | HDLC, PPP, GRE tunnels, Frame Relay, MPLS, encapsulation comparison
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

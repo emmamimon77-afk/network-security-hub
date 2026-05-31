@@ -27,6 +27,7 @@ function loadNavigation() {
                 <a href="/routing-switching/hsrp-vrrp.html">🔄 HSRP/VRRP</a>
                 <a href="/routing-switching/ospf.html">🔄 OSPF</a>
                 <a href="/routing-switching/eigrp.html">⚡ EIGRP</a>
+                <a href="/routing-switching/wan-technologies.html">🌍 WAN Technologies</a>
             </div>
         </div>
         
