@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTP/SNMP/Syslog - Complete Guide | Network Security Hub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .protocol-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .severity-table td {
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>⏰ NTP/SNMP/Syslog — Network Management Complete Guide</h1>
+        <p><strong>NTP, SNMP, and Syslog</strong> are the three pillars of network management. NTP synchronizes time across devices, SNMP monitors device health, and Syslog collects logs. Together, they help you troubleshoot, audit, and secure your network.</p>
+        <div class="tip-box">
+            💡 <strong>Prerequisite:</strong> Basic IP addressing and routing. These services run on every production network.
+        </div>
+    </div>
+
+    <!-- Part 1: NTP -->
+    <div class="card">
+        <h2>⏰ NTP — Network Time Protocol</h2>
+        <p><strong>NTP (Network Time Protocol)</strong> synchronizes clocks across network devices. Accurate timestamps are essential for:</p>
+        <ul>
+            <li>✅ Correlating logs across multiple devices during incident investigation</li>
+            <li>✅ Authentication (Kerberos, certificates require time sync)</li>
+            <li>✅ Scheduled tasks (backups, updates)</li>
+            <li>✅ Legal and compliance requirements (audit trails)</li>
+        </ul>
+
+        <h3>NTP Hierarchy (Stratum Levels)</h3>
+        <div class="diagram-box">
+    Stratum 0: Atomic clocks, GPS (reference sources)
+         │
+         ▼
+    Stratum 1: Primary time servers (directly connected to Stratum 0)
+         │
+         ▼
+    Stratum 2: Secondary servers (sync from Stratum 1)
+         │
+         ▼
+    Stratum 3: Clients (sync from Stratum 2)
+        </div>
+
+        <h3>NTP Configuration (Cisco Router):</h3>
+        <div class="config-block">
+            ! Set timezone\n
+            Router(config)# clock timezone PST -8\n
+            Router(config)# clock summer-time PDT recurring\n
+            \n
+            ! Configure NTP server\n
+            Router(config)# ntp server 0.pool.ntp.org\n
+            Router(config)# ntp server 1.pool.ntp.org\n
+            \n
+            ! Optional: Make router an NTP server for local devices\n
+            Router(config)# ntp master 5\n
+            \n
+            ! Authenticate NTP (prevent spoofing)\n
+            Router(config)# ntp authenticate\n
+            Router(config)# ntp authentication-key 1 md5 SecureKey123\n
+            Router(config)# ntp trusted-key 1\n
+            Router(config)# ntp server 192.168.1.1 key 1\n
+            \n
+            ! Verification\n
+            Router# show ntp associations\n
+            Router# show ntp status
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Linux NTP Commands:</strong><br>
+            # Check NTP status<br>
+            timedatectl status<br>
+            <br>
+            # Sync time manually<br>
+            sudo timedatectl set-ntp true<br>
+            sudo systemctl restart systemd-timesyncd
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Security note:</strong> Always use authenticated NTP when possible. Unauthenticated NTP can be spoofed to cause time manipulation attacks.
+        </div>
+    </div>
+
+    <!-- Part 2: SNMP -->
+    <div class="card">
+        <h2>📊 SNMP — Simple Network Management Protocol</h2>
+        <p><strong>SNMP (Simple Network Management Protocol)</strong> monitors network devices — CPU usage, memory, interface traffic, errors, temperature, and more.</p>
+
+        <h3>SNMP Components:</h3>
+        <ul>
+            <li><strong>SNMP Manager:</strong> Monitoring system (SolarWinds, PRTG, Zabbix, Nagios)</li>
+            <li><strong>SNMP Agent:</strong> Software on managed device (router, switch, server)</li>
+            <li><strong>MIB (Management Information Base):</strong> Database of objects that can be monitored</li>
+            <li><strong>OID (Object Identifier):</strong> Unique number identifying a specific MIB object</li>
+        </ul>
+
+        <h3>SNMP Versions:</h3>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table">
+                <thead>
+                    <tr><th>Version</th><th>Security</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SNMPv1</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>No encryption, community strings in clear text</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Legacy, deprecated (avoid)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>SNMPv2c</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Community strings, no encryption</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Read-only monitoring acceptable for internal networks</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>SNMPv3</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Authentication (MD5/SHA) + Encryption (DES/AES)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Production networks requiring security</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>SNMP Configuration (Cisco Router):</h3>
+        <div class="config-block">
+            ! Set contact and location (optional but helpful)\n
+            Router(config)# snmp-server contact admin@company.com\n
+            Router(config)# snmp-server location "Data Center Rack A"\n
+            \n
+            ! SNMPv2c (read-only - common for monitoring)\n
+            Router(config)# snmp-server community public RO\n
+            Router(config)# snmp-server community private RW\n
+            \n
+            ! SNMPv3 (secure - recommended for production)\n
+            Router(config)# snmp-server group ADMINS v3 auth read v1default write v1default\n
+            Router(config)# snmp-server user admin ADMINS v3 auth md5 SecurePass123\n
+            \n
+            ! Configure SNMP traps (alerts)\n
+            Router(config)# snmp-server enable traps\n
+            Router(config)# snmp-server host 192.168.1.100 version 2c public\n
+            \n
+            ! Restrict SNMP access\n
+            Router(config)# access-list 10 permit 192.168.1.0 0.0.0.255\n
+            Router(config)# snmp-server community public RO 10\n
+            \n
+            ! Verification\n
+            Router# show snmp\n
+            Router# show snmp community\n
+            Router# show snmp group
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>SNMPv3 is the standard today.</strong> If your devices support it, always use SNMPv3 with authentication and encryption.
+        </div>
+    </div>
+
+    <!-- Part 3: Syslog -->
+    <div class="card">
+        <h2>📝 Syslog — Centralized Logging</h2>
+        <p><strong>Syslog</strong> collects logs from network devices and sends them to a central server. Critical for security auditing, troubleshooting, and compliance.</p>
+
+        <h3>Syslog Severity Levels (0-7):</h3>
+        <div style="overflow-x: auto;">
+            <table class="protocol-table severity-table">
+                <thead>
+                    <tr><th>Level</th><th>Name</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>0</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Emergency</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>System unusable</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>System crash</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>1</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Alert</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Immediate action needed</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>High temperature</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Critical</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Critical condition</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Interface down</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Error</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Error condition</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Routing protocol error</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    <tr>
+                    <tr>
+                        <td><strong>4</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Warning</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Warning condition</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>High CPU usage</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>5</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Notice</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Normal but significant</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Interface up/down</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>6</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Informational</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Normal operational messages</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Regular logging</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>7</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Debug</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Debug-level messages</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <table>Detailed debugging (high volume)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Syslog Configuration (Cisco Router):</h3>
+        <div class="config-block">
+            ! Enable logging\n
+            Router(config)# logging on\n
+            Router(config)# logging 192.168.1.100   ! Syslog server IP\n
+            \n
+            ! Set logging level (0-7)\n
+            Router(config)# logging trap warnings\n
+            Router(config)# logging facility local6\n
+            \n
+            ! Send log messages to console (less severe)\n
+            Router(config)# logging console warnings\n
+            Router(config)# logging monitor informational\n
+            Router(config)# logging buffered 16384\n
+            \n
+            ! Add timestamps (critical for correlation)\n
+            Router(config)# service timestamps log datetime msec localtime show-timezone\n
+            Router(config)# service timestamps debug datetime msec\n
+            \n
+            ! Verification\n
+            Router# show logging
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Linux Syslog Configuration:</strong><br>
+            # /etc/rsyslog.conf or /etc/syslog-ng.conf\n
+            # Send logs to remote server\n
+            *.* @192.168.1.100:514\n
+            \n
+            # Restart service\n
+            sudo systemctl restart rsyslog
+        </div>
+    </div>
+
+    <!-- Integration Example -->
+    <div class="card">
+        <h2>🔗 Putting It All Together — Complete Network Management</h2>
+        <p>A well-managed network has all three services working together:</p>
+
+        <div class="diagram-box">
+    ⏰ NTP: All devices have synchronized time
+         │
+         ▼
+    📊 SNMP: Monitors device health (CPU, memory, interface errors)
+         │
+         ▼
+    📝 Syslog: Collects logs from all devices with accurate timestamps
+         │
+         ▼
+    📈 SIEM: Analyzes logs and triggers alerts (Splunk, ELK, Sentinel)
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Best Practice:</strong> Configure NTP first. Without synchronized time, log correlation is nearly impossible.
+        </div>
+    </div>
+
+    <!-- Practice Questions -->
+    <div class="card">
+        <h2>📝 Practice Questions</h2>
+        
+        <details>
+            <summary><strong>Q1:</strong> Why is NTP critical for security investigations?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Accurate timestamps across devices allow you to correlate events from multiple sources (firewall, router, server) during an incident investigation. Without time sync, you cannot reconstruct the attack timeline.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q2:</strong> What is the difference between SNMPv2c and SNMPv3?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> SNMPv3 adds authentication (MD5/SHA) and encryption (DES/AES), making it secure. SNMPv2c uses community strings in clear text.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q3:</strong> What syslog severity level would indicate a critical interface failure?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Level 2 (Critical). Level 2 indicates a critical condition requiring immediate attention.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q4:</strong> Why is authenticated NTP important?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Unauthenticated NTP can be spoofed to change device time, which can break authentication (Kerberos) and make log analysis impossible.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Q5:</strong> What is the purpose of the SNMP MIB?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> MIB (Management Information Base) is a database of objects that can be monitored on a device. Each object has a unique OID (e.g., 1.3.6.1.2.1.1.3.0 = uptime).
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Network Management)</h3>
+            <ul>
+                <li>✅ <strong>NTP:</strong> Synchronize time first — essential for log correlation and authentication</li>
+                <li>✅ <strong>SNMP:</strong> Monitor device health — use SNMPv3 with auth and encryption</li>
+                <li>✅ <strong>Syslog:</strong> Centralize logs — severity levels 0-7, send to SIEM</li>
+                <li>✅ <strong>Always add timestamps</strong> to logs: `service timestamps log datetime msec`</li>
+                <li>✅ <strong>Authenticate NTP</strong> and SNMP to prevent spoofing</li>
+                <li>✅ <strong>Configure NTP first</strong> before SNMP or Syslog</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.ntp.org/" target="_blank">NTP: Network Time Protocol</a></div>
+        <div class="external-link">📘 <a href="https://www.snmp.com/" target="_blank">SNMP Protocol Guide</a></div>
+        <div class="external-link">🎓 <a href="https://www.cisco.com/c/en/us/support/docs/ios-nx-os-software/ios-software-releases-121-mainline/19706-9.html" target="_blank">Cisco: Syslog Configuration</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="wan-technologies.html" class="nav-btn">◀ Previous: WAN Technologies</a>
+        <a href="../index.html" class="nav-btn">🏠 Back to Hub</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — NTP/SNMP/Syslog | Complete guide to network management, time sync, monitoring, and centralized logging
+    </div>
+</div>
+
+<script src="../js/nav.js"></script>
+<script src="../js/attack-explainer.js"></script>
+<script src="../js/module-loader.js"></script>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ function loadNavigation() {
                 <a href="/networking-basics/subnetting.html">✂️ Subnetting</a>
                 <a href="/networking-basics/nat-pat.html">🔄 NAT/PAT</a>
                 <a href="/networking-basics/dhcp-dns.html">🌐 DHCP & DNS</a>
+                <a href="/networking-basics/ntp-snmp-syslog.html">⏰ NTP/SNMP/Syslog</a>
                 <a href="/networking-basics/cisco-commands.html">⚙️ Cisco Commands</a>
                 <a href="/networking-basics/huawei-commands.html">🇨🇳 Huawei Commands</a>
             </div>
