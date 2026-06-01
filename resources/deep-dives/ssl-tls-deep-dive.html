@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL/TLS Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .handshake-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .cipher-table td, .cipher-table th {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🔐 SSL/TLS Deep Dive</h1>
+        <p><strong>Secure Sockets Layer / Transport Layer Security</strong> is the foundation of internet security — HTTPS, secure email, VPNs, and more. This deep dive covers certificate authorities, the TLS handshake, cipher suites, Perfect Forward Secrecy, and common attacks.</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> Anyone who wants to understand how encryption works on the web, and how to configure it securely.
+        </div>
+    </div>
+
+    <!-- Section 1: SSL vs TLS -->
+    <div class="card">
+        <h2>📜 SSL vs TLS — What's the Difference?</h2>
+        <ul>
+            <li><strong>SSL (Secure Sockets Layer):</strong> Developed by Netscape in 1995. SSLv2 and SSLv3 are now <strong>deprecated and insecure</strong> (POODLE attack).</li>
+            <li><strong>TLS (Transport Layer Security):</strong> Successor to SSL. TLS 1.0 (1999), TLS 1.1 (2006), TLS 1.2 (2008), TLS 1.3 (2018).</li>
+            <li><strong>Today:</strong> Only TLS 1.2 and TLS 1.3 are considered secure. TLS 1.3 is the current standard.</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Never use SSLv2, SSLv3, or TLS 1.0.</strong> They are vulnerable to POODLE, BEAST, and other attacks.
+        </div>
+    </div>
+
+    <!-- Section 2: Public Key Infrastructure (PKI) -->
+    <div class="card">
+        <h2>🏛️ PKI — Public Key Infrastructure</h2>
+        <p>PKI is the system that enables secure communication over untrusted networks. It consists of:</p>
+        <ul>
+            <li><strong>Certificate Authority (CA):</strong> Trusted third party that issues digital certificates (e.g., Let's Encrypt, DigiCert, GlobalSign)</li>
+            <li><strong>Registration Authority (RA):</strong> Verifies the identity of certificate requesters</li>
+            <li><strong>Certificate Database:</strong> Stores issued certificates and CRLs (Certificate Revocation Lists)</li>
+            <li><strong>Certificate Revocation List (CRL) / OCSP:</strong> Methods to check if a certificate is still valid</li>
+        </ul>
+
+        <div class="diagram-box">
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                    Certificate Authority (CA)                   │
+    │                         (Root of Trust)                         │
+    └───────────────────────────────┬─────────────────────────────────┘
+                                    │
+                    ┌───────────────┼───────────────┐
+                    ▼               ▼               ▼
+            ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+            │  Web Server │  │  Email Svr │  │   VPN Svr   │
+            │  (TLS cert) │  │  (S/MIME)  │  │  (IPsec)    │
+            └─────────────┘  └─────────────┘  └─────────────┘
+        </div>
+    </div>
+
+    <!-- Section 3: Digital Certificates -->
+    <div class="card">
+        <h2>📜 Digital Certificates — X.509</h2>
+        <p>An X.509 certificate contains:</p>
+        <ul>
+            <li>Subject (who the certificate belongs to — domain name or organization)</li>
+            <li>Issuer (which CA issued it)</li>
+            <li>Public key</li>
+            <li>Validity period (not before / not after)</li>
+            <li>Signature algorithm (e.g., sha256RSA)</li>
+            <li>Extensions (Subject Alternative Names, Key Usage, etc.)</li>
+        </ul>
+
+        <h3>Types of Certificates:</h3>
+        <div style="overflow-x: auto;">
+            <table class="handshake-table">
+                <thead>
+                    <tr><th>Type</th><th>Validation Level</th><th>Use Case</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Domain Validation (DV)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Domain ownership only</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Personal websites, blogs (Let's Encrypt)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Organization Validation (OV)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Domain + organization identity</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Business websites</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Extended Validation (EV)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Rigorous identity verification</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Banks, e-commerce (green bar historically)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>View Certificate Details (OpenSSL):</h3>
+        <div class="config-block">
+            # Check a website's certificate
+            openssl s_client -connect google.com:443 -showcerts
+            <br>
+            # View certificate details
+            echo | openssl s_client -connect google.com:443 2>/dev/null | openssl x509 -text
+        </div>
+    </div>
+
+    <!-- Section 4: TLS Handshake -->
+    <div class="card">
+        <h2>🤝 TLS Handshake — Step by Step</h2>
+        <div class="diagram-box">
+    Client (Browser)                              Server
+         │                                            │
+         │  1. Client Hello                          │
+         │  (TLS version, cipher suites, random)    │
+         │───────────────────────────────────────────▶
+         │                                            │
+         │  2. Server Hello                          │
+         │  (chosen cipher suite, server random)     │
+         │◀───────────────────────────────────────────│
+         │                                            │
+         │  3. Certificate                           │
+         │  (server's certificate + chain)           │
+         │◀───────────────────────────────────────────│
+         │                                            │
+         │  4. Server Hello Done                     │
+         │◀───────────────────────────────────────────│
+         │                                            │
+         │  5. Client Key Exchange                   │
+         │  (Pre-master secret encrypted with       │
+         │   server's public key)                    │
+         │───────────────────────────────────────────▶
+         │                                            │
+         │  6. Change Cipher Spec                    │
+         │───────────────────────────────────────────▶
+         │                                            │
+         │  7. Finished (encrypted)                  │
+         │───────────────────────────────────────────▶
+         │                                            │
+         │  8. Change Cipher Spec                    │
+         │◀───────────────────────────────────────────│
+         │                                            │
+         │  9. Finished (encrypted)                  │
+         │◀───────────────────────────────────────────│
+         │                                            │
+         │         Application Data (encrypted)       │
+         │◀──────────────────────────────────────────▶│
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Key Insight:</strong> The pre-master secret is generated by the client and encrypted with the server's public key. Only the server can decrypt it using its private key. Both sides then derive the same session keys.
+        </div>
+    </div>
+
+    <!-- Section 5: Cipher Suites -->
+    <div class="card">
+        <h2>🔢 Cipher Suites — The Encryption Recipe</h2>
+        <p>A cipher suite defines four algorithms:</p>
+        <ul>
+            <li><strong>Key Exchange:</strong> RSA, ECDHE, DHE</li>
+            <li><strong>Authentication:</strong> RSA, ECDSA</li>
+            <li><strong>Bulk Encryption:</strong> AES, ChaCha20</li>
+            <li><strong>Message Authentication Code (MAC):</strong> SHA256, SHA384</li>
+        </ul>
+
+        <div class="example-box">
+            Example cipher suite: <code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code><br>
+            Breakdown:
+            <ul>
+                <li><strong>ECDHE</strong> = Key exchange (Elliptic Curve Diffie-Hellman Ephemeral)</li>
+                <li><strong>RSA</strong> = Authentication (server cert signed with RSA)</li>
+                <li><strong>AES_128_GCM</strong> = Bulk encryption (AES-128 in Galois/Counter Mode)</li>
+                <li><strong>SHA256</strong> = MAC/hashing</li>
+            </ul>
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Perfect Forward Secrecy (PFS):</strong> Key exchange using Diffie-Hellman Ephemeral (DHE or ECDHE). If the server's private key is compromised later, past sessions cannot be decrypted.
+        </div>
+    </div>
+
+    <!-- Section 6: TLS 1.3 Enhancements -->
+    <div class="card">
+        <h2>⚡ TLS 1.3 — Faster and More Secure</h2>
+        <div style="overflow-x: auto;">
+            <table class="handshake-table">
+                <thead>
+                    <tr><th>Feature</th><th>TLS 1.2</th><th>TLS 1.3</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Handshake time</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>2 RTT (2 round trips)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>1 RTT (or 0-RTT for resumption)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Legacy algorithms removed</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Supports MD5, SHA1, RC4, 3DES</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Only secure AEAD ciphers (AES-GCM, ChaCha20-Poly1305)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Perfect Forward Secrecy</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Optional (requires DHE/ECDHE)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Mandatory (all key exchanges provide PFS)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </td>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 7: Common Attacks -->
+    <div class="card">
+        <h2>⚔️ Common SSL/TLS Attacks</h2>
+        <ul>
+            <li><strong>Heartbleed (CVE-2014-0160):</strong> Memory leak in OpenSSL. Allowed attackers to read server memory (including private keys). Fixed in 2014.</li>
+            <li><strong>POODLE (CVE-2014-3566):</strong> Downgrade attack forcing SSLv3. Mitigation: Disable SSLv3.</li>
+            <li><strong>BEAST (CVE-2011-3389):</strong> Chosen-plaintext attack against TLS 1.0. Mitigation: Use TLS 1.2+.</li>
+            <li><strong>CRIME (CVE-2012-4929):</strong> Compression side-channel. Mitigation: Disable TLS compression.</li>
+            <li><strong>Logjam (CVE-2015-4000):</strong> Downgrade attack to 512-bit Diffie-Hellman. Mitigation: Use 2048-bit+ DH parameters.</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Modern best practices:</strong> Use TLS 1.2+ only, disable weak cipher suites, enable HSTS, use strong DH parameters.
+        </div>
+    </div>
+
+    <!-- Section 8: Practical OpenSSL Commands -->
+    <div class="card">
+        <h2>🛠️ Practical OpenSSL Commands</h2>
+        
+        <h3>Generate a Private Key and Self-Signed Certificate:</h3>
+        <div class="config-block">
+            # Generate private key (2048-bit RSA)
+            openssl genrsa -out private.key 2048
+            <br>
+            # Generate self-signed certificate (valid for 365 days)
+            openssl req -new -x509 -key private.key -out certificate.crt -days 365
+        </div>
+
+        <h3>Generate a Certificate Signing Request (CSR):</h3>
+        <div class="config-block">
+            # Generate CSR for a CA to sign
+            openssl req -new -key private.key -out request.csr
+        </div>
+
+        <h3>Check a Website's TLS Configuration:</h3>
+        <div class="config-block">
+            # Check which cipher suites are supported
+            nmap --script ssl-enum-ciphers -p 443 example.com
+            <br>
+            # Using openssl (specific cipher)
+            openssl s_client -connect example.com:443 -cipher 'ECDHE-RSA-AES128-GCM-SHA256'
+        </div>
+
+        <h3>Convert Certificate Formats:</h3>
+        <div class="config-block">
+            # PEM to DER (binary)
+            openssl x509 -in cert.pem -outform DER -out cert.der
+            <br>
+            # DER to PEM
+            openssl x509 -in cert.der -inform DER -outform PEM -out cert.pem
+            <br>
+            # PKCS#12 (PFX) to PEM (common for importing into applications)
+            openssl pkcs12 -in keystore.pfx -out keystore.pem -nodes
+        </div>
+
+        <h3>Check Certificate Expiration:</h3>
+        <div class="config-block">
+            openssl x509 -in certificate.crt -noout -dates
+        </div>
+    </div>
+
+    <!-- Section 9: HSTS (HTTP Strict Transport Security) -->
+    <div class="card">
+        <h2>🛡️ HSTS — Force HTTPS Only</h2>
+        <p>HSTS tells browsers to <strong>always</strong> use HTTPS for your domain, preventing SSL stripping attacks.</p>
+
+        <div class="config-block">
+            # Add to web server response header
+            Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+        </div>
+        <ul>
+            <li><code>max-age=31536000</code> — 1 year validity</li>
+            <li><code>includeSubDomains</code> — Apply to all subdomains</li>
+            <li><code>preload</code> — Submit to browser preload list</li>
+        </ul>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Generate a self-signed certificate and key, then start a temporary HTTPS server with Python to test it</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes</code><br>
+                <code>python3 -m http.server --ssl --cert cert.pem --key key.pem 8443</code><br>
+                Then visit <code>https://localhost:8443</code> (accept the warning).
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Verify which TLS version and cipher suite a website uses</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>openssl s_client -connect google.com:443 -tls1_2</code><br>
+                Look for "Cipher" in the output.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Check your own website's TLS configuration using ssllabs.com (online)</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                Go to <code>https://www.ssllabs.com/ssltest/</code> and enter your domain.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (SSL/TLS)</h3>
+            <ul>
+                <li>✅ <strong>SSL is dead;</strong> only use TLS 1.2 and TLS 1.3</li>
+                <li>✅ <strong>PKI</strong> — Certificate Authorities establish trust</li>
+                <li>✅ <strong>X.509 certificates</strong> contain public key, identity, and CA signature</li>
+                <li>✅ <strong>TLS handshake</strong> — Client hello → Server hello → Certificate → Key exchange → Finished</li>
+                <li>✅ <strong>Perfect Forward Secrecy (PFS)</strong> — Use DHE/ECDHE to protect past sessions</li>
+                <li>✅ <strong>TLS 1.3</strong> — Faster, only secure ciphers, mandatory PFS</li>
+                <li>✅ <strong>HSTS</strong> — Force HTTPS to prevent SSL stripping</li>
+                <li>✅ <strong>OpenSSL</strong> is the Swiss Army knife for certificate operations</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://datatracker.ietf.org/doc/html/rfc8446" target="_blank">RFC 8446 — TLS 1.3 Specification</a></div>
+        <div class="external-link">📘 <a href="https://www.ssllabs.com/ssltest/" target="_blank">Qualys SSL Labs — Test your website</a></div>
+        <div class="external-link">🎓 <a href="https://letsencrypt.org/" target="_blank">Let's Encrypt — Free SSL certificates</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="windows-security-internals.html" class="nav-btn">◀ Previous: Windows Security Internals</a>
+        <a href="bgp-deep-dive.html" class="nav-btn">Next: BGP Deep Dive ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — SSL/TLS Deep Dive | PKI, X.509 certificates, handshake, cipher suites, TLS 1.3, attacks, OpenSSL commands
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>
+
