@@ -145,7 +145,7 @@ th {
 }
 
 /* ===== CLI BOXES - FIXED MOBILE OVERFLOW ===== */
-.ascii-box, .cli-box, .routing-diagram, .ospf-diagram, .eigrp-diagram {
+.ascii-box, .cli-box, .routing-diagram, .ospf-diagram, .eigrp-diagram, .diagram-box {
     background: #dff0e8;
     color: #1a3b32;
     padding: 1rem;
