@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireshark Mastery - Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .wireshark-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <div class="card">
+        <h1>📡 Wireshark Mastery — Deep Dive</h1>
+        <p><strong>Wireshark</strong> is the world's most popular network protocol analyzer. This deep dive covers capture vs display filters, TCP analysis, following streams, statistical tools, and command-line magic with tshark.</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> Network engineers, security analysts, and anyone who wants to see what's really happening on the wire.
+        </div>
+    </div>
+
+    <!-- Section 1: Installation -->
+    <div class="card">
+        <h2>📥 Installation</h2>
+        <div class="config-block">
+            # Ubuntu/Debian
+            sudo apt update && sudo apt install wireshark -y
+
+            # Fedora/RHEL
+            sudo dnf install wireshark -y
+
+            # macOS (Homebrew)
+            brew install --cask wireshark
+
+            # Windows
+            # Download from https://www.wireshark.org/download.html
+        </div>
+        <div class="warning-box-advanced">
+            ⚠️ During installation on Linux, you may be prompted to allow non-superusers to capture packets. Select "Yes" if you want to avoid running Wireshark with `sudo`.
+        </div>
+    </div>
+
+    <!-- Section 2: Capture Filters vs Display Filters -->
+    <div class="card">
+        <h2>🎭 Capture Filters vs. Display Filters</h2>
+        <p>This is the most important distinction in Wireshark.</p>
+        <div style="overflow-x: auto;">
+            <table class="wireshark-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Capture Filter</th>
+                        <th>Display Filter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>When applied</strong></td>
+                        <td>Before capture starts</td>
+                        <td>After capture (on saved packets)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Syntax</strong></td>
+                        <td>`tcp port 80` (Berkeley Packet Filter)</td>
+                        <td>`tcp.port == 80` (Wireshark display filter)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Impact on data</strong></td>
+                        <td>Dropped packets are gone forever</td>
+                        <td>Packets are hidden from view, but still in the file</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="example-box">
+            <strong>📋 When to use which:</strong>
+            - Capture filter: You're on a very busy network and need to reduce the capture file size.
+            - Display filter: You want to analyze a full capture from different angles.
+        </div>
+    </div>
+
+    <!-- Section 3: Common Capture Filters -->
+    <div class="card">
+        <h2>🎣 Common Capture Filters (BPF Syntax)</h2>
+        <div class="config-block">
+            # Capture only web traffic (ports 80 and 443)
+            tcp port 80 or tcp port 443
+
+            # Capture only traffic to/from a specific host
+            host 192.168.1.100
+
+            # Capture traffic from a specific subnet
+            src net 192.168.1.0/24
+
+            # Capture all traffic except SSH (port 22)
+            not port 22
+        </div>
+    </div>
+
+    <!-- Section 4: Essential Display Filters -->
+    <div class="card">
+        <h2>🔍 Essential Display Filters (Most Powerful Feature)</h2>
+        <div class="config-block">
+            # Filter by protocol
+            dns
+            http
+            tls
+            icmp
+
+            # Filter by IP address (source or destination)
+            ip.addr == 192.168.1.1
+
+            # Filter by source IP
+            ip.src == 192.168.1.10
+
+            # Filter by destination IP
+            ip.dst == 8.8.8.8
+
+            # Filter by port
+            tcp.port == 443
+
+            # Filter by TCP flags (SYN packets)
+            tcp.flags.syn == 1 and tcp.flags.ack == 0
+
+            # Find retransmissions (network issues)
+            tcp.analysis.retransmission
+
+            # Find HTTP POST requests (login attempts)
+            http.request.method == "POST"
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Pro tip:</strong> Right-click any field in a packet and select "Apply as Filter" to auto-generate the filter expression.
+        </div>
+    </div>
+
+    <!-- Section 5: Logical Operators and Aliases -->
+    <div class="card">
+        <h2>🧮 Logical Operators</h2>
+        <div style="overflow-x: auto;">
+            <table class="wireshark-table">
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Alias</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>and</td>
+                        <td>&amp;&amp;</td>
+                        <td>`ip.src == 10.0.0.1 and tcp.port == 80`</td>
+                    </tr>
+                    <tr>
+                        <td>or</td>
+                        <td>||</td>
+                        <td>`ip.src == 10.0.0.1 or ip.src == 192.168.1.1`</td>
+                    </tr>
+                    <tr>
+                        <td>not</td>
+                        <td>!</td>
+                        <td>`not tcp.port == 22`</td>
+                    </tr>
+                    <tr>
+                        <td>contains</td>
+                        <td>—</td>
+                        <td>`http contains "password"`</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="example-box">
+            <strong>📋 Complex filter example:</strong>
+            `(ip.src == 192.168.1.10 or ip.src == 10.0.0.5) and (tcp.port == 80 or tcp.port == 443) and not icmp`
+        </div>
+    </div>
+
+    <!-- Section 6: Following Streams -->
+    <div class="card">
+        <h2>💬 Following Streams — Reconstruct Conversations</h2>
+        <p>This is pure magic for security analysts.</p>
+        <div class="diagram-box">
+    Right-click a packet → Follow → TCP Stream (or UDP Stream)
+
+    Wireshark opens a window showing the entire conversation, removing protocol headers.
+        </div>
+        <div class="warning-box-advanced">
+            ⚠️ You can find plaintext passwords in HTTP or FTP streams. This is why HTTPS is critical.
+        </div>
+    </div>
+
+    <!-- Section 7: Statistical Analysis -->
+    <div class="card">
+        <h2>📊 Statistical Analysis</h2>
+        <p>Wireshark's statistical tools help you identify traffic patterns and anomalies.</p>
+        <ul>
+            <li><strong>Statistics → Endpoints</strong> — See all IP/MAC addresses communicating.</li>
+            <li><strong>Statistics → Conversations</strong> — Traffic between pairs of endpoints.</li>
+            <li><strong>Statistics → Protocol Hierarchy</strong> — See which protocols dominate traffic.</li>
+            <li><strong>Statistics → I/O Graph</strong> — Visualize traffic over time.</li>
+        </ul>
+    </div>
+
+    <!-- Section 8: Command Line with tshark -->
+    <div class="card">
+        <h2>🖥️ tshark — The Command-Line Wireshark</h2>
+        <p>Automate captures and analysis with the same filtering power.</p>
+        <div class="config-block">
+            # Capture 100 packets and write to file
+            tshark -i eth0 -c 100 -w capture.pcap
+
+            # Read a pcap and apply display filter
+            tshark -r capture.pcap -Y "tcp.port == 443"
+
+            # Show HTTP requests only
+            tshark -r capture.pcap -Y "http.request" -T fields -e http.request.method -e http.request.uri
+
+            # Get statistics on IP addresses
+            tshark -r capture.pcap -z endpoints,ip
+        </div>
+    </div>
+
+    <!-- Section 9: Case Study - Diagnosing Slow Web Server -->
+    <div class="card">
+        <h2>📋 Case Study: Diagnosing a Slow Web Server</h2>
+        <div class="example-box">
+            <strong>Scenario:</strong> A web server is responding slowly. Capture traffic and open in Wireshark.
+            <br><br>
+            <strong>Step 1:</strong> Filter to web traffic: `tcp.port == 80 or tcp.port == 443`
+            <br>
+            <strong>Step 2:</strong> Check for TCP retransmissions: `tcp.analysis.retransmission`
+            <br>
+            <strong>Step 3:</strong> Follow TCP stream of a slow request to see delay between request and response.
+            <br>
+            <strong>Step 4:</strong> Use I/O Graph to see traffic spikes.
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Capture HTTP traffic only and save to a file.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>tshark -i eth0 -f "tcp port 80" -c 1000 -w http_traffic.pcap</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Find all packets containing the word "password" in an HTTP stream.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>http contains "password"</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Find all TCP SYN packets (connection requests).</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>tcp.flags.syn == 1 and tcp.flags.ack == 0</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Extract all DNS queries from a capture file.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>tshark -r capture.pcap -Y dns -T fields -e dns.qry.name</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Wireshark Mastery)</h3>
+            <ul>
+                <li>✅ <strong>Capture filters</strong> drop packets before capture (use BPF syntax).</li>
+                <li>✅ <strong>Display filters</strong> hide packets after capture (more powerful).</li>
+                <li>✅ <strong>Follow TCP/UDP streams</strong> to reconstruct entire conversations.</li>
+                <li>✅ <strong>Use logical operators</strong> (`and`, `or`, `not`) to combine filters.</li>
+                <li>✅ <strong>Statistics</strong> (Endpoints, Conversations, I/O Graph) reveal patterns.</li>
+                <li>✅ <strong>tshark</strong> brings Wireshark's power to the command line.</li>
+                <li>✅ <strong>Always capture legally.</strong> Only analyze your own traffic or traffic you have permission to inspect.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.wireshark.org/docs/" target="_blank">Official Wireshark Documentation</a></div>
+        <div class="external-link">📘 <a href="https://www.wireshark.org/docs/wsug_html_chunked/" target="_blank">Wireshark User's Guide</a></div>
+        <div class="external-link">🎓 <a href="https://www.wireshark.org/docs/dfref/" target="_blank">Display Filter Reference</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="bgp-deep-dive.html" class="nav-btn">◀ Previous: BGP Deep Dive</a>
+        <a href="docker-container-security.html" class="nav-btn">Next: Docker & Container Security ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Wireshark Mastery Deep Dive | Capture/display filters, TCP analysis, tshark, stream following
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>

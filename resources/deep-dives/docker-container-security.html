@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker & Container Security - Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .docker-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <div class="card">
+        <h1>🐳 Docker & Container Security — Deep Dive</h1>
+        <p><strong>Containers have revolutionized application deployment, but they introduce unique security challenges.</strong> This deep dive covers container isolation, image security, runtime protection, Kubernetes security contexts, and industry best practices.</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> DevOps engineers, security professionals, and anyone running containers in production.
+        </div>
+    </div>
+
+    <!-- Section 1: Container Isolation -- Linux Namespaces and Cgroups -->
+    <div class="card">
+        <h2>🔒 Container Isolation — How Containers Stay Separate</h2>
+        <p>Containers are not virtual machines. They share the host kernel but are isolated using two key Linux features:</p>
+        <ul>
+            <li><strong>Namespaces:</strong> Provide process isolation (PID, NET, MNT, UTS, IPC, USER, CGROUP).</li>
+            <li><strong>Control Groups (Cgroups):</strong> Limit and meter resources (CPU, memory, disk I/O).</li>
+        </ul>
+        <div class="diagram-box">
+    ┌─────────────────────────────────────────────────────────────┐
+    │                       Host Kernel                          │
+    │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
+    │  │ Namespace│  │ Namespace│  │ Namespace│  │ Namespace│    │
+    │  │  (PID)   │  │  (NET)   │  │  (MNT)   │  │  (UTS)   │    │
+    │  └─────────┘  └─────────┘  └─────────┘  └─────────┘        │
+    │  ┌─────────────────────────────────────────────────────┐   │
+    │  │                     Cgroups                          │   │
+    │  │  (CPU, Memory, Disk I/O limits)                     │   │
+    │  └─────────────────────────────────────────────────────┘   │
+    │                                                             │
+    │  ┌─────────────────┐  ┌─────────────────┐                  │
+    │  │   Container 1   │  │   Container 2   │                  │
+    │  │  (App A)        │  │  (App B)        │                  │
+    │  └─────────────────┘  └─────────────────┘                  │
+    └─────────────────────────────────────────────────────────────┘
+        </div>
+    </div>
+
+    <!-- Section 2: Image Security -- Building Secure Images -->
+    <div class="card">
+        <h2>📦 Image Security — Building Secure Containers</h2>
+        <p>The supply chain starts with the image. Compromised images lead to compromised containers.</p>
+        <div class="config-block">
+            # Dockerfile Best Practices
+            # 1. Use specific, minimal base images
+            FROM alpine:3.18  # NOT FROM ubuntu:latest
+
+            # 2. Create a non-root user
+            RUN addgroup -g 1001 -S appgroup && \
+                adduser -u 1001 -S appuser -G appgroup
+
+            # 3. Run as non-root user
+            USER appuser
+
+            # 4. Pin dependency versions
+            RUN pip install flask==2.2.5
+
+            # 5. Use multi-stage builds to reduce size
+            FROM golang:1.19-alpine AS builder
+            # ... build steps ...
+            FROM alpine:3.18
+            COPY --from=builder /app/binary .
+        </div>
+        <div class="example-box">
+            <strong>📋 Security scanning with Trivy:</strong>
+            <br>trivy image nginx:latest
+        </div>
+    </div>
+
+    <!-- Section 3: Runtime Security -- Hardening Containers -->
+    <div class="card">
+        <h2>🛡️ Runtime Security — Running Containers Securely</h2>
+        <p>Prevent containers from being the weakest link in your infrastructure.</p>
+        <div class="config-block">
+            # 1. Drop all capabilities, then add only needed ones
+            docker run --cap-drop=ALL --cap-add=NET_RAW nginx
+
+            # 2. Set resource limits (prevent DoS)
+            docker run --memory="512m" --cpus="1.0" nginx
+
+            # 3. Make root filesystem read-only (prevents writes to container)
+            docker run --read-only nginx
+
+            # 4. Use Docker Bench Security to audit your host
+            docker run --net host --pid host --userns host --cap-add audit_control \
+              -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
+              -v /var/lib:/var/lib \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              -v /usr/lib/systemd:/usr/lib/systemd \
+              -v /etc/docker:/etc/docker \
+              --label docker_bench_security \
+              docker/docker-bench-security
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Pro tip:</strong> Never run containers with the `--privileged` flag in production. It disables all security features.
+        </div>
+    </div>
+
+    <!-- Section 4: Kubernetes Security Contexts -->
+    <div class="card">
+        <h2>☸️ Kubernetes Security Contexts — Pod-Level Security</h2>
+        <p>In Kubernetes, a `securityContext` defines privilege and access control settings for a Pod or Container.</p>
+        <div class="config-block">
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: secure-pod
+            spec:
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1001
+                fsGroup: 2001
+                seccompProfile:
+                  type: RuntimeDefault
+              containers:
+              - name: app
+                image: nginx
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop: ["ALL"]
+                    add: ["NET_ADMIN"]
+        </div>
+    </div>
+
+    <!-- Section 5: Supply Chain Security -->
+    <div class="card">
+        <h2>🔗 Supply Chain Security — SBOM, Provenance, Signing</h2>
+        <ul>
+            <li><strong>SBOM (Software Bill of Materials):</strong> A complete inventory of all components in your container.</li>
+            <li><strong>Provenance:</strong> Verifiable attestation of how and where the image was built.</li>
+            <li><strong>Image Signing (Cosign):</strong> Cryptographically sign images to ensure authenticity.</li>
+        </ul>
+        <div class="config-block">
+            # Generate SBOM with Syft
+            syft nginx:latest -o spdx-json > sbom.json
+
+            # Sign an image with Cosign
+            cosign generate-key-pair
+            cosign sign --key cosign.key nginx:latest
+            cosign verify --key cosign.pub nginx:latest
+        </div>
+    </div>
+
+    <!-- Section 6: Runtime Monitoring -->
+    <div class="card">
+        <h2>👀 Monitoring at Runtime — Falco</h2>
+        <p>Falco is the open-source standard for runtime security, detecting anomalous behavior.</p>
+        <div class="config-block">
+            # Install Falco
+            curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | sudo apt-key add -
+            echo "deb https://download.falco.org/packages/deb stable main" | sudo tee /etc/apt/sources.list.d/falcosecurity.list
+            sudo apt update && sudo apt install -y falco
+
+            # Run Falco
+            sudo falco
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Create a secure Dockerfile for a Python app that runs as a non-root user.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>FROM python:3.10-slim</code>
+                <br><code>RUN useradd -m appuser</code>
+                <br><code>USER appuser</code>
+                <br><code>COPY --chown=appuser:appuser . /app</code>
+                <br><code>CMD ["python", "/app/app.py"]</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Scan a container image for vulnerabilities using Trivy.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>trivy image nginx:latest</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Run an nginx container with read-only root filesystem and resource limits.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong>
+                <br><code>docker run -d --read-only --memory="256m" --cpus="0.5" nginx</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> What is the purpose of a Kubernetes `securityContext`?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> It defines privilege and access control settings for a Pod or Container, such as running as a non-root user or dropping all Linux capabilities.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Container Security)</h3>
+            <ul>
+                <li>✅ <strong>Isolation:</strong> Namespaces and cgroups are the foundation of container security.</li>
+                <li>✅ <strong>Images:</strong> Use minimal base images, pin versions, and run as non-root.</li>
+                <li>✅ <strong>Runtime:</strong> Drop capabilities, set resource limits, and never use `--privileged`.</li>
+                <li>✅ <strong>Kubernetes:</strong> Use `securityContext` to enforce pod-level security.</li>
+                <li>✅ <strong>Supply chain:</strong> Generate SBOMs, sign images, and verify provenance.</li>
+                <li>✅ <strong>Monitoring:</strong> Use Falco for runtime anomaly detection.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://docs.docker.com/engine/security/" target="_blank">Docker Security Documentation</a></div>
+        <div class="external-link">📘 <a href="https://kubernetes.io/docs/concepts/security/" target="_blank">Kubernetes Security Concepts</a></div>
+        <div class="external-link">🎓 <a href="https://github.com/docker/docker-bench-security" target="_blank">Docker Bench Security</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="wireshark-mastery.html" class="nav-btn">◀ Previous: Wireshark Mastery</a>
+        <a href="index.html" class="nav-btn">🏠 Back to Deep Dives Index</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Docker & Container Security Deep Dive | Isolation, image security, runtime hardening, Kubernetes security contexts
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>
