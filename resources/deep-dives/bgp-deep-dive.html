@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGP Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .bgp-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🌐 BGP Deep Dive — Border Gateway Protocol</h1>
+        <p><strong>Border Gateway Protocol (BGP)</strong> is the routing protocol of the internet. It connects autonomous systems (ASes) — ISPs, large enterprises, cloud providers — exchanging routing information across the globe. This deep dive covers BGP fundamentals, path attributes, route selection, iBGP/eBGP, route reflectors, communities, and BGP security (RPKI).</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> Network engineers, ISP staff, and anyone who wants to understand how the internet routes traffic.
+        </div>
+    </div>
+
+    <!-- Section 1: BGP Basics -->
+    <div class="card">
+        <h2>🎯 BGP Basics — Autonomous Systems</h2>
+        <p>An <strong>Autonomous System (AS)</strong> is a collection of IP networks under a single administrative entity (ISP, large company, university). Each AS has a unique 16-bit or 32-bit number (ASN).</p>
+        <ul>
+            <li><strong>Public ASN:</strong> Used on the internet (1-64495, 65536-65551, 131072-4199999999)</li>
+            <li><strong>Private ASN:</strong> Used internally (64512-65535)</li>
+            <li><strong>Example:</strong> Google's ASN is 15169, Cloudflare is 13335, your home router uses no ASN.</li>
+        </ul>
+
+        <h3>eBGP vs iBGP</h3>
+        <div class="diagram-box">
+    eBGP (External BGP): Between different ASes
+    ┌──────────┐  eBGP  ┌──────────┐
+    │  AS 65001│◀──────▶│  AS 65002│
+    └──────────┘        └──────────┘
+
+    iBGP (Internal BGP): Within the same AS
+    ┌──────────┐  iBGP  ┌──────────┐
+    │ Router A │◀──────▶│ Router B │
+    │ (AS 65001)        │ (AS 65001)│
+    └──────────┘        └──────────┘
+        </div>
+        <ul>
+            <li><strong>eBGP:</strong> Used between different ASes. AD (Administrative Distance) = 20. Requires directly connected or multihop.</li>
+            <li><strong>iBGP:</strong> Used within the same AS. AD = 200. Does <strong>not</strong> require direct connection. iBGP routers must be fully meshed or use route reflectors.</li>
+        </ul>
+    </div>
+
+    <!-- Section 2: BGP Path Attributes -->
+    <div class="card">
+        <h2>📊 BGP Path Attributes — How BGP Chooses the Best Path</h2>
+        <p>BGP selects the best path based on a list of attributes, processed in order (decision process).</p>
+
+        <div style="overflow-x: auto;">
+            <table class="bgp-table">
+                <thead>
+                    <tr><th>Attribute</th><th>Type</th><th>Description</th><th>Preference</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Weight (Cisco)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Cisco proprietary</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Highest local preference (router-specific)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Higher is better</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Local Preference</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Well-known discretionary</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Exchanged within iBGP (higher = more preferred). Used to influence exit path</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Higher is better</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>AS Path</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Well-known mandatory</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>List of ASNs the route has traversed (loop prevention)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Shorter is better</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Origin</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Well-known mandatory</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>How route was injected: i (IGP), e (EGP), ? (incomplete/redistributed)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>i > e > ?</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>MED (Multi-Exit Discriminator)</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Optional non-transitive</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Influences inbound path from neighbor AS (lower = better)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Lower is better</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tip-box-advanced">
+            💡 <strong>Decision order:</strong> Weight (highest) → Local Pref (highest) → Originate locally → AS Path (shortest) → Origin (i > e > ?) → MED (lowest) → eBGP over iBGP → IGP metric → Router ID (lowest).<br>
+            Many attributes exist; this is the Cisco decision process.
+        </div>
+    </div>
+
+    <!-- Section 3: IBGP vs EBGP Details -->
+    <div class="card">
+        <h2>🔀 IBGP vs EBGP — Key Differences</h2>
+        <div style="overflow-x: auto;">
+            <table class="bgp-table">
+                <thead>
+                    <tr><th>Feature</th><th>eBGP</th><th>iBGP</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Administrative Distance</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>20</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>200</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>TTL/hop limit</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Default 1 (must be directly connected, or multihop configured)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <tr>Unlimited (can be any reachable IBGP neighbor)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    <tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>eBGP Configuration (Cisco):</h3>
+        <div class="config-block">
+            router bgp 65001
+             neighbor 192.168.1.2 remote-as 65002
+             neighbor 192.168.1.2 description "eBGP to ISP"
+             network 203.0.113.0 mask 255.255.255.0
+        </div>
+
+        <h3>iBGP Configuration (Cisco):</h3>
+        <div class="config-block">
+            router bgp 65001
+             neighbor 10.0.0.2 remote-as 65001
+             neighbor 10.0.0.2 description "iBGP to router B"
+             neighbor 10.0.0.2 update-source loopback0
+             network 192.168.1.0 mask 255.255.255.0
+        </div>
+    </div>
+
+    <!-- Section 4: BGP Route Reflectors & Confederations -->
+    <div class="card">
+        <h2>🔄 Scaling iBGP — Route Reflectors and Confederations</h2>
+        <p>iBGP requires a <strong>full mesh</strong> of sessions between routers. For large ASes, this scales poorly (n(n-1)/2 sessions). Route reflectors and confederations reduce this.</p>
+
+        <h3>Route Reflector (RR)</h3>
+        <div class="diagram-box">
+    Without RR (full mesh, 6 sessions):
+         R1────R2
+         │＼  ／│
+         │  X  │
+         │／  ＼│
+         R3────R4
+
+    With RR (1 session each to RR, 3 sessions total):
+              ┌────┐
+              │ RR │
+              └─┬──┘
+           ┌────┼────┐
+           R1   R2   R3   R4
+        </div>
+        <div class="config-block">
+            ! Configure route reflector on RR
+            router bgp 65001
+             neighbor 10.0.0.2 route-reflector-client
+             neighbor 10.0.0.3 route-reflector-client
+             neighbor 10.0.0.4 route-reflector-client
+        </div>
+
+        <h3>Confederations (sub-ASes)</h3>
+        <p>Split a large AS into smaller sub-ASes that communicate as eBGP within the confederation.</p>
+        <div class="config-block">
+            router bgp 65001
+             bgp confederation identifier 65100
+             bgp confederation peers 65002 65003
+             neighbor 10.0.1.2 remote-as 65002
+        </div>
+    </div>
+
+    <!-- Section 5: BGP Communities -->
+    <div class="card">
+        <h2>🏷️ BGP Communities — Tagging Routes for Policy</h2>
+        <p>Communities are optional transitive attributes that allow tagging routes with a 32-bit value (often written as AS:number). They simplify policy enforcement.</p>
+
+        <h3>Well-known Communities:</h3>
+        <ul>
+            <li><code>NO_EXPORT (0xFFFFFF01)</code> — Do not advertise to eBGP peers</li>
+            <li><code>NO_ADVERTISE (0xFFFFFF02)</code> — Do not advertise to any peer</li>
+            <li><code>LOCAL_AS (0xFFFFFF03)</code> — Do not advertise outside the local AS</li>
+        </ul>
+
+        <div class="config-block">
+            ! Set community on a route
+            route-map SET-COMMUNITY permit 10
+             set community 65001:100 additive
+            !
+            router bgp 65001
+             neighbor 192.168.1.2 route-map SET-COMMUNITY out
+        </div>
+    </div>
+
+    <!-- Section 6: BGP Security — RPKI and Prefix Filtering -->
+    <div class="card">
+        <h2>🛡️ BGP Security — RPKI, Prefix Filtering, and BGPSEC</h2>
+        <p>BGP was designed without built-in security, making it vulnerable to route leaks and hijacks. RPKI (Resource Public Key Infrastructure) adds cryptographic validation.</p>
+
+        <h3>Common BGP Attacks:</h3>
+        <ul>
+            <li><strong>Route hijack:</strong> Announcing a prefix you don't own (e.g., BGP hijacking of AWS routes in 2018).</li>
+            <li><strong>Route leak:</strong> Leaking routes from one AS to another violating policies.</li>
+            <li><strong>AS path spoofing:</strong> Forging AS path to manipulate path selection.</li>
+        </ul>
+
+        <h3>RPKI (Resource Public Key Infrastructure):</h3>
+        <div class="tip-box-advanced">
+            💡 RPKI uses ROAs (Route Origin Authorizations) — a cryptographically signed attestation that an AS is authorized to announce a specific prefix.
+            <br><br>
+            Validation result: <strong>Valid</strong> (ROA exists, matches), <strong>Invalid</strong> (ROA exists but mismatched), <strong>NotFound</strong> (no ROA).
+        </div>
+
+        <h3>Prefix Filtering Best Practices:</h3>
+        <div class="config-block">
+            ! Example: Limit received prefixes from neighbor
+            router bgp 65001
+             neighbor 192.168.1.2 maximum-prefix 1000 80 restart 30
+            !
+            ! Filter routes from a specific AS
+            ip as-path access-list 10 deny _65002_
+            route-map DENY-AS65002 permit 10
+             match as-path 10
+             set community no-advertise
+        </div>
+    </div>
+
+    <!-- Section 7: BGP Route Aggregation -->
+    <div class="card">
+        <h2>🗺️ BGP Route Aggregation (Summarization)</h2>
+        <p>Aggregating prefixes reduces global routing table size and hides internal flapping.</p>
+        <div class="config-block">
+            router bgp 65001
+             aggregate-address 192.168.0.0 255.255.0.0 summary-only
+             aggregate-address 10.0.0.0 255.0.0.0 as-set
+        </div>
+    </div>
+
+    <!-- Section 8: BGP Best Path Selection Example -->
+    <div class="card">
+        <h2>📊 BGP Decision Process Example</h2>
+        <div class="example-box">
+            <strong>Scenario:</strong> Router receives three routes to 203.0.113.0/24:<br>
+            - Route A: AS path 65002 65005, Local Pref 100, MED 50<br>
+            - Route B: AS path 65003, Local Pref 150, MED 20<br>
+            - Route C: AS path 65002 65005 65007, Local Pref 100, MED 30 (learned via eBGP with weight 200)<br>
+            <br>
+            <strong>Decision:</strong><br>
+            1. Weight: Route C (200) > others → wins.<br>
+            2. If no weight, highest Local Pref (B has 150).<br>
+            3. Then shortest AS path (B has length 1).<br>
+            4. Then lowest origin? B is i (IGP) → same as others.<br>
+            5. Then lowest MED (B has 20).<br>
+            6. Then eBGP over iBGP, then IGP metric, then lowest Router ID.<br>
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Determine which BGP path would be chosen given: Path1: AS_PATH 65001 65002 65003, Local Pref 200; Path2: AS_PATH 65004, Local Pref 150.</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> Path1 because Local Pref (200) is higher than Path2 (150). AS_PATH length is considered only after Local Pref.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Why are full meshes required for iBGP?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> iBGP routers do not advertise routes learned from one iBGP peer to another iBGP peer (to prevent loops). A full mesh ensures every router receives all routes directly.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> What does the BGP community NO_EXPORT do?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> It prevents a route from being advertised to eBGP peers (keeps it within the local AS).
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> What is RPKI and how does it improve BGP security?</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Answer:</strong> RPKI uses cryptographic certificates (ROAs) to validate that an AS is authorized to advertise a prefix, mitigating route hijacks.
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (BGP)</h3>
+            <ul>
+                <li>✅ <strong>BGP = routing protocol of the internet</strong> — connects ASes</li>
+                <li>✅ <strong>eBGP</strong> (between ASes, AD 20) and <strong>iBGP</strong> (within AS, AD 200) are distinct</li>
+                <li>✅ <strong>Path selection</strong> — Weight → Local Pref → AS Path → Origin → MED → eBGP over iBGP → IGP metric → Router ID</li>
+                <li>✅ <strong>Route reflectors</strong> and <strong>confederations</strong> reduce iBGP full mesh requirements</li>
+                <li>✅ <strong>Communities</strong> enable scalable routing policies (e.g., tagging routes for NO_EXPORT)</li>
+                <li>✅ <strong>RPKI</strong> adds cryptographic validation to prevent route hijacks</li>
+                <li>✅ <strong>Always filter incoming routes</strong> — limit prefixes, validate AS paths, block bogon announcements</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/13738-33.html" target="_blank">Cisco BGP Best Path Selection Algorithm</a></div>
+        <div class="external-link">📘 <a href="https://www.ripe.net/manage-ips-and-asns/resource-management/rpki" target="_blank">RIPE RPKI Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://bgp.he.net/" target="_blank">Hurricane Electric BGP Toolkit</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="ssl-tls-deep-dive.html" class="nav-btn">◀ Previous: SSL/TLS Deep Dive</a>
+        <a href="wireshark-mastery.html" class="nav-btn">Next: Wireshark Mastery ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — BGP Deep Dive | ASNs, eBGP/iBGP, path attributes, route reflectors, communities, RPKI, decision process
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>
