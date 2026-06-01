@@ -66,7 +66,16 @@ function loadNavigation() {
                 <a href="/resources/command-libraries/linux-index.html">🐧 Linux Command Library</a>
                 <a href="/resources/command-libraries/powershell-index.html">⚡ PowerShell Library</a>
                 <a href="/resources/deep-dives/index.html">🔬 Deep Dives</a>
+                <a href="/resources/deep-dives/eigrp-advanced.html">⚡ EIGRP Advanced</a>
+                <a href="/resources/deep-dives/ospf-deep-dive.html">🔄 OSPF Deep Dive</a>
+                <a href="/resources/deep-dives/iptables-advanced.html">🛠️ iptables Advanced</a>
+                <a href="/resources/deep-dives/zbf-advanced.html">🧱 ZBF Advanced</a>
                 <a href="/resources/deep-dives/linux-security-hardening.html">🐧 Linux Security Hardening</a>
+                <a href="/resources/deep-dives/windows-security-internals.html">🪟 Windows Security Internals</a>
+                <a href="/resources/deep-dives/ssl-tls-deep-dive.html">🔐 SSL/TLS Deep Dive</a>
+                <a href="/resources/deep-dives/bgp-deep-dive.html">🌐 BGP Deep Dive</a>
+                <a href="/resources/deep-dives/wireshark-mastery.html">📡 Wireshark Mastery</a>
+                <a href="/resources/deep-dives/docker-container-security.html">🐳 Docker Security</a>
             </div>
         </div>
     `;
