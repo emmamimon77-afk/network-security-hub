@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Security Hardening - Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .hardening-table th {
+            background: #1b4332;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .command-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .command-table th, .command-table td {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .status-pass { color: #10b981; font-weight: bold; }
+        .status-fail { color: #dc2626; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🐧 Linux Security Hardening — Deep Dive</h1>
+        <p><strong>Transform your Linux system into a fortress.</strong> This deep dive covers Mandatory Access Control (SELinux/AppArmor), kernel hardening, auditd monitoring, system security benchmarks, and practical hardening commands you can apply today.</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> Linux administrators, security professionals, and anyone running a production Linux server.
+        </div>
+    </div>
+
+    <!-- Why Harden Linux -->
+    <div class="card">
+        <h2>🎯 Why Linux Security Hardening Matters</h2>
+        <ul>
+            <li>✅ <strong>Linux powers 90%+ of cloud servers</strong> — from AWS to Azure to Google Cloud</li>
+            <li>✅ <strong>Default installations are NOT secure</strong> — they're configured for convenience</li>
+            <li>✅ <strong>Compliance requirements</strong> — PCI-DSS, HIPAA, GDPR demand hardening</li>
+            <li>✅ <strong>Defense in depth</strong> — multiple layers protect against zero-day exploits</li>
+        </ul>
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Reality check:</strong> Most breaches exploit misconfigurations, not zero-days. Hardening eliminates low-hanging fruit.
+        </div>
+    </div>
+
+    <!-- Section 1: System Audit — Know Your Baseline -->
+    <div class="card">
+        <h2>📊 Step 1: Audit Your System — Know What You're Hardening</h2>
+        
+        <h3>Essential Audit Commands:</h3>
+        <div class="config-block">
+            # Check OS version<br>
+            cat /etc/os-release<br>
+            <br>
+            # List all running services<br>
+            systemctl list-units --type=service --state=running<br>
+            <br>
+            # Check open ports and listening services<br>
+            ss -tulpn<br>
+            <br>
+            # List all installed packages<br>
+            dpkg -l | wc -l   (Debian/Ubuntu)<br>
+            rpm -qa | wc -l   (RHEL/CentOS)<br>
+            <br>
+            # Check for unnecessary users<br>
+            cat /etc/passwd | grep -E "/bin/bash|/bin/sh"<br>
+            <br>
+            # Check sudoers configuration<br>
+            cat /etc/sudoers<br>
+            cat /etc/sudoers.d/*
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Create a baseline report:</strong><br>
+            <code>mkdir ~/security-audit-$(date +%Y%m%d)</code><br>
+            <code>ss -tulpn > ~/security-audit-$(date +%Y%m%d)/open-ports.txt</code><br>
+            <code>systemctl list-units --type=service --state=running > ~/security-audit-$(date +%Y%m%d)/running-services.txt</code><br>
+            <code>cat /etc/passwd > ~/security-audit-$(date +%Y%m%d)/users.txt</code>
+        </div>
+    </div>
+
+    <!-- Section 2: Mandatory Access Control (MAC) -->
+    <div class="card">
+        <h2>🔒 Step 2: Mandatory Access Control — SELinux vs AppArmor</h2>
+        <p>MAC systems restrict even root processes. They're the difference between a compromised service and a fully compromised server.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="hardening-table">
+                <thead>
+                    <tr><th>Feature</th><th>AppArmor (Ubuntu/Debian)</th><th>SELinux (RHEL/CentOS/Fedora)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Default on</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Ubuntu, Debian, SUSE</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>RHEL, CentOS, Fedora, Amazon Linux</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Configuration</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Per-profile (easier)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Policy-based (more complex)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning curve</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Gentle</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Steep</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>AppArmor Commands (Ubuntu/Debian/Pop!_OS — Your Laptop!)</h3>
+        <div class="config-block">
+            # Check AppArmor status<br>
+            sudo aa-status<br>
+            <br>
+            # List loaded profiles<br>
+            sudo apparmor_status<br>
+            <br>
+            # Put a profile into complain mode (log violations without blocking)<br>
+            sudo aa-complain /etc/apparmor.d/usr.sbin.nginx<br>
+            <br>
+            # Put a profile into enforce mode (block violations)<br>
+            sudo aa-enforce /etc/apparmor.d/usr.sbin.nginx<br>
+            <br>
+            # Reload all profiles<br>
+            sudo systemctl reload apparmor<br>
+            <br>
+            # Disable AppArmor (not recommended!)<br>
+            sudo systemctl stop apparmor<br>
+            sudo systemctl disable apparmor
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Pro tip:</strong> On your new Ubuntu laptop, run <code>sudo aa-status</code> to see which processes are confined. You'll likely see Docker, Snap packages, and system services.
+        </div>
+    </div>
+
+    <!-- Section 3: Kernel Hardening (sysctl) -->
+    <div class="card">
+        <h2>🔧 Step 3: Kernel Hardening — /etc/sysctl.conf</h2>
+        <p>The Linux kernel has hundreds of security knobs. These are essential for production servers.</p>
+
+        <h3>Critical Kernel Security Parameters:</h3>
+        <div class="config-block">
+            # /etc/sysctl.d/99-security.conf<br>
+            <br>
+            # IP Spoofing protection<br>
+            net.ipv4.conf.all.rp_filter=1<br>
+            net.ipv4.conf.default.rp_filter=1<br>
+            <br>
+            # Ignore ICMP redirects (prevent man-in-the-middle)<br>
+            net.ipv4.conf.all.accept_redirects=0<br>
+            net.ipv4.conf.default.accept_redirects=0<br>
+            <br>
+            # Ignore source route packets<br>
+            net.ipv4.conf.all.accept_source_route=0<br>
+            net.ipv4.conf.default.accept_source_route=0<br>
+            <br>
+            # Enable TCP SYN cookie protection (mitigates SYN flood)<br>
+            net.ipv4.tcp_syncookies=1<br>
+            <br>
+            # Log martian packets (spoofed, source-routed, etc.)<br>
+            net.ipv4.conf.all.log_martians=1<br>
+            <br>
+            # Disable IPv6 if not needed<br>
+            net.ipv6.conf.all.disable_ipv6=1<br>
+            net.ipv6.conf.default.disable_ipv6=1<br>
+            <br>
+            # Restrict kernel pointer access (mitigates certain exploits)<br>
+            kernel.kptr_restrict=2<br>
+            <br>
+            # Restrict dmesg access (prevents kernel info leaks)<br>
+            kernel.dmesg_restrict=1
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Apply kernel settings:</strong><br>
+            <code>sudo sysctl -p /etc/sysctl.d/99-security.conf</code><br>
+            <code>sudo sysctl --system</code>  (apply all)
+        </div>
+    </div>
+
+    <!-- Section 4: auditd — The System Detective -->
+    <div class="card">
+        <h2>📝 Step 4: auditd — Kernel-Level Auditing</h2>
+        <p>auditd watches file access, system calls, and user actions — critical for intrusion detection and compliance.</p>
+
+        <h3>Install and Configure auditd:</h3>
+        <div class="config-block">
+            # Install auditd<br>
+            sudo apt install auditd audispd-plugins -y<br>
+            <br>
+            # Add audit rules (/etc/audit/rules.d/audit.rules)<br>
+            # Monitor /etc/passwd (user changes)<br>
+            -w /etc/passwd -p wa -k user_changes<br>
+            # Monitor /etc/shadow (password changes)<br>
+            -w /etc/shadow -p wa -k password_changes<br>
+            # Monitor /etc/sudoers (sudo privileges)<br>
+            -w /etc/sudoers -p wa -k sudo_changes<br>
+            # Monitor SSH configuration<br>
+            -w /etc/ssh/sshd_config -p wa -k ssh_changes<br>
+            # Monitor critical binaries<br>
+            -w /bin/systemctl -p x -k systemctl_exec<br>
+            -w /bin/rm -p x -k rm_exec<br>
+            # Monitor failed file access<br>
+            -a always,exit -S openat -F success=0 -k failed_access
+        </div>
+
+        <div class="example-box">
+            <strong>📋 Working with audit logs:</strong><br>
+            <code>sudo ausearch -k user_changes</code><br>
+            <code>sudo aureport --summary</code><br>
+            <code>sudo aureport --failed</code><br>
+            <code>sudo tail -f /var/log/audit/audit.log</code>
+        </div>
+    </div>
+
+    <!-- Section 5: SSH Hardening -->
+    <div class="card">
+        <h2>🔑 Step 5: SSH Hardening — Protect Remote Access</h2>
+        
+        <div class="config-block">
+            # /etc/ssh/sshd_config — CRITICAL CHANGES<br>
+            <br>
+            # Disable root login (attackers target root!)<br>
+            PermitRootLogin no<br>
+            <br>
+            # Use key-based authentication only<br>
+            PasswordAuthentication no<br>
+            PubkeyAuthentication yes<br>
+            <br>
+            # Change default port (reduces bot scans)<br>
+            Port 2222<br>
+            <br>
+            # Limit login attempts<br>
+            MaxAuthTries 3<br>
+            MaxSessions 5<br>
+            <br>
+            # Disable empty passwords<br>
+            PermitEmptyPasswords no<br>
+            <br>
+            # Restrict users who can SSH (if applicable)<br>
+            AllowUsers alice bob<br>
+            <br>
+            # Configure idle timeout<br>
+            ClientAliveInterval 300<br>
+            ClientAliveCountMax 2<br>
+            <br>
+            # Apply changes<br>
+            sudo systemctl restart sshd
+        </div>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>WARNING:</strong> Before changing SSH config, keep another terminal open with a root session. If you lock yourself out, you'll need physical access to recover!
+        </div>
+    </div>
+
+    <!-- Section 6: fail2ban — Automated Brute-Force Protection -->
+    <div class="card">
+        <h2>🤖 Step 6: fail2ban — Automatic Attacker Blocking</h2>
+        
+        <div class="config-block">
+            # Install fail2ban<br>
+            sudo apt install fail2ban -y<br>
+            <br>
+            # Create local configuration<br>
+            sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local<br>
+            <br>
+            # Configure SSH protection<br>
+            [sshd]<br>
+            enabled = true<br>
+            port = ssh<br>
+            maxretry = 3<br>
+            bantime = 3600<br>
+            findtime = 600<br>
+            <br>
+            # Enable and start<br>
+            sudo systemctl enable fail2ban --now<br>
+            <br>
+            # Check banned IPs<br>
+            sudo fail2ban-client status sshd<br>
+            <br>
+            # Unban an IP<br>
+            sudo fail2ban-client set sshd unbanip 203.0.113.5
+        </div>
+    </div>
+
+    <!-- Section 7: CIS Benchmarks -->
+    <div class="card">
+        <h2>📋 Step 7: CIS Benchmarks — Industry Standard</h2>
+        <p>The <strong>CIS (Center for Internet Security) Benchmarks</strong> are the gold standard for system hardening. Use automated tools to check compliance.</p>
+
+        <div class="config-block">
+            # Install Lynis (security auditing tool)<br>
+            sudo apt install lynis -y<br>
+            <br>
+            # Run a system audit<br>
+            sudo lynis audit system<br>
+            <br>
+            # Generate report<br>
+            sudo lynis show details<br>
+            <br>
+            # Install oscap (OpenSCAP) for CIS benchmarks<br>
+            sudo apt install openscap-scanner -y<br>
+            <br>
+            # Run CIS benchmark scan (Ubuntu)<br>
+            sudo oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis --results scan-results.xml /usr/share/xml/scap/ssg/content/ssg-ubuntu2204-ds.xml
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Lynis tip:</strong> Run <code>sudo lynis audit system</code> on your laptop. It will show you exactly what hardening steps are missing on your own system!
+        </div>
+    </div>
+
+    <!-- Section 8: Additional Hardening Measures -->
+    <div class="card">
+        <h2>🛡️ Step 8: Additional Hardening Measures</h2>
+        
+        <h3>Automatic Security Updates:</h3>
+        <div class="config-block">
+            # Enable unattended upgrades<br>
+            sudo apt install unattended-upgrades -y<br>
+            sudo dpkg-reconfigure --priority=low unattended-upgrades
+        </div>
+
+        <h3>Disable Unused Network Services:</h3>
+        <div class="config-block">
+            # Remove unnecessary packages<br>
+            sudo apt remove --purge telnet rsh-server rsh-client<br>
+            <br>
+            # Disable IPv6 if not needed<br>
+            echo 'net.ipv6.conf.all.disable_ipv6=1' | sudo tee -a /etc/sysctl.conf
+        </div>
+
+        <h3>File Integrity Monitoring (AIDE):</h3>
+        <div class="config-block">
+            # Install AIDE<br>
+            sudo apt install aide -y<br>
+            <br>
+            # Initialize database (baseline)<br>
+            sudo aideinit<br>
+            sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db<br>
+            <br>
+            # Run integrity check<br>
+            sudo aide --check
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Run an audit on your Ubuntu laptop with Lynis</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo apt install lynis -y</code><br>
+                <code>sudo lynis audit system</code><br>
+                Review the report — how many hardening suggestions did it find?
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Check which AppArmor profiles are active on your system</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo aa-status | head -20</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Add an audit rule to monitor failed sudo attempts</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo auditctl -w /bin/sudo -p x -k sudo_attempt</code><br>
+                <code>sudo ausearch -k sudo_attempt</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Configure fail2ban to protect SSH on your laptop</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>sudo apt install fail2ban -y</code><br>
+                <code>sudo systemctl enable fail2ban --now</code><br>
+                <code>sudo fail2ban-client status sshd</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Linux Security Hardening)</h3>
+            <ul>
+                <li>✅ <strong>Audit first:</strong> Know your baseline with <code>lynis</code> or manual checks</li>
+                <li>✅ <strong>AppArmor/SELinux</strong> — Mandatory Access Control limits damage from exploits</li>
+                <li>✅ <strong>Kernel hardening</strong> — sysctl parameters block common attacks (IP spoofing, SYN flood)</li>
+                <li>✅ <strong>auditd</strong> — Kernel-level logging for compliance and intrusion detection</li>
+                <li>✅ <strong>SSH hardening</strong> — Disable root login, use keys, change port</li>
+                <li>✅ <strong>fail2ban</strong> — Automatic brute-force protection</li>
+                <li>✅ <strong>CIS Benchmarks</strong> — Industry standard; use Lynis to check compliance</li>
+                <li>✅ <strong>Regular updates</strong> — Enable unattended-upgrades for security patches</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://ubuntu.com/security/certifications/docs/cis" target="_blank">Ubuntu CIS Benchmarks</a></div>
+        <div class="external-link">📘 <a href="https://www.cisecurity.org/benchmark/ubuntu_linux/" target="_blank">CIS Ubuntu Linux Benchmark</a></div>
+        <div class="external-link">🎓 <a href="https://linux-audit.com/" target="_blank">Linux Audit — Security Hardening Guides</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="ospf-deep-dive.html" class="nav-btn">◀ Previous: OSPF Deep Dive</a>
+        <a href="windows-security-internals.html" class="nav-btn">Next: Windows Security Internals ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Linux Security Hardening Deep Dive | SELinux/AppArmor, kernel hardening, auditd, fail2ban, CIS benchmarks
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>
