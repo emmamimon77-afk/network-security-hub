@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Security Internals - Deep Dive | Network Security Hub</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .win-table th {
+            background: #0078d4;
+            color: white;
+        }
+        .example-box {
+            background: #e9f0ed;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+        .config-block {
+            background: #1e2a36;
+            color: #cbd5e6;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .tip-box-advanced {
+            background: #eef2ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .warning-box-advanced {
+            background: #fef9e3;
+            border-left: 4px solid #e68a2e;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        .event-table td, .event-table th {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="card">
+        <h1>🪟 Windows Security Internals — Deep Dive</h1>
+        <p><strong>Understand the security features built into Windows.</strong> This deep dive covers Credential Guard, PatchGuard, Secure Kernel, Virtualization-Based Security (VBS), advanced event log analysis, and Windows Defender internals.</p>
+        <div class="tip-box">
+            💡 <strong>Target audience:</strong> Windows administrators, security professionals, and anyone defending Windows environments.
+        </div>
+    </div>
+
+    <!-- Section 1: Windows Security Architecture -->
+    <div class="card">
+        <h2>🏛️ Windows Security Architecture Overview</h2>
+        <div class="diagram-box">
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    User Mode                               │
+    │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐          │
+    │  │  Apps   │ │ Services│ │  LSASS  │ │ Winlogon│          │
+    │  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘          │
+    │       └───────────┼───────────┼───────────┘                │
+    │                   ▼           ▼                            │
+    │              ┌─────────────────────┐                       │
+    │              │      System Call    │                       │
+    │              │      (syscall)      │                       │
+    │              └──────────┬──────────┘                       │
+    └─────────────────────────┼──────────────────────────────────┘
+                              │
+    ┌─────────────────────────┼──────────────────────────────────┐
+    │                    Kernel Mode                             │
+    │              ┌──────────┴──────────┐                       │
+    │              │   Executive (NTOS)   │                       │
+    │              └──────────┬──────────┘                       │
+    │                         │                                   │
+    │      ┌──────────────────┼──────────────────┐               │
+    │      ▼                  ▼                  ▼               │
+    │ ┌─────────┐      ┌───────────┐      ┌───────────┐          │
+    │ │  Kernel │      │  Security │      │  Hardware │          │
+    │ │         │      │ Reference │      │  Abstr.   │          │
+    │ │         │      │  Monitor  │      │   Layer   │          │
+    │ └─────────┘      └───────────┘      └───────────┘          │
+    │                                                             │
+    │              ┌─────────────────────┐                       │
+    │              │    Hardware (CPU,    │                       │
+    │              │     Memory, Disks)   │                       │
+    │              └─────────────────────┘                       │
+    └─────────────────────────────────────────────────────────────┘
+        </div>
+        <ul>
+            <li><strong>User Mode:</strong> Applications, services, and non-critical OS components</li>
+            <li><strong>Kernel Mode:</strong> Core OS components, drivers, and security reference monitor</li>
+            <li><strong>Security Reference Monitor (SRM):</strong> Enforces access checks</li>
+            <li><strong>Local Security Authority (LSASS):</strong> Handles authentication</li>
+        </ul>
+    </div>
+
+    <!-- Section 2: Virtualization-Based Security (VBS) -->
+    <div class="card">
+        <h2>🔒 Virtualization-Based Security (VBS) — The Foundation</h2>
+        <p><strong>VBS</strong> uses hardware virtualization to create a secure, isolated region of memory separate from the normal OS. This "Virtual Secure Mode" (VSM) protects critical security components even if the kernel is compromised.</p>
+
+        <div class="diagram-box">
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    Normal OS (Ring 0)                       │
+    │  ┌─────────────────────────────────────────────────────┐   │
+    │  │                  Hyper-V Hypervisor                 │   │
+    │  └─────────────────────────────────────────────────────┘   │
+    │                                                             │
+    │  ┌─────────────────────┐    ┌─────────────────────────┐   │
+    │  │   Normal Kernel     │    │   Virtual Secure Mode   │   │
+    │  │   (Ring 0)          │    │   (Ring -1)             │   │
+    │  │                     │    │  ┌───────────────────┐  │   │
+    │  │                     │    │  │ Credential Guard  │  │   │
+    │  │                     │    │  ├───────────────────┤  │   │
+    │  │                     │    │  │   Secure Kernel   │  │   │
+    │  │                     │    │  ├───────────────────┤  │   │
+    │  │                     │    │  │   Isolated User   │  │   │
+    │  │                     │    │  │      Mode         │  │   │
+    │  │                     │    │  └───────────────────┘  │   │
+    │  └─────────────────────┘    └─────────────────────────┘   │
+    └─────────────────────────────────────────────────────────────┘
+        </div>
+
+        <h3>Check VBS Status:</h3>
+        <div class="config-block">
+            # PowerShell (Admin)
+            Get-ComputerInfo -Property "DeviceGuard*"
+            <br>
+            # Or via System Information
+            msinfo32  (look for "Virtualization-based security")
+        </div>
+    </div>
+
+    <!-- Section 3: Credential Guard -->
+    <div class="card">
+        <h2>🔐 Credential Guard — Protect NTLM Hashes & Kerberos Tickets</h2>
+        <p><strong>Credential Guard</strong> uses VBS to isolate LSASS (Local Security Authority Subsystem Service). Even if an attacker compromises the kernel, they cannot extract NTLM hashes or Kerberos tickets.</p>
+
+        <div class="diagram-box">
+    Without Credential Guard:          With Credential Guard:
+    ┌─────────────┐                    ┌─────────────┐
+    │   LSASS     │ ◀── Attacker        │   LSASS     │ (Isolated)
+    │ (NTLM Hash) │ can read            │ (NTLM Hash) │
+    └─────────────┘                    └──────┬──────┘
+                                              │
+                                         ┌────┴────┐
+                                         │   VBS   │ (Protected)
+                                         │  Memory │
+                                         └─────────┘
+        </div>
+
+        <h3>Enable Credential Guard:</h3>
+        <div class="config-block">
+            # Via Group Policy
+            Computer Configuration → Administrative Templates → System → Device Guard → Turn on Virtualization Based Security
+            <br>
+            # Set to "Enabled with UEFI lock"
+            <br>
+            # Select "Credential Guard" under "Select Platform Security Level"
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Requirement:</strong> UEFI, Secure Boot, and virtualization extensions (VT-x/AMD-V) must be enabled.
+        </div>
+    </div>
+
+    <!-- Section 4: PatchGuard -->
+    <div class="card">
+        <h2>🛡️ PatchGuard — Kernel Protection</h2>
+        <p><strong>PatchGuard</strong> prevents unauthorized modifications to the Windows kernel. It detects and blocks rootkits that try to hook critical kernel structures.</p>
+
+        <h3>What PatchGuard Protects:</h3>
+        <ul>
+            <li>✅ System Service Dispatch Table (SSDT) — System call hooks</li>
+            <li>✅ Interrupt Descriptor Table (IDT) — Interrupt handlers</li>
+            <li>✅ Global Descriptor Table (GDT) — Memory segments</li>
+            <li>✅ Kernel code sections</li>
+            <li>✅ Critical system structures</li>
+        </ul>
+
+        <div class="warning-box-advanced">
+            ⚠️ <strong>Note:</strong> PatchGuard cannot be disabled on 64-bit Windows. It's why rootkits are rarer on modern Windows than on Linux.
+        </div>
+    </div>
+
+    <!-- Section 5: Secure Kernel & HVCI -->
+    <div class="card">
+        <h2>🔐 Secure Kernel & HVCI (Hypervisor-Protected Code Integrity)</h2>
+        <p><strong>HVCI</strong> ensures that only signed, verified code can run in kernel mode. It uses the hypervisor to enforce code integrity policies.</p>
+
+        <h3>Check HVCI Status:</h3>
+        <div class="config-block">
+            # PowerShell (Admin)
+            Get-ComputerInfo -Property "DeviceGuard*"
+            <br>
+            # Or via Windows Security
+            Windows Security → Device Security → Core Isolation → Memory Integrity
+        </div>
+
+        <h3>Enable Memory Integrity (HVCI):</h3>
+        <div class="config-block">
+            Windows Security → Device Security → Core Isolation details → Memory integrity → ON → Reboot
+        </div>
+
+        <div class="tip-box-advanced">
+            💡 <strong>Note:</strong> HVCI may conflict with some older drivers. Test before enabling on critical systems.
+        </div>
+    </div>
+
+    <!-- Section 6: Windows Defender Advanced Threat Protection -->
+    <div class="card">
+        <h2>🦠 Windows Defender ATP — Next-Gen Antivirus</h2>
+        <p>Modern Windows includes enterprise-grade EDR (Endpoint Detection and Response) capabilities.</p>
+
+        <h3>Key Components:</h3>
+        <ul>
+            <li><strong>Cloud-delivered protection:</strong> Real-time updates from Microsoft cloud</li>
+            <li><strong>Behavioral monitoring:</strong> Detects ransomware, fileless malware</li>
+            <li><strong>Attack Surface Reduction (ASR):</strong> Blocks common attack patterns</li>
+            <li><strong>Network protection:</strong> Blocks malicious domains/IPs</li>
+            <li><strong>Controlled folder access:</strong> Protects against ransomware</li>
+        </ul>
+
+        <h3>Check Defender Status (PowerShell):</h3>
+        <div class="config-block">
+            Get-MpComputerStatus
+            <br>
+            # Check real-time protection
+            (Get-MpPreference).DisableRealtimeMonitoring
+            <br>
+            # Update definitions
+            Update-MpSignature
+            <br>
+            # Run a quick scan
+            Start-MpScan -ScanType QuickScan
+        </div>
+    </div>
+
+    <!-- Section 7: Event Log Analysis (Critical Event IDs) -->
+    <div class="card">
+        <h2>📋 Event Log Analysis — Security Events You Must Monitor</h2>
+
+        <div style="overflow-x: auto;">
+            <table class="event-table">
+                <thead>
+                    <tr><th>Event ID</th><th>Event Name</th><th>Description</th><th>Importance</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>4624</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>An account was successfully logged on</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Successful authentication (normal, but spikes = suspicious)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🔴 Critical</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4625</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>An account failed to log on</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Brute-force detection — too many = active attack</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🔴 Critical</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4672</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Special privileges assigned to new logon</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Admin logon — monitor carefully</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🟡 High</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4688</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>A new process has been created</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Detect malware execution (requires command-line logging)</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🟡 High</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>4698</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>A scheduled task was created</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Persistence mechanism — malware loves this</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🔴 Critical</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </tr>
+                    <tr>
+                        <td><strong>7045</strong></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>A new service was installed</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>Service persistence — common for backdoors</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                        <td>🔴 Critical</code></code></code></code></code></code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code> </code>
+                    </td>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>PowerShell Commands for Event Analysis:</h3>
+        <div class="config-block">
+            # Get failed logons in last 24 hours
+            $startTime = (Get-Date).AddHours(-24)
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625; StartTime=$startTime} | Select-Object TimeCreated, Message
+            <br>
+            # Get admin logons (Event ID 4672)
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4672} -MaxEvents 50 | Select-Object TimeCreated, Message
+            <br>
+            # Monitor new processes (requires command-line logging)
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4688} -MaxEvents 50 | Format-List TimeCreated, Message
+            <br>
+            # Export to CSV for analysis
+            Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625} -MaxEvents 1000 | Export-Csv -Path "failed_logons.csv"
+        </div>
+    </div>
+
+    <!-- Section 8: Windows Security Baselines -->
+    <div class="card">
+        <h2>📋 Windows Security Baselines (Microsoft Recommendations)</h2>
+        <p>Microsoft provides official security baselines for Windows. Use the Security Compliance Toolkit to apply them.</p>
+
+        <div class="config-block">
+            # Download Security Compliance Toolkit
+            https://www.microsoft.com/en-us/download/details.aspx?id=55319
+            <br>
+            # Apply baseline via PowerShell
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+            <br>
+            # Use LGPO (Local Group Policy Object) to import baseline
+            LGPO.exe /g "C:\Baselines\Windows-Security-Baseline"
+        </div>
+    </div>
+
+    <!-- Practice Exercises -->
+    <div class="card">
+        <h2>📝 Practice Exercises</h2>
+        
+        <details>
+            <summary><strong>Exercise 1:</strong> Check if VBS and Credential Guard are enabled on your Windows system</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution (PowerShell as Admin):</strong><br>
+                <code>Get-ComputerInfo -Property "DeviceGuard*"</code><br>
+                Look for DeviceGuardSecurityServicesConfigured and DeviceGuardSecurityServicesRunning.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 2:</strong> Find all failed logins (Event ID 4625) from the last hour</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$startTime = (Get-Date).AddHours(-1)</code><br>
+                <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4625; StartTime=$startTime} | Select-Object TimeCreated, Message</code>
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 3:</strong> Check if real-time protection is enabled on Windows Defender</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>Get-MpPreference | Select-Object DisableRealtimeMonitoring</code><br>
+                If False, real-time protection is ON. If True, it's OFF.
+            </div>
+        </details>
+        
+        <details>
+            <summary><strong>Exercise 4:</strong> Export all process creation events (4688) from the last week to CSV</summary>
+            <div class="example-box" style="margin-top: 0.5rem;">
+                <strong>Solution:</strong><br>
+                <code>$startTime = (Get-Date).AddDays(-7)</code><br>
+                <code>Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4688; StartTime=$startTime} | Export-Csv -Path "process_creation_events.csv"</code>
+            </div>
+        </details>
+    </div>
+
+    <!-- Key Takeaways -->
+    <div class="card">
+        <div class="takeaway">
+            <h3>🎓 Key Takeaways (Windows Security Internals)</h3>
+            <ul>
+                <li>✅ <strong>VBS (Virtualization-Based Security)</strong> — Creates isolated secure memory region</li>
+                <li>✅ <strong>Credential Guard</strong> — Protects NTLM hashes and Kerberos tickets</li>
+                <li>✅ <strong>PatchGuard</strong> — Prevents kernel modification (can't be disabled)</li>
+                <li>✅ <strong>HVCI (Memory Integrity)</strong> — Ensures only signed kernel code runs</li>
+                <li>✅ <strong>Event IDs to monitor:</strong> 4624 (success), 4625 (failure), 4672 (admin), 4688 (process), 4698 (task), 7045 (service)</li>
+                <li>✅ <strong>Windows Defender ATP</strong> — Enterprise-grade EDR with ASR rules</li>
+                <li>✅ <strong>Enable command-line auditing</strong> to see exact commands in Event 4688</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- External Resources -->
+    <div class="card">
+        <h2>🔗 Learn More</h2>
+        <div class="external-link">📖 <a href="https://learn.microsoft.com/en-us/windows/security/" target="_blank">Microsoft Windows Security Documentation</a></div>
+        <div class="external-link">📘 <a href="https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard" target="_blank">Credential Guard Documentation</a></div>
+        <div class="external-link">🎓 <a href="https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-security-center/windows-defender-security-center" target="_blank">Windows Defender Security Center</a></div>
+    </div>
+
+    <!-- Page Navigation -->
+    <div class="page-nav">
+        <a href="linux-security-hardening.html" class="nav-btn">◀ Previous: Linux Security Hardening</a>
+        <a href="ssl-tls-deep-dive.html" class="nav-btn">Next: SSL/TLS Deep Dive ▶</a>
+    </div>
+
+    <div class="footer">
+        Network Security Hub — Windows Security Internals Deep Dive | VBS, Credential Guard, PatchGuard, HVCI, Event Log Analysis, Defender ATP
+    </div>
+</div>
+
+<script src="../../js/nav.js"></script>
+<script src="../../js/attack-explainer.js"></script>
+<script src="../../js/module-loader.js"></script>
+
+</body>
+</html>
